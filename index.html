@@ -11,14 +11,23 @@
             --box-bg: #ffffff;
             --text-main: #334155;
             --border-color: #cbd5e1;
-            --code-bg: #0f172a; 
-            --code-text: #34d399; 
-            --code-param: #fbbf24; 
+            
+            /* ============== 优化 2：护眼浅色代码主题 ============== */
+            /* 主代码块配色 */
+            --code-bg: #eff6ff;     /* 极浅的蓝底 */
+            --code-border: #bfdbfe; /* 浅蓝边框 */
+            --code-text: #1e3a8a;   /* 深藏青色代码 */
+            --code-param: #c2410c;  /* 深铁锈橙参数 */
+            
+            /* 参数框配色保持暖色警告感 */
             --param-bg: #fffbeb; 
             --param-border: #f59e0b;
             --param-text: #92400e;
-            --example-bg: #1e293b;
-            --example-text: #bae6fd;
+            
+            /* 示例块配色 */
+            --example-bg: #f8fafc;     /* 极浅石板灰 */
+            --example-border: #cbd5e1; /* 灰色虚线边框 */
+            --example-text: #475569;   /* 深灰色代码 */
         }
 
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--primary-bg); color: var(--text-main); padding: 20px; margin: 0; line-height: 1.6; }
@@ -28,14 +37,22 @@
         
         .box1 { flex: 1; min-width: 240px; max-width: 280px; position: sticky; top: 20px; }
         
-        /* ============== 优化 1：Logo 和标题同排 ============== */
-        .header-title { display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; }
-        .team-logo { width: 45px; height: auto; display: block; }
-        .box1 h2 { margin: 0; color: #1e293b; font-size: 1.3rem; font-weight: bold; letter-spacing: 1px; border: none; padding: 0; }
+        /* ============== 优化 1：Logo 与标题字体调整 ============== */
+        .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; }
+        .team-logo { width: 40px; height: auto; display: block; }
+        .box1 h2 { 
+            margin: 0; 
+            color: #1e293b; 
+            font-size: 1.1rem; /* 缩小字号 */
+            font-weight: 700; 
+            /* 强制指定中英混排表现更好的字体栈 */
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+            letter-spacing: 0.5px; 
+            border: none; 
+            padding: 0; 
+        }
         
         .box2 { flex: 3; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
-        
-        /* 内部小卡片容器的缝隙 */
         #commands-container { display: flex; flex-direction: column; gap: 20px; }
 
         .form-group { margin-bottom: 20px; }
@@ -43,24 +60,27 @@
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; outline: none; background-color: #fff; }
 
-        /* 特化：实例输入框的样式 */
         .instance-box { padding: 15px 25px; margin-bottom: 0; background-color: #e0f2fe; border-left: 5px solid #0ea5e9; }
         .instance-box label { color: #0369a1; }
         .instance-box input { border-color: #7dd3fc; }
 
         .cmd-card { background: var(--box-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .cmd-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
-        .cmd-code { background: var(--code-bg); color: var(--code-text); padding: 12px 18px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 1.1rem; flex-grow: 1; overflow-x: auto; white-space: nowrap; margin: 0; }
         
+        /* 更新代码块浅色样式 */
+        .cmd-code { background: var(--code-bg); color: var(--code-text); border: 1px solid var(--code-border); padding: 12px 18px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 1.1rem; font-weight: 600; flex-grow: 1; overflow-x: auto; white-space: nowrap; margin: 0; }
         .param-hl { color: var(--code-param); }
 
-        .copy-btn { background-color: #3b82f6; color: white; border: none; padding: 12px 20px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+        .copy-btn { background-color: #3b82f6; color: white; border: none; padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
         .copy-btn:hover { background-color: #2563eb; }
+        
         .cmd-desc { margin-bottom: 15px; font-size: 1rem; color: #334155; }
         .cmd-params { background: var(--param-bg); border-left: 4px solid var(--param-border); color: var(--param-text); padding: 12px 15px; border-radius: 4px 8px 8px 4px; margin-bottom: 15px; font-size: 0.95rem; }
         .cmd-params strong { display: block; margin-bottom: 5px; color: #b45309; }
-        .cmd-example { background: var(--example-bg); color: var(--example-text); padding: 15px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 0.95rem; overflow-x: auto; white-space: pre-wrap; margin: 0; }
-        .cmd-example .example-label { display: block; margin-bottom: 8px; color: #94a3b8; font-family: sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+        
+        /* 更新示例块浅色样式 */
+        .cmd-example { background: var(--example-bg); color: var(--example-text); border: 1px dashed var(--example-border); padding: 15px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 0.95rem; overflow-x: auto; white-space: pre-wrap; margin: 0; }
+        .cmd-example .example-label { display: block; margin-bottom: 8px; color: #64748b; font-family: sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
 
         #toast { visibility: hidden; min-width: 200px; background-color: #10b981; color: #fff; text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 100; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         #toast.show { visibility: visible; animation: fadein 0.3s, fadeout 0.3s 2s; }
@@ -95,7 +115,6 @@
     </div>
 
     <div class="box2">
-        
         <div class="box instance-box" id="instance-settings" style="display: none;">
             <div class="form-group" style="margin-bottom: 0;">
                 <label for="instance-name">当前实例名称（如需修改，请在此输入）：</label>
@@ -106,7 +125,6 @@
         <div id="commands-container">
             <div class="box" style="color:#3b82f6; font-weight:bold;">⏳ 正在连接 Google Sheets 获取数据...</div>
         </div>
-        
     </div>
 </div>
 
@@ -174,21 +192,15 @@
             return;
         }
 
-        // ==========================================
-        // 核心逻辑：判断是否需要实例框，并读取默认值
-        // ==========================================
         let needsInstance = currentObjectCommands.some(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE');
         if (needsInstance) {
-            // 找到包含 default_instance 的第一条数据，提取其默认值（如果没填，则默认用 obj）
             let defaultName = currentObjectCommands.find(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE' && cmd.default_instance)?.default_instance || 'obj';
-            
             document.getElementById("instance-settings").style.display = 'block';
             document.getElementById("instance-name").value = defaultName;
         } else {
             document.getElementById("instance-settings").style.display = 'none';
         }
 
-        // 渲染卡片 HTML
         let htmlContent = '';
         currentObjectCommands.forEach((cmd, index) => {
             htmlContent += `
@@ -204,8 +216,6 @@
         });
 
         container.innerHTML = htmlContent;
-        
-        // 渲染完框架后，立刻触发一次代码填入
         updateAllDynamicCodes(); 
     }
 
