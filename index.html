@@ -12,52 +12,50 @@
             --text-main: #334155;
             --border-color: #cbd5e1;
             
-            /* 主代码块浅色配色 */
             --code-bg: #eff6ff;     
             --code-border: #bfdbfe; 
             --code-text: #1e3a8a;   
             --code-param: #c2410c;  
             
-            /* 搜索高亮配色 */
             --search-hl-bg: #fef08a; 
             --search-hl-text: #854d0e; 
             
-            /* 参数框配色 */
             --param-bg: #fffbeb; 
             --param-border: #f59e0b;
             --param-text: #92400e;
             
-            /* 示例块配色 */
             --example-bg: #f8fafc;     
             --example-border: #cbd5e1; 
             --example-text: #475569;   
         }
 
-        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--primary-bg); color: var(--text-main); padding: 20px; margin: 0; line-height: 1.6; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--primary-bg); color: var(--text-main); padding: 20px 0; margin: 0; line-height: 1.6; }
         
-        .layout-container { display: flex; flex-wrap: wrap; gap: 24px; max-width: 1200px; margin: 0 auto; align-items: flex-start; }
+        /* ============== 优化 1：宽屏布局铺满屏幕 ============== */
+        .layout-container { display: flex; flex-wrap: wrap; gap: 24px; max-width: 1600px; width: 96%; margin: 0 auto; align-items: flex-start; }
         .box { background: var(--box-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; }
         
-        .box1 { flex: 1; min-width: 240px; max-width: 280px; position: sticky; top: 20px; }
+        /* 左侧菜单栏也稍微放宽一点 */
+        .box1 { flex: 1; min-width: 260px; max-width: 320px; position: sticky; top: 20px; }
         
-        /* ============== 优化 1：最优解的标题与Logo排版 ============== */
-        .header-title { display: flex; align-items: center; justify-content: center; gap: 8px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: nowrap; overflow: hidden; }
+        /* ============== 优化 2：Logo与标题 1:1 像素级对齐 ============== */
+        .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: nowrap; overflow: hidden; }
         
-        /* 锁定高度为 38px，宽度随原图比例自动，绝不挤压变形 */
-        .team-logo { height: 38px; width: auto; max-width: 45px; object-fit: contain; flex-shrink: 0; display: block; } 
+        /* 强制 32px 绝对高度 */
+        .team-logo { height: 32px; width: auto; object-fit: contain; flex-shrink: 0; display: block; } 
         
         .box1 h2 { 
             margin: 0; 
             color: #334155; 
-            font-size: 1.35rem; /* 经过计算的最佳视觉字号 */
+            font-size: 26px; /* 使用绝对像素字号 */
             font-weight: bold; 
             font-family: "Microsoft YaHei", "PingFang SC", sans-serif; 
             letter-spacing: 0.5px; 
             border: none; 
             padding: 0; 
-            line-height: 38px; /* 行高与 Logo 高度绝对锁定一致 */
+            line-height: 32px; /* 行高与Logo高度完全一致 */
             white-space: nowrap; 
-            flex-shrink: 1; /* 极端情况下允许文字间距轻微收缩 */
+            flex-shrink: 1; 
         }
         
         .box2 { flex: 3; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
@@ -77,10 +75,9 @@
 
         .form-group { margin-bottom: 0; }
         
-        /* ============== 优化 2：并排下拉菜单样式 ============== */
         .dropdown-row { display: flex; gap: 12px; width: 100%; margin-bottom: 20px; }
-        .dropdown-row .form-group { flex: 1; min-width: 0; /* 防止下拉框文字过长撑破容器 */ }
-        .dropdown-row select { padding: 10px 8px; font-size: 14px; } /* 缩小内边距，适应并排的窄空间 */
+        .dropdown-row .form-group { flex: 1; min-width: 0; }
+        .dropdown-row select { padding: 10px 8px; font-size: 14px; } 
         
         label { display: block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.95rem;}
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
