@@ -21,13 +21,16 @@
         }
 
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--primary-bg); color: var(--text-main); padding: 20px; margin: 0; line-height: 1.6; }
+        
         .layout-container { display: flex; flex-wrap: wrap; gap: 24px; max-width: 1200px; margin: 0 auto; align-items: flex-start; }
         .box { background: var(--box-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; }
         
-        .box1 { flex: 1; min-width: 300px; position: sticky; top: 20px; }
+        /* 优化点1：让左侧框1变窄，且固定最大宽度 */
+        .box1 { flex: 1; min-width: 240px; max-width: 280px; position: sticky; top: 20px; }
         .box1 h2 { margin-top: 0; color: #1e293b; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; font-size: 1.5rem; text-align: center; }
         
-        .box2 { flex: 2; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
+        /* 优化点2：让右侧框2占比变大 (flex: 3) */
+        .box2 { flex: 3; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
 
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; }
@@ -50,8 +53,9 @@
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         
+        /* 优化点3：确保在手机窄屏时，左侧框解除 max-width 限制，铺满屏幕 */
         @media (max-width: 768px) {
-            .box1 { position: static; }
+            .box1 { position: static; max-width: 100%; }
             .box1, .box2 { flex: 1 1 100%; min-width: 100%; }
             .cmd-header { flex-direction: column; align-items: stretch; }
             .copy-btn { width: 100%; }
@@ -74,19 +78,18 @@
         
         <div class="form-group" id="instance-group">
             <label for="instance-name">当前实例名称：</label>
-            <input type="text" id="instance-name" placeholder="例如: rgb (自动添加至代码前)" oninput="updateAllDynamicCodes()">
+            <input type="text" id="instance-name" placeholder="例如: rgb" oninput="updateAllDynamicCodes()">
         </div>
     </div>
 
     <div class="box2" id="commands-container">
-        <div class="box" style="color:#3b82f6; font-weight:bold;">⏳ 正在尝试连接 Google Sheets 获取数据，请稍候...</div>
+        <div class="box" style="color:#3b82f6; font-weight:bold;">⏳ 正在连接 Google Sheets 获取数据...</div>
     </div>
 </div>
 
 <div id="toast">复制成功！</div>
 
 <script>
-    // 已经替换为你提供的真实链接
     const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6MbDLNT-1FodfmKICS_piH9Co__x0GdZ3N0TSxe6aCEGEKJWV9S9NifPZQIWBsPMrWZH3CY8u5e1w/pub?output=csv'; 
 
     let commandDatabase = [];
@@ -98,41 +101,23 @@
             header: true,
             skipEmptyLines: true,
             complete: function(results) {
-                // 【诊断1】检查表格是否为空
                 if (!results.data || results.data.length === 0) {
-                    document.getElementById("commands-container").innerHTML = '<div class="box" style="color:red;">❌ 成功连接到了表格，但是表格是空的。请确保表格里有数据，且已经“发布到网络”。</div>';
+                    document.getElementById("commands-container").innerHTML = '<div class="box" style="color:red;">❌ 表格无数据，请检查。</div>';
                     return;
                 }
 
-                // 【诊断2】严格检查表头字段名称
                 const firstRowKeys = Object.keys(results.data[0]);
                 if (!firstRowKeys.includes('category') || !firstRowKeys.includes('object_name')) {
-                    document.getElementById("commands-container").innerHTML = `
-                        <div class="box" style="color:#b91c1c; background-color:#fef2f2; border: 1px solid #fca5a5;">
-                            <h3>❌ 发现问题：表格的“表头（第一行）”名字不对！</h3>
-                            <p>代码读取到你的第一行是：<strong>${firstRowKeys.join(' , ')}</strong></p>
-                            <p>⚠️ 但代码严格需要以下英文名称作为第一行（请注意小写和下划线）：<br>
-                            <strong style="color:blue;">category, object_name, command_template, requires_instance, description, params, example</strong></p>
-                            <p><strong>怎么修？</strong>请去 Google 表格，把第一行改对。改完后等待大概 2-5 分钟（Google 缓存有延迟），再刷新这个网页！</p>
-                        </div>`;
+                    document.getElementById("commands-container").innerHTML = '<div class="box" style="color:red;">❌ 表头格式错误，请检查第一行是否为严格的英文表头。</div>';
                     return;
                 }
 
-                // 一切正常，执行渲染
                 commandDatabase = results.data;
                 initCategoryDropdown();
             },
             error: function(err) {
-                // 【诊断3】网络拦截或跨域问题
                 console.error("加载错误：", err);
-                document.getElementById("commands-container").innerHTML = `
-                    <div class="box" style="color:#b91c1c; background-color:#fef2f2; border: 1px solid #fca5a5;">
-                        <h3>❌ 网络请求被拦截！</h3>
-                        <p><strong>最大可能：</strong> 你是在电脑上直接双击打开的 index.html（浏览器地址栏是 file:/// 开头）。很多浏览器会拦截本地文件访问外部链接。</p>
-                        <p><strong>怎么修？</strong> 请把这个 index.html 直接传到你用于展示的 GitHub 仓库里，通过你设置好的 GitHub Pages 网址来访问，百分之百就能加载出来了！</p>
-                        <hr>
-                        <p style="font-size:0.85em; color:#666;">底层错误信息 (供参考): ${err.message || '网络连接失败'}</p>
-                    </div>`;
+                document.getElementById("commands-container").innerHTML = '<div class="box" style="color:red;">❌ 数据加载失败，请检查网络或表格链接。</div>';
             }
         });
     };
