@@ -34,16 +34,29 @@
         .layout-container { display: flex; flex-wrap: wrap; gap: 24px; max-width: 1600px; width: 96%; margin: 0 auto; align-items: flex-start; }
         .box { background: var(--box-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; }
         
-        /* 框1 基础样式 */
-        .box1 { flex: 1; min-width: 260px; max-width: 320px; position: sticky; top: 20px; max-height: 95vh; display: flex; flex-direction: column; }
+        /* ============== 修复 2：为宽屏下的框1增加滚动能力 ============== */
+        .box1 { 
+            flex: 1; 
+            min-width: 260px; 
+            max-width: 320px; 
+            position: sticky; 
+            top: 20px; 
+            max-height: 95vh; 
+            display: flex; 
+            flex-direction: column; 
+            overflow-y: auto; /* 当工具栏展开超过高度时，允许框1整体滑动 */
+        }
+        /* 美化框1的全局滚动条 */
+        .box1::-webkit-scrollbar { width: 5px; }
+        .box1::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
         
         .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: nowrap; overflow: hidden; flex-shrink: 0; }
         
-        .team-logo { height: 22px; width: auto; object-fit: contain; flex-shrink: 0; display: block; } 
+        /* ============== 修复 1：Logo再缩小8px (22px - 8px = 14px) ============== */
+        .team-logo { height: 14px; width: auto; object-fit: contain; flex-shrink: 0; display: block; } 
         
         .box1 h2 { margin: 0; color: #334155; font-size: 22px; font-weight: bold; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; letter-spacing: 0.5px; border: none; padding: 0; line-height: 22px; white-space: nowrap; flex-shrink: 1; display: flex; align-items: center;}
         
-        /* ============== 新增：移动端折叠小箭头（默认电脑端隐藏） ============== */
         .mobile-toggle-icon { display: none; }
 
         .box2 { flex: 3; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
@@ -111,28 +124,21 @@
         
         .tool-panel { flex-shrink: 0; margin-top: auto; padding-top: 20px; border-top: 2px dashed var(--border-color); }
 
-        /* ============== 核心更新：移动端窄屏自适应与动画逻辑 ============== */
         @media (max-width: 768px) {
-            /* 1. 让框1悬浮吸顶，并加重阴影使其浮在最上面 */
-            .box1 { position: sticky; top: 10px; z-index: 999; max-width: 100%; max-height: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); margin-bottom: 20px;}
+            /* 移动端覆盖，保证嵌套动画层正常工作 */
+            .box1 { position: sticky; top: 10px; z-index: 999; max-width: 100%; max-height: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); margin-bottom: 20px; overflow-y: visible; }
             .box1, .box2 { flex: 1 1 100%; min-width: 100%; }
             
-            /* 2. 标题区变为可点击的按钮 */
             .header-title { cursor: pointer; border-bottom: none; padding-bottom: 0; margin-bottom: 0; user-select: none; transition: padding 0.3s, margin 0.3s; }
             .mobile-toggle-icon { display: block; margin-left: auto; color: #64748b; transition: transform 0.3s ease; }
             
-            /* 展开状态下的标题区样式 */
             .box1.expanded .header-title { border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
             .box1.expanded .mobile-toggle-icon { transform: rotate(180deg); color: #3b82f6; }
             
-            /* 3. 使用 CSS Grid 黑科技实现高度动画平滑展开/收起 */
             .box1-content-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
             .box1.expanded .box1-content-wrapper { grid-template-rows: 1fr; }
             
-            /* 必须配合 overflow: hidden 才能让 Grid 动画生效 */
             .box1-content-inner { overflow: hidden; }
-            
-            /* 限制内部最大高度，防止下拉菜单太长导致无法滑动 */
             .box1-scroll-area { max-height: 70vh; overflow-y: auto; padding-bottom: 5px; }
 
             .top-controls { flex-direction: column; gap: 15px; }
@@ -205,7 +211,11 @@
                             </div>
                         </div>
                     </div>
-                </div> </div> </div> </div>
+                </div> 
+            </div> 
+        </div> 
+
+    </div>
 
     <div class="box2">
         <div class="top-controls" id="top-controls" style="display: none;">
@@ -240,7 +250,6 @@
 
     window.addEventListener('resize', () => {
         adjustCodeFontSizes();
-        // 如果用户在移动端收起了框1，然后横屏或拉长浏览器窗口，强制让它展开
         if (window.innerWidth > 768) {
             document.getElementById('main-box1').classList.add('expanded');
         }
@@ -271,7 +280,6 @@
         });
     };
 
-    // ============== 新增：移动端手动折叠开关 ==============
     function toggleMobileBox1() {
         if (window.innerWidth <= 768) {
             document.getElementById('main-box1').classList.toggle('expanded');
@@ -350,7 +358,6 @@
         
         updateDisplay(); 
 
-        // ============== 智能收起：手机端成功渲染列表后，自动折起框1 ==============
         if (window.innerWidth <= 768 && currentObjectCommands.length > 0) {
             document.getElementById('main-box1').classList.remove('expanded');
         }
@@ -374,7 +381,6 @@
             setTimeout(() => { targetCard.classList.remove('highlight-active'); }, 1600);
         }, 100); 
 
-        // ============== 智能收起：点击目录跳转后，自动折起框1，让出视野 ==============
         if (window.innerWidth <= 768) {
             document.getElementById('main-box1').classList.remove('expanded');
         }
