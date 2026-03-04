@@ -36,22 +36,20 @@
         
         .box1 { flex: 1; min-width: 260px; max-width: 320px; position: sticky; top: 20px; }
         
-        /* ============== 优化：高度精简 10px ============== */
         .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: nowrap; overflow: hidden; }
         
-        /* 高度精确缩减为 22px */
         .team-logo { height: 22px; width: auto; object-fit: contain; flex-shrink: 0; display: block; } 
         
         .box1 h2 { 
             margin: 0; 
             color: #334155; 
-            font-size: 22px; /* 字号同步缩小，保持 1:1 */
+            font-size: 22px; 
             font-weight: bold; 
             font-family: "Microsoft YaHei", "PingFang SC", sans-serif; 
             letter-spacing: 0.5px; 
             border: none; 
             padding: 0; 
-            line-height: 22px; /* 行高同步锁定为 22px */
+            line-height: 22px; 
             white-space: nowrap; 
             flex-shrink: 1; 
         }
@@ -71,9 +69,8 @@
 
         #commands-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
 
-        /* ============== 恢复：上下堆叠的间距 ============== */
         .form-group { margin-bottom: 20px; }
-        .box2 .form-group { margin-bottom: 0; } /* 顶部的控制台不需要底边距 */
+        .box2 .form-group { margin-bottom: 0; } 
         
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 0.95rem;}
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
@@ -105,6 +102,9 @@
         .copy-btn { background-color: #3b82f6; color: white; border: none; padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; flex-shrink: 0; }
         .copy-btn:hover { background-color: #2563eb; }
         
+        /* 工具栏特殊按钮样式 */
+        .tool-copy-btn { padding: 10px 15px; font-size: 13px; margin-left: 8px; }
+
         .cmd-desc { margin-bottom: 15px; font-size: 1rem; color: #334155; }
         .cmd-params { background: var(--param-bg); border-left: 4px solid var(--param-border); color: var(--param-text); padding: 12px 15px; border-radius: 4px 8px 8px 4px; margin-bottom: 15px; font-size: 0.95rem; }
         .cmd-params strong { display: block; margin-bottom: 5px; color: #b45309; }
@@ -123,6 +123,8 @@
             .top-controls { flex-direction: column; gap: 15px; }
             .cmd-header { flex-direction: column; align-items: stretch; }
             .copy-btn { width: 100%; }
+            .tool-copy-btn { margin-left: 0; margin-top: 8px; width: 100%; }
+            .tool-input-group { flex-direction: column; }
         }
     </style>
 </head>
@@ -137,12 +139,44 @@
         
         <div class="form-group">
             <label for="category">对象类别：</label>
-            <select id="category" onchange="updateObjectNames()"><option>...</option></select>
+            <select id="category" onchange="updateObjectNames()"><option>等待连接...</option></select>
         </div>
         <div class="form-group">
             <label for="object-name">对象名称：</label>
-            <select id="object-name" onchange="renderCommandCards()"><option>...</option></select>
+            <select id="object-name" onchange="renderCommandCards()"><option>等待连接...</option></select>
         </div>
+
+        <div style="margin-top: 35px; border-top: 2px dashed var(--border-color); padding-top: 25px;">
+            <div class="form-group" style="margin-bottom: 10px;">
+                <label for="tool-select">🛠️ 扩展工具栏：</label>
+                <select id="tool-select" onchange="toggleTool()">
+                    <option value="none">【可选择小工具】</option>
+                    <option value="color_picker">🎨 实时取色器</option>
+                </select>
+            </div>
+            
+            <div id="tool-color-picker" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; animation: fadein 0.3s;">
+                <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">点击下方色块打开画板：</label>
+                <input type="color" id="native-color" value="#00FF00" style="width: 100%; height: 50px; border: none; border-radius: 8px; cursor: pointer; padding: 0; margin-bottom: 15px; background: none;">
+
+                <div class="form-group" style="margin-bottom: 12px;">
+                    <label style="font-size: 0.85rem; margin-bottom: 4px;">16进制 (HEX)</label>
+                    <div class="tool-input-group" style="display: flex;">
+                        <input type="text" id="hex-input" value="#00FF00" style="font-family: Consolas, monospace; text-transform: uppercase;">
+                        <button class="copy-btn tool-copy-btn" onclick="copyToolValue('hex-input', 'HEX 代码')">复制</button>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label style="font-size: 0.85rem; margin-bottom: 4px;">RGB 数组</label>
+                    <div class="tool-input-group" style="display: flex;">
+                        <input type="text" id="rgb-input" value="0, 255, 0" style="font-family: Consolas, monospace;">
+                        <button class="copy-btn tool-copy-btn" onclick="copyToolValue('rgb-input', 'RGB 数组')">复制</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
     <div class="box2">
@@ -332,12 +366,96 @@
     function copyCommand(index) {
         const textToCopy = document.getElementById(`code-preview-${index}`).innerText;
         navigator.clipboard.writeText(textToCopy).then(() => {
-            const toast = document.getElementById("toast");
-            toast.className = "show";
-            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
+            showToast("代码复制成功！");
         }).catch(err => {
             alert('复制失败，请手动选择代码复制。');
         });
+    }
+
+    // ==========================================
+    // 新增：工具栏交互逻辑与三向绑定核心代码
+    // ==========================================
+    function toggleTool() {
+        const tool = document.getElementById('tool-select').value;
+        const cp = document.getElementById('tool-color-picker');
+        if (tool === 'color_picker') {
+            cp.style.display = 'block';
+        } else {
+            cp.style.display = 'none';
+        }
+    }
+
+    const nativeColor = document.getElementById('native-color');
+    const hexInput = document.getElementById('hex-input');
+    const rgbInput = document.getElementById('rgb-input');
+
+    // HEX 转换 RGB
+    function hexToRgb(hex) {
+        let r = 0, g = 0, b = 0;
+        if (hex.length === 4) {
+            r = parseInt("0x" + hex[1] + hex[1]);
+            g = parseInt("0x" + hex[2] + hex[2]);
+            b = parseInt("0x" + hex[3] + hex[3]);
+        } else if (hex.length === 7) {
+            r = parseInt("0x" + hex[1] + hex[2]);
+            g = parseInt("0x" + hex[3] + hex[4]);
+            b = parseInt("0x" + hex[5] + hex[6]);
+        }
+        return `${r}, ${g}, ${b}`;
+    }
+
+    // RGB 转换 HEX
+    function rgbToHex(r, g, b) {
+        return "#" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
+    }
+
+    // 1. 鼠标选色器改动 -> 同步输入框
+    nativeColor.addEventListener('input', (e) => {
+        const hex = e.target.value.toUpperCase();
+        hexInput.value = hex;
+        rgbInput.value = hexToRgb(hex);
+    });
+
+    // 2. 手动修改 HEX 输入框 -> 同步选色器和 RGB
+    hexInput.addEventListener('input', (e) => {
+        let hex = e.target.value.trim();
+        if (!hex.startsWith('#')) hex = '#' + hex;
+        if (/^#[0-9A-F]{6}$/i.test(hex)) { // 简单的防错正则
+            nativeColor.value = hex;
+            rgbInput.value = hexToRgb(hex);
+        }
+    });
+
+    // 3. 手动修改 RGB 输入框 -> 同步选色器和 HEX
+    rgbInput.addEventListener('input', (e) => {
+        const rgbStr = e.target.value.trim();
+        // 提取逗号分隔的数字
+        const rgbArr = rgbStr.split(',').map(n => parseInt(n.trim()));
+        if (rgbArr.length === 3 && rgbArr.every(n => !isNaN(n) && n >= 0 && n <= 255)) {
+            const hex = rgbToHex(rgbArr[0], rgbArr[1], rgbArr[2]);
+            nativeColor.value = hex;
+            hexInput.value = hex;
+        }
+    });
+
+    // 工具栏专用复制功能，带动态提示文案
+    function copyToolValue(id, name) {
+        const textToCopy = document.getElementById(id).value;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            showToast(`${name} 复制成功！`);
+        });
+    }
+
+    // 重构吐司提示功能（为了复用）
+    function showToast(msg) {
+        const toast = document.getElementById("toast");
+        toast.innerText = msg;
+        toast.className = "show";
+        // 每次展示前先清除之前的定时器，防止连点 Bug
+        if(window.toastTimer) clearTimeout(window.toastTimer);
+        window.toastTimer = setTimeout(() => { 
+            toast.className = toast.className.replace("show", ""); 
+        }, 2000);
     }
 </script>
 
