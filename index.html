@@ -19,8 +19,8 @@
             --code-param: #c2410c;  
             
             /* 搜索高亮配色 */
-            --search-hl-bg: #fef08a; /* 亮黄色背景 */
-            --search-hl-text: #854d0e; /* 深棕色文字 */
+            --search-hl-bg: #fef08a; 
+            --search-hl-text: #854d0e; 
             
             /* 参数框配色 */
             --param-bg: #fffbeb; 
@@ -40,20 +40,22 @@
         
         .box1 { flex: 1; min-width: 240px; max-width: 280px; position: sticky; top: 20px; }
         
-        /* ============== 优化 1：标题与Logo对齐、统一字体 ============== */
-        .header-title { display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; }
-        .team-logo { height: 45px; width: auto; display: block; } 
+        /* ============== 紧急修复：标题与Logo对齐、防止文字竖排 ============== */
+        .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 18px; margin-bottom: 20px; flex-wrap: nowrap; }
+        
+        /* 强制锁定 Logo 宽高，防止原图过大撑破布局 */
+        .team-logo { width: 45px; height: 45px; object-fit: contain; flex-shrink: 0; display: block; } 
         
         .box1 h2 { 
             margin: 0; 
-            color: #334155; /* 深灰色，非纯黑 */
-            font-size: 1.7rem; /* 大小与Logo协调 */
+            color: #334155; 
+            font-size: 1.4rem; /* 稍微调小一点，确保在240px宽度内放得下 */
             font-weight: bold; 
-            font-family: "Microsoft YaHei", "PingFang SC", sans-serif; /* 统一使用雅黑 */
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif; 
             letter-spacing: 1px; 
             border: none; 
             padding: 0; 
-            line-height: 45px; /* 让文字垂直居中 */
+            white-space: nowrap; /* 【核心修复】强制不换行，绝不允许字挤成竖排！ */
         }
         
         .box2 { flex: 3; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
@@ -80,8 +82,7 @@
 
         .cmd-card { background: var(--box-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         
-        /* ============== 优化 3：代码框布局约束 ============== */
-        .cmd-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: nowrap; /* 强制在一行，通过JS缩小字体 */ }
+        .cmd-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: nowrap; }
         
         .cmd-code { 
             background: var(--code-bg); 
@@ -93,15 +94,13 @@
             font-size: 1.1rem; 
             font-weight: 600; 
             flex-grow: 1; 
-            min-width: 0; /* 关键：防止Flex子元素撑破容器 */
-            overflow-x: auto; /* 兜底机制：字号缩小到极限依然放不下时，允许内部滚动 */
+            min-width: 0; 
+            overflow-x: auto; 
             white-space: nowrap; 
             margin: 0; 
         }
         
         .param-hl { color: var(--code-param); }
-        
-        /* 新增：搜索高亮类 */
         .search-hl { background-color: var(--search-hl-bg); color: var(--search-hl-text); border-radius: 3px; padding: 0 2px; font-weight: bold; }
 
         .copy-btn { background-color: #3b82f6; color: white; border: none; padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; flex-shrink: 0; }
@@ -178,7 +177,6 @@
     let commandDatabase = [];
     let currentObjectCommands = [];
 
-    // 窗口尺寸改变时，重新计算字号
     window.addEventListener('resize', () => {
         adjustCodeFontSizes();
     });
@@ -267,23 +265,16 @@
         });
 
         container.innerHTML = htmlContent;
-        updateDisplay(); // 触发一次渲染显示
+        updateDisplay(); 
     }
 
-    // ==========================================
-    // 核心工具：安全替换文本并加上 <mark> 标签
-    // ==========================================
     function highlightSafe(htmlString, query) {
         if (!query) return htmlString;
         const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-        // 这个正则的作用是：只匹配不在 HTML 标签内部的文本，防止破坏代码结构
         const regex = new RegExp(`(${escapedQuery})(?![^<]*>)`, 'gi');
         return htmlString.replace(regex, '<mark class="search-hl">$1</mark>');
     }
 
-    // ==========================================
-    // 核心更新：将实例更新、搜索筛选、关键字高亮整合
-    // ==========================================
     function updateDisplay() {
         const query = document.getElementById("search-input").value.trim().toLowerCase();
         const instanceVal = document.getElementById("instance-name").value.trim() || 'YOUR_INSTANCE';
@@ -295,15 +286,12 @@
             const codeTemplate = (cmd.command_template || '').toLowerCase();
             const description = (cmd.description || '').toLowerCase();
 
-            // 1. 判断是否匹配搜索
             if (query === '' || codeTemplate.includes(query) || description.includes(query)) {
                 card.style.display = 'block';
 
-                // 2. 更新详解内容（带搜索高亮）
                 const descElem = document.getElementById(`cmd-desc-${index}`);
                 descElem.innerHTML = highlightSafe(cmd.description || '暂无详细说明。', query);
 
-                // 3. 更新代码块（替换实例 -> 参数分色 -> 搜索高亮）
                 let finalCode = cmd.command_template || '';
                 const needsInstance = String(cmd.requires_instance).toUpperCase() === 'TRUE';
                 
@@ -313,38 +301,28 @@
                     finalCode = finalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
                 }
                 
-                // 先给括号内参数加上青色分色 span
                 let highlightedCode = finalCode.replace(/\((.*?)\)/g, '(<span class="param-hl">$1</span>)');
-                // 再给搜索关键字套上黄色高亮 mark
                 highlightedCode = highlightSafe(highlightedCode, query);
 
                 const codeBlock = document.getElementById(`code-preview-${index}`);
                 codeBlock.innerHTML = highlightedCode;
 
             } else {
-                card.style.display = 'none'; // 不匹配则隐藏
+                card.style.display = 'none'; 
             }
         });
 
-        // DOM 更新后，延迟 10 毫秒执行字号缩放计算，确保能获取到准确宽度
         setTimeout(adjustCodeFontSizes, 10);
     }
 
-    // ==========================================
-    // 核心黑科技：如果代码太长，自动缩小字体直到能塞入容器
-    // ==========================================
     function adjustCodeFontSizes() {
         const codeBlocks = document.querySelectorAll('.cmd-code');
         codeBlocks.forEach(block => {
-            // 如果卡片当前被隐藏，则跳过计算
             if (block.closest('.cmd-card').style.display === 'none') return;
             
-            // 每次重新计算前，先重置回最大的默认字号
             block.style.fontSize = '1.1rem';
             let currentSize = 1.1;
             
-            // 当内部文本宽度 (scrollWidth) 大于容器宽度 (clientWidth) 时，开始缩放
-            // 设定最小缩小到 0.65rem，防止缩得比蚂蚁还小无法阅读
             while (block.scrollWidth > block.clientWidth + 2 && currentSize > 0.65) {
                 currentSize -= 0.05;
                 block.style.fontSize = `${currentSize}rem`;
@@ -353,7 +331,6 @@
     }
 
     function copyCommand(index) {
-        // .innerText 可以直接穿透我们添加的 <mark> 和 <span> 标签，提取出纯净的文本代码！
         const textToCopy = document.getElementById(`code-preview-${index}`).innerText;
         navigator.clipboard.writeText(textToCopy).then(() => {
             const toast = document.getElementById("toast");
