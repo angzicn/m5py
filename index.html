@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>M5Py助手</title>
+    <title>M5代码助手</title>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <style>
         :root {
@@ -17,6 +17,10 @@
             --code-border: #bfdbfe; 
             --code-text: #1e3a8a;   
             --code-param: #c2410c;  
+            
+            /* 搜索高亮配色 */
+            --search-hl-bg: #fef08a; /* 亮黄色背景 */
+            --search-hl-text: #854d0e; /* 深棕色文字 */
             
             /* 参数框配色 */
             --param-bg: #fffbeb; 
@@ -36,32 +40,24 @@
         
         .box1 { flex: 1; min-width: 240px; max-width: 280px; position: sticky; top: 20px; }
         
-        /* ============== 优化 1：Logo 放大与标题比例调整 ============== */
-        .header-title { display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 2px solid var(--border-color); padding-bottom: 18px; margin-bottom: 20px; }
-        .team-logo { width: 55px; height: auto; display: block; } /* Logo 放大了 */
+        /* ============== 优化 1：标题与Logo对齐、统一字体 ============== */
+        .header-title { display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; }
+        .team-logo { height: 45px; width: auto; display: block; } 
         
         .box1 h2 { 
             margin: 0; 
-            color: #0f172a; 
-            font-size: 1.5rem; /* 英文字母更大 */
-            font-weight: 800; 
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            letter-spacing: 0.5px; 
+            color: #334155; /* 深灰色，非纯黑 */
+            font-size: 1.7rem; /* 大小与Logo协调 */
+            font-weight: bold; 
+            font-family: "Microsoft YaHei", "PingFang SC", sans-serif; /* 统一使用雅黑 */
+            letter-spacing: 1px; 
             border: none; 
             padding: 0; 
-            display: flex;
-            align-items: baseline; /* 底部基线对齐 */
-        }
-        .box1 h2 .sub-title {
-            font-size: 0.65em; /* 中文“助手”比英文小 */
-            font-weight: 600;
-            color: #475569;
-            margin-left: 4px;
+            line-height: 45px; /* 让文字垂直居中 */
         }
         
         .box2 { flex: 3; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
         
-        /* ============== 优化 2：顶部控制台（实例 + 搜索） ============== */
         .top-controls { display: flex; gap: 20px; width: 100%; }
         .control-box { flex: 1; padding: 18px 20px; border-radius: 12px; box-sizing: border-box; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
         
@@ -75,20 +71,40 @@
 
         #commands-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
 
-        .form-group { margin-bottom: 0; /* 在控制盒子里去掉了底边距 */ }
-        .box1 .form-group { margin-bottom: 20px; } /* 但左侧菜单保留 */
+        .form-group { margin-bottom: 0; }
+        .box1 .form-group { margin-bottom: 20px; } 
         
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 0.95rem;}
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; background-color: #fff; }
 
         .cmd-card { background: var(--box-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
-        .cmd-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
         
-        .cmd-code { background: var(--code-bg); color: var(--code-text); border: 1px solid var(--code-border); padding: 12px 18px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 1.1rem; font-weight: 600; flex-grow: 1; overflow-x: auto; white-space: nowrap; margin: 0; }
+        /* ============== 优化 3：代码框布局约束 ============== */
+        .cmd-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: nowrap; /* 强制在一行，通过JS缩小字体 */ }
+        
+        .cmd-code { 
+            background: var(--code-bg); 
+            color: var(--code-text); 
+            border: 1px solid var(--code-border); 
+            padding: 12px 18px; 
+            border-radius: 8px; 
+            font-family: 'Consolas', monospace; 
+            font-size: 1.1rem; 
+            font-weight: 600; 
+            flex-grow: 1; 
+            min-width: 0; /* 关键：防止Flex子元素撑破容器 */
+            overflow-x: auto; /* 兜底机制：字号缩小到极限依然放不下时，允许内部滚动 */
+            white-space: nowrap; 
+            margin: 0; 
+        }
+        
         .param-hl { color: var(--code-param); }
+        
+        /* 新增：搜索高亮类 */
+        .search-hl { background-color: var(--search-hl-bg); color: var(--search-hl-text); border-radius: 3px; padding: 0 2px; font-weight: bold; }
 
-        .copy-btn { background-color: #3b82f6; color: white; border: none; padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+        .copy-btn { background-color: #3b82f6; color: white; border: none; padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; flex-shrink: 0; }
         .copy-btn:hover { background-color: #2563eb; }
         
         .cmd-desc { margin-bottom: 15px; font-size: 1rem; color: #334155; }
@@ -103,7 +119,6 @@
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         
-        /* 手机端窄屏适配：控制台上下折叠 */
         @media (max-width: 768px) {
             .box1 { position: static; max-width: 100%; }
             .box1, .box2 { flex: 1 1 100%; min-width: 100%; }
@@ -119,7 +134,7 @@
     <div class="box box1">
         <div class="header-title">
             <img src="beijiq.svg" alt="BEIJIQ Logo" class="team-logo">
-            <h2>M5Py<span class="sub-title">助手</span></h2>
+            <h2>M5代码助手</h2>
         </div>
         
         <div class="form-group">
@@ -134,21 +149,19 @@
 
     <div class="box2">
         <div class="top-controls" id="top-controls" style="display: none;">
-            
             <div class="control-box instance-box" id="instance-settings" style="display: none;">
                 <div class="form-group">
                     <label for="instance-name">实例名称 (自动替换前缀)：</label>
-                    <input type="text" id="instance-name" oninput="updateAllDynamicCodes()">
+                    <input type="text" id="instance-name" oninput="updateDisplay()">
                 </div>
             </div>
 
             <div class="control-box search-box" id="search-settings">
                 <div class="form-group">
                     <label for="search-input">快速搜索当前对象命令：</label>
-                    <input type="text" id="search-input" placeholder="输入代码或中文解释..." oninput="filterCommands()">
+                    <input type="text" id="search-input" placeholder="输入代码或中文解释..." oninput="updateDisplay()">
                 </div>
             </div>
-
         </div>
 
         <div id="commands-container">
@@ -164,6 +177,11 @@
 
     let commandDatabase = [];
     let currentObjectCommands = [];
+
+    // 窗口尺寸改变时，重新计算字号
+    window.addEventListener('resize', () => {
+        adjustCodeFontSizes();
+    });
 
     window.onload = function() {
         Papa.parse(csvUrl, {
@@ -206,7 +224,6 @@
         
         objSelect.innerHTML = uniqueObjects.map(obj => `<option value="${obj}">${obj}</option>`).join('');
         
-        // 每次切换对象时，清空搜索框的内容
         document.getElementById("search-input").value = '';
         renderCommandCards();
     }
@@ -224,85 +241,119 @@
             return;
         }
 
-        // 显示顶部控制台区域
         document.getElementById("top-controls").style.display = 'flex';
 
-        // 检查是否需要实例，控制实例框显隐
         let needsInstance = currentObjectCommands.some(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE');
         if (needsInstance) {
             let defaultName = currentObjectCommands.find(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE' && cmd.default_instance)?.default_instance || 'obj';
             document.getElementById("instance-settings").style.display = 'block';
             document.getElementById("instance-name").value = defaultName;
         } else {
-            // 如果该对象全都不需要实例（如 time），就隐藏实例框，搜索框会自动占满整行
             document.getElementById("instance-settings").style.display = 'none';
         }
 
         let htmlContent = '';
         currentObjectCommands.forEach((cmd, index) => {
-            // 给每张卡片加上 ID，方便后面搜索过滤时控制显隐
             htmlContent += `
             <div class="cmd-card" id="cmd-card-${index}">
                 <div class="cmd-header">
                     <div class="cmd-code" id="code-preview-${index}"></div>
                     <button class="copy-btn" onclick="copyCommand(${index})">复制</button>
                 </div>
-                <div class="cmd-desc">${cmd.description || '暂无详细说明。'}</div>
+                <div class="cmd-desc" id="cmd-desc-${index}"></div>
                 ${cmd.params ? `<div class="cmd-params"><strong>参数说明:</strong>${cmd.params.replace(/\n/g, '<br>')}</div>` : ''}
                 ${cmd.example ? `<div class="cmd-example"><span class="example-label">具体示例</span>${cmd.example}</div>` : ''}
             </div>`;
         });
 
         container.innerHTML = htmlContent;
-        updateAllDynamicCodes(); 
-        filterCommands(); // 渲染后执行一次过滤（防备有残留输入）
+        updateDisplay(); // 触发一次渲染显示
     }
 
-    function updateAllDynamicCodes() {
+    // ==========================================
+    // 核心工具：安全替换文本并加上 <mark> 标签
+    // ==========================================
+    function highlightSafe(htmlString, query) {
+        if (!query) return htmlString;
+        const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        // 这个正则的作用是：只匹配不在 HTML 标签内部的文本，防止破坏代码结构
+        const regex = new RegExp(`(${escapedQuery})(?![^<]*>)`, 'gi');
+        return htmlString.replace(regex, '<mark class="search-hl">$1</mark>');
+    }
+
+    // ==========================================
+    // 核心更新：将实例更新、搜索筛选、关键字高亮整合
+    // ==========================================
+    function updateDisplay() {
+        const query = document.getElementById("search-input").value.trim().toLowerCase();
         const instanceVal = document.getElementById("instance-name").value.trim() || 'YOUR_INSTANCE';
         
         currentObjectCommands.forEach((cmd, index) => {
-            let finalCode = cmd.command_template || '';
-            const needsInstance = String(cmd.requires_instance).toUpperCase() === 'TRUE';
-            
-            if (needsInstance) {
-                finalCode = finalCode.replace(/{instance}/g, instanceVal);
-            } else {
-                finalCode = finalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
-            }
-            
-            const codeBlock = document.getElementById(`code-preview-${index}`);
-            if (codeBlock) {
+            const card = document.getElementById(`cmd-card-${index}`);
+            if (!card) return;
+
+            const codeTemplate = (cmd.command_template || '').toLowerCase();
+            const description = (cmd.description || '').toLowerCase();
+
+            // 1. 判断是否匹配搜索
+            if (query === '' || codeTemplate.includes(query) || description.includes(query)) {
+                card.style.display = 'block';
+
+                // 2. 更新详解内容（带搜索高亮）
+                const descElem = document.getElementById(`cmd-desc-${index}`);
+                descElem.innerHTML = highlightSafe(cmd.description || '暂无详细说明。', query);
+
+                // 3. 更新代码块（替换实例 -> 参数分色 -> 搜索高亮）
+                let finalCode = cmd.command_template || '';
+                const needsInstance = String(cmd.requires_instance).toUpperCase() === 'TRUE';
+                
+                if (needsInstance) {
+                    finalCode = finalCode.replace(/{instance}/g, instanceVal);
+                } else {
+                    finalCode = finalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
+                }
+                
+                // 先给括号内参数加上青色分色 span
                 let highlightedCode = finalCode.replace(/\((.*?)\)/g, '(<span class="param-hl">$1</span>)');
+                // 再给搜索关键字套上黄色高亮 mark
+                highlightedCode = highlightSafe(highlightedCode, query);
+
+                const codeBlock = document.getElementById(`code-preview-${index}`);
                 codeBlock.innerHTML = highlightedCode;
+
+            } else {
+                card.style.display = 'none'; // 不匹配则隐藏
             }
         });
+
+        // DOM 更新后，延迟 10 毫秒执行字号缩放计算，确保能获取到准确宽度
+        setTimeout(adjustCodeFontSizes, 10);
     }
 
     // ==========================================
-    // 核心新增：实时搜索与过滤卡片显示
+    // 核心黑科技：如果代码太长，自动缩小字体直到能塞入容器
     // ==========================================
-    function filterCommands() {
-        const query = document.getElementById("search-input").value.toLowerCase();
-        
-        currentObjectCommands.forEach((cmd, index) => {
-            // 提取目标命令的代码模板和中文解析，转换为小写用于模糊匹配
-            const codeTemplate = (cmd.command_template || '').toLowerCase();
-            const description = (cmd.description || '').toLowerCase();
-            const card = document.getElementById(`cmd-card-${index}`);
+    function adjustCodeFontSizes() {
+        const codeBlocks = document.querySelectorAll('.cmd-code');
+        codeBlocks.forEach(block => {
+            // 如果卡片当前被隐藏，则跳过计算
+            if (block.closest('.cmd-card').style.display === 'none') return;
             
-            if (!card) return;
+            // 每次重新计算前，先重置回最大的默认字号
+            block.style.fontSize = '1.1rem';
+            let currentSize = 1.1;
             
-            // 如果搜索词为空，或者搜索词包含在代码/解析中，则显示该卡片
-            if (query === '' || codeTemplate.includes(query) || description.includes(query)) {
-                card.style.display = 'block';
-            } else {
-                card.style.display = 'none'; // 否则隐藏
+            // 当内部文本宽度 (scrollWidth) 大于容器宽度 (clientWidth) 时，开始缩放
+            // 设定最小缩小到 0.65rem，防止缩得比蚂蚁还小无法阅读
+            while (block.scrollWidth > block.clientWidth + 2 && currentSize > 0.65) {
+                currentSize -= 0.05;
+                block.style.fontSize = `${currentSize}rem`;
             }
         });
     }
 
     function copyCommand(index) {
+        // .innerText 可以直接穿透我们添加的 <mark> 和 <span> 标签，提取出纯净的文本代码！
         const textToCopy = document.getElementById(`code-preview-${index}`).innerText;
         navigator.clipboard.writeText(textToCopy).then(() => {
             const toast = document.getElementById("toast");
