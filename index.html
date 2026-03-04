@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BEIJIQ M5 Python助手</title>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <style>
+        :root {
+            --primary-bg: #f0f4f8;
+            --box-bg: #ffffff;
+            --text-main: #334155;
+            --border-color: #cbd5e1;
+            --code-bg: #0f172a; 
+            --code-text: #34d399; 
+            --param-bg: #fffbeb; 
+            --param-border: #f59e0b;
+            --param-text: #92400e;
+            --example-bg: #1e293b;
+            --example-text: #bae6fd;
+        }
+
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--primary-bg); color: var(--text-main); padding: 20px; margin: 0; line-height: 1.6; }
+        .layout-container { display: flex; flex-wrap: wrap; gap: 24px; max-width: 1200px; margin: 0 auto; align-items: flex-start; }
+        .box { background: var(--box-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; }
+        
+        .box1 { flex: 1; min-width: 300px; position: sticky; top: 20px; }
+        .box1 h2 { margin-top: 0; color: #1e293b; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; font-size: 1.5rem; text-align: center; }
+        
+        .box2 { flex: 2; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
+
+        .form-group { margin-bottom: 20px; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; }
+        select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #f8fafc; }
+        select:focus, input[type="text"]:focus { border-color: #3b82f6; outline: none; background-color: #fff; }
+
+        .cmd-card { background: var(--box-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        .cmd-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
+        .cmd-code { background: var(--code-bg); color: var(--code-text); padding: 12px 18px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 1.1rem; flex-grow: 1; overflow-x: auto; white-space: nowrap; margin: 0; }
+        .copy-btn { background-color: #3b82f6; color: white; border: none; padding: 12px 20px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
+        .copy-btn:hover { background-color: #2563eb; }
+        .cmd-desc { margin-bottom: 15px; font-size: 1rem; color: #334155; }
+        .cmd-params { background: var(--param-bg); border-left: 4px solid var(--param-border); color: var(--param-text); padding: 12px 15px; border-radius: 4px 8px 8px 4px; margin-bottom: 15px; font-size: 0.95rem; }
+        .cmd-params strong { display: block; margin-bottom: 5px; color: #b45309; }
+        .cmd-example { background: var(--example-bg); color: var(--example-text); padding: 15px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 0.95rem; overflow-x: auto; white-space: pre-wrap; margin: 0; }
+        .cmd-example .example-label { display: block; margin-bottom: 8px; color: #94a3b8; font-family: sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; }
+
+        #toast { visibility: hidden; min-width: 200px; background-color: #10b981; color: #fff; text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 100; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
+        #toast.show { visibility: visible; animation: fadein 0.3s, fadeout 0.3s 2s; }
+        @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
+        @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
+        
+        @media (max-width: 768px) {
+            .box1 { position: static; }
+            .box1, .box2 { flex: 1 1 100%; min-width: 100%; }
+            .cmd-header { flex-direction: column; align-items: stretch; }
+            .copy-btn { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="layout-container">
+    <div class="box box1">
+        <h2>BEIJIQ M5 Python助手</h2>
+        <div class="form-group">
+            <label for="category">对象类别：</label>
+            <select id="category" onchange="updateObjectNames()"><option>等待连接...</option></select>
+        </div>
+        <div class="form-group">
+            <label for="object-name">对象名称：</label>
+            <select id="object-name" onchange="renderCommandCards()"><option>等待连接...</option></select>
+        </div>
+        
+        <div class="form-group" id="instance-group">
+            <label for="instance-name">当前实例名称：</label>
+            <input type="text" id="instance-name" placeholder="例如: rgb (自动添加至代码前)" oninput="updateAllDynamicCodes()">
+        </div>
+    </div>
+
+    <div class="box2" id="commands-container">
+        <div class="box" style="color:#3b82f6; font-weight:bold;">⏳ 正在尝试连接 Google Sheets 获取数据，请稍候...</div>
+    </div>
+</div>
+
+<div id="toast">复制成功！</div>
+
+<script>
+    // 已经替换为你提供的真实链接
+    const csvUrl = 'https://docs.google.com/spreadsheets/d/e/2PACX-1vQ6MbDLNT-1FodfmKICS_piH9Co__x0GdZ3N0TSxe6aCEGEKJWV9S9NifPZQIWBsPMrWZH3CY8u5e1w/pub?output=csv'; 
+
+    let commandDatabase = [];
+    let currentObjectCommands = [];
+
+    window.onload = function() {
+        Papa.parse(csvUrl, {
+            download: true,
+            header: true,
+            skipEmptyLines: true,
+            complete: function(results) {
+                // 【诊断1】检查表格是否为空
+                if (!results.data || results.data.length === 0) {
+                    document.getElementById("commands-container").innerHTML = '<div class="box" style="color:red;">❌ 成功连接到了表格，但是表格是空的。请确保表格里有数据，且已经“发布到网络”。</div>';
+                    return;
+                }
+
+                // 【诊断2】严格检查表头字段名称
+                const firstRowKeys = Object.keys(results.data[0]);
+                if (!firstRowKeys.includes('category') || !firstRowKeys.includes('object_name')) {
+                    document.getElementById("commands-container").innerHTML = `
+                        <div class="box" style="color:#b91c1c; background-color:#fef2f2; border: 1px solid #fca5a5;">
+                            <h3>❌ 发现问题：表格的“表头（第一行）”名字不对！</h3>
+                            <p>代码读取到你的第一行是：<strong>${firstRowKeys.join(' , ')}</strong></p>
+                            <p>⚠️ 但代码严格需要以下英文名称作为第一行（请注意小写和下划线）：<br>
+                            <strong style="color:blue;">category, object_name, command_template, requires_instance, description, params, example</strong></p>
+                            <p><strong>怎么修？</strong>请去 Google 表格，把第一行改对。改完后等待大概 2-5 分钟（Google 缓存有延迟），再刷新这个网页！</p>
+                        </div>`;
+                    return;
+                }
+
+                // 一切正常，执行渲染
+                commandDatabase = results.data;
+                initCategoryDropdown();
+            },
+            error: function(err) {
+                // 【诊断3】网络拦截或跨域问题
+                console.error("加载错误：", err);
+                document.getElementById("commands-container").innerHTML = `
+                    <div class="box" style="color:#b91c1c; background-color:#fef2f2; border: 1px solid #fca5a5;">
+                        <h3>❌ 网络请求被拦截！</h3>
+                        <p><strong>最大可能：</strong> 你是在电脑上直接双击打开的 index.html（浏览器地址栏是 file:/// 开头）。很多浏览器会拦截本地文件访问外部链接。</p>
+                        <p><strong>怎么修？</strong> 请把这个 index.html 直接传到你用于展示的 GitHub 仓库里，通过你设置好的 GitHub Pages 网址来访问，百分之百就能加载出来了！</p>
+                        <hr>
+                        <p style="font-size:0.85em; color:#666;">底层错误信息 (供参考): ${err.message || '网络连接失败'}</p>
+                    </div>`;
+            }
+        });
+    };
+
+    function initCategoryDropdown() {
+        const catSelect = document.getElementById("category");
+        const uniqueCategories = [...new Set(commandDatabase.map(item => item.category).filter(Boolean))];
+        catSelect.innerHTML = uniqueCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        updateObjectNames(); 
+    }
+
+    function updateObjectNames() {
+        const selectedCat = document.getElementById("category").value;
+        const objSelect = document.getElementById("object-name");
+        
+        const filteredData = commandDatabase.filter(item => item.category === selectedCat);
+        const uniqueObjects = [...new Set(filteredData.map(item => item.object_name).filter(Boolean))];
+        
+        objSelect.innerHTML = uniqueObjects.map(obj => `<option value="${obj}">${obj}</option>`).join('');
+        renderCommandCards();
+    }
+
+    function renderCommandCards() {
+        const selectedCat = document.getElementById("category").value;
+        const selectedObj = document.getElementById("object-name").value;
+        const container = document.getElementById("commands-container");
+        
+        currentObjectCommands = commandDatabase.filter(item => item.category === selectedCat && item.object_name === selectedObj);
+        
+        if (currentObjectCommands.length === 0) {
+            container.innerHTML = '<div class="box">该对象下暂无命令数据。</div>';
+            return;
+        }
+
+        let htmlContent = '';
+        currentObjectCommands.forEach((cmd, index) => {
+            htmlContent += `
+            <div class="cmd-card">
+                <div class="cmd-header">
+                    <div class="cmd-code" id="code-preview-${index}"></div>
+                    <button class="copy-btn" onclick="copyCommand(${index})">复制</button>
+                </div>
+                <div class="cmd-desc">${cmd.description || '暂无详细说明。'}</div>
+                ${cmd.params ? `<div class="cmd-params"><strong>参数说明:</strong>${cmd.params.replace(/\n/g, '<br>')}</div>` : ''}
+                ${cmd.example ? `<div class="cmd-example"><span class="example-label">具体示例</span>${cmd.example}</div>` : ''}
+            </div>`;
+        });
+
+        container.innerHTML = htmlContent;
+        updateAllDynamicCodes(); 
+    }
+
+    function updateAllDynamicCodes() {
+        const instanceVal = document.getElementById("instance-name").value.trim() || 'YOUR_INSTANCE';
+        
+        currentObjectCommands.forEach((cmd, index) => {
+            let finalCode = cmd.command_template || '';
+            const needsInstance = String(cmd.requires_instance).toUpperCase() === 'TRUE';
+            
+            if (needsInstance) {
+                finalCode = finalCode.replace(/{instance}/g, instanceVal);
+            } else {
+                finalCode = finalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
+            }
+            
+            const codeBlock = document.getElementById(`code-preview-${index}`);
+            if (codeBlock) {
+                codeBlock.innerText = finalCode;
+            }
+        });
+    }
+
+    function copyCommand(index) {
+        const textToCopy = document.getElementById(`code-preview-${index}`).innerText;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            const toast = document.getElementById("toast");
+            toast.className = "show";
+            setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2000);
+        }).catch(err => {
+            alert('复制失败，请手动选择代码复制。');
+        });
+    }
+</script>
+
+</body>
+</html>
