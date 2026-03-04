@@ -34,27 +34,12 @@
         .layout-container { display: flex; flex-wrap: wrap; gap: 24px; max-width: 1600px; width: 96%; margin: 0 auto; align-items: flex-start; }
         .box { background: var(--box-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; }
         
-        /* ============== 修复 2：为宽屏下的框1增加滚动能力 ============== */
-        .box1 { 
-            flex: 1; 
-            min-width: 260px; 
-            max-width: 320px; 
-            position: sticky; 
-            top: 20px; 
-            max-height: 95vh; 
-            display: flex; 
-            flex-direction: column; 
-            overflow-y: auto; /* 当工具栏展开超过高度时，允许框1整体滑动 */
-        }
-        /* 美化框1的全局滚动条 */
+        .box1 { flex: 1; min-width: 260px; max-width: 320px; position: sticky; top: 20px; max-height: 95vh; display: flex; flex-direction: column; overflow-y: auto; }
         .box1::-webkit-scrollbar { width: 5px; }
         .box1::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
         
         .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: nowrap; overflow: hidden; flex-shrink: 0; }
-        
-        /* ============== 修复 1：Logo再缩小8px (22px - 8px = 14px) ============== */
         .team-logo { height: 14px; width: auto; object-fit: contain; flex-shrink: 0; display: block; } 
-        
         .box1 h2 { margin: 0; color: #334155; font-size: 22px; font-weight: bold; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; letter-spacing: 0.5px; border: none; padding: 0; line-height: 22px; white-space: nowrap; flex-shrink: 1; display: flex; align-items: center;}
         
         .mobile-toggle-icon { display: none; }
@@ -86,7 +71,6 @@
         .toc-list { list-style: none; padding: 0; margin: 0; }
         .toc-item { font-size: 0.95rem; color: #3b82f6; padding: 6px 4px; margin-bottom: 2px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
         .toc-item:hover { background-color: #eff6ff; color: #1d4ed8; }
-        
         .toc-container::-webkit-scrollbar { width: 4px; }
         .toc-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
@@ -99,10 +83,33 @@
         }
         .highlight-active { animation: flashFocus 0.8s ease 2 alternate; border-color: #3b82f6 !important; }
 
-        .cmd-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: nowrap; }
+        /* ============== 核心重构：代码区与参数编辑器样式 ============== */
+        .cmd-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 15px; flex-wrap: nowrap; }
         
-        .cmd-code { background: var(--code-bg); color: var(--code-text); border: 1px solid var(--code-border); padding: 12px 18px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 1.1rem; font-weight: 600; flex-grow: 1; min-width: 0; overflow-x: auto; white-space: nowrap; margin: 0; }
+        .cmd-code-container { flex-grow: 1; min-width: 0; background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 8px; overflow: hidden; }
         
+        .cmd-code-text { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; color: var(--code-text); font-family: 'Consolas', monospace; font-weight: 600; overflow-x: auto; white-space: nowrap; transition: background-color 0.2s; }
+        .cmd-code-text span { font-size: 1.1rem; }
+        
+        /* 只有带参数的才会有 hover 效果和手型指针 */
+        .cmd-code-text.clickable { cursor: pointer; }
+        .cmd-code-text.clickable:hover { background-color: #e0f2fe; }
+        
+        .edit-hint { font-size: 0.95rem; opacity: 0; transition: opacity 0.2s; margin-left: 10px; filter: grayscale(100%); }
+        .cmd-code-text.clickable:hover .edit-hint { opacity: 1; }
+
+        /* 参数折叠区黑科技 */
+        .params-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
+        .params-wrapper.open { grid-template-rows: 1fr; }
+        .params-inner { overflow: hidden; }
+        
+        .params-content { padding: 15px 18px; background: #f8fafc; border-top: 1px dashed var(--code-border); }
+        .param-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+        .param-row:last-child { margin-bottom: 0; }
+        .param-label { font-family: Consolas, monospace; color: #1e3a8a; font-weight: bold; font-size: 0.95rem; width: 100px; text-align: right; flex-shrink: 0; }
+        .param-input { flex-grow: 1; padding: 8px 10px; border: 1px solid #bfdbfe; border-radius: 6px; font-family: Consolas, monospace; font-size: 0.95rem; color: #1e3a8a; background: #ffffff; transition: border-color 0.2s; box-sizing: border-box;}
+        .param-input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
+
         .param-hl { color: var(--code-param); }
         .search-hl { background-color: var(--search-hl-bg); color: var(--search-hl-text); border-radius: 3px; padding: 0 2px; font-weight: bold; }
 
@@ -125,7 +132,6 @@
         .tool-panel { flex-shrink: 0; margin-top: auto; padding-top: 20px; border-top: 2px dashed var(--border-color); }
 
         @media (max-width: 768px) {
-            /* 移动端覆盖，保证嵌套动画层正常工作 */
             .box1 { position: sticky; top: 10px; z-index: 999; max-width: 100%; max-height: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); margin-bottom: 20px; overflow-y: visible; }
             .box1, .box2 { flex: 1 1 100%; min-width: 100%; }
             
@@ -146,6 +152,7 @@
             .copy-btn { width: 100%; }
             .tool-copy-btn { margin-left: 0; margin-top: 8px; width: 100%; }
             .tool-input-group { flex-direction: column; }
+            .param-label { width: 80px; font-size: 0.85rem;}
         }
     </style>
 </head>
@@ -178,7 +185,7 @@
                     <div class="toc-container" id="toc-container" style="display: none;">
                         <div class="toc-title">📑 本页目录</div>
                         <ul class="toc-list" id="toc-list">
-                            </ul>
+                        </ul>
                     </div>
 
                     <div class="tool-panel">
@@ -265,11 +272,6 @@
                     document.getElementById("commands-container").innerHTML = '<div class="box" style="color:red;">❌ 表格无数据，请检查。</div>';
                     return;
                 }
-                const firstRowKeys = Object.keys(results.data[0]);
-                if (!firstRowKeys.includes('category') || !firstRowKeys.includes('object_name')) {
-                    document.getElementById("commands-container").innerHTML = '<div class="box" style="color:red;">❌ 表头格式错误，请检查第一行是否为严格的英文表头。</div>';
-                    return;
-                }
                 commandDatabase = results.data;
                 initCategoryDropdown();
             },
@@ -341,10 +343,49 @@
             let title = cmd.command_title || cmd.command_template || `命令 ${index + 1}`;
             tocContent += `<li class="toc-item" onclick="scrollToCard(${index})">📌 ${title}</li>`;
 
+            // ============== 核心修改：动态识别参数并生成输入框 ==============
+            let hasParams = false;
+            let paramInputsHtml = '';
+            
+            // 提取括号内的默认参数 (例如 index, color_hex)
+            const paramMatch = (cmd.command_template || '').match(/\((.*)\)/);
+            if (paramMatch && paramMatch[1].trim() !== '') {
+                const params = paramMatch[1].split(',').map(p => p.trim());
+                if (params.length > 0) {
+                    hasParams = true;
+                    params.forEach((p, pIdx) => {
+                        paramInputsHtml += `
+                            <div class="param-row">
+                                <span class="param-label">${p}:</span>
+                                <input type="text" class="param-input" id="param-input-${index}-${pIdx}" placeholder="默认: ${p}" oninput="updateDisplay()">
+                            </div>
+                        `;
+                    });
+                }
+            }
+
             htmlContent += `
             <div class="cmd-card" id="cmd-card-${index}">
                 <div class="cmd-header">
-                    <div class="cmd-code" id="code-preview-${index}"></div>
+                    <div class="cmd-code-container">
+                        <div class="cmd-code-text ${hasParams ? 'clickable' : ''}" onclick="toggleParamsPanel(${index}, ${hasParams})">
+                            <span id="code-text-${index}"></span>
+                            ${hasParams ? '<span class="edit-hint">✏️ 点此填入参数</span>' : ''}
+                        </div>
+                        ${hasParams ? `
+                        <div class="params-wrapper" id="params-wrapper-${index}">
+                            <div class="params-inner">
+                                <div class="params-content">
+                                    <div style="font-size: 0.85rem; color: #64748b; margin-bottom: 12px; display: flex; align-items: center; gap: 5px;">
+                                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line></svg>
+                                        在下方填入数值，代码将实时更新
+                                    </div>
+                                    ${paramInputsHtml}
+                                </div>
+                            </div>
+                        </div>
+                        ` : ''}
+                    </div>
                     <button class="copy-btn" onclick="copyCommand(${index})">复制</button>
                 </div>
                 <div class="cmd-desc" id="cmd-desc-${index}"></div>
@@ -360,6 +401,15 @@
 
         if (window.innerWidth <= 768 && currentObjectCommands.length > 0) {
             document.getElementById('main-box1').classList.remove('expanded');
+        }
+    }
+
+    // 展开/收起参数面板控制
+    function toggleParamsPanel(index, hasParams) {
+        if (!hasParams) return;
+        const wrapper = document.getElementById(`params-wrapper-${index}`);
+        if (wrapper) {
+            wrapper.classList.toggle('open');
         }
     }
 
@@ -414,17 +464,36 @@
                 let finalCode = cmd.command_template || '';
                 const needsInstance = String(cmd.requires_instance).toUpperCase() === 'TRUE';
                 
+                // 1. 替换实例名称
                 if (needsInstance) {
                     finalCode = finalCode.replace(/{instance}/g, instanceVal);
                 } else {
                     finalCode = finalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
                 }
+
+                // 2. 核心：读取参数框输入，替换原始参数
+                const paramMatch = (cmd.command_template || '').match(/\((.*)\)/);
+                if (paramMatch && paramMatch[1].trim() !== '') {
+                    const defaultParams = paramMatch[1].split(',').map(p => p.trim());
+                    let currentParams = [];
+                    for (let i = 0; i < defaultParams.length; i++) {
+                        const inputEl = document.getElementById(`param-input-${index}-${i}`);
+                        if (inputEl && inputEl.value.trim() !== '') {
+                            currentParams.push(inputEl.value.trim());
+                        } else {
+                            currentParams.push(defaultParams[i]); // 空则保留默认名字
+                        }
+                    }
+                    // 精准替换括号内的内容
+                    finalCode = finalCode.replace(/\((.*)\)/, `(${currentParams.join(', ')})`);
+                }
                 
+                // 3. 上色与高亮
                 let highlightedCode = finalCode.replace(/\((.*?)\)/g, '(<span class="param-hl">$1</span>)');
                 highlightedCode = highlightSafe(highlightedCode, query);
 
-                const codeBlock = document.getElementById(`code-preview-${index}`);
-                codeBlock.innerHTML = highlightedCode;
+                const codeBlock = document.getElementById(`code-text-${index}`);
+                if(codeBlock) codeBlock.innerHTML = highlightedCode;
 
             } else {
                 card.style.display = 'none'; 
@@ -435,22 +504,29 @@
     }
 
     function adjustCodeFontSizes() {
-        const codeBlocks = document.querySelectorAll('.cmd-code');
-        codeBlocks.forEach(block => {
-            if (block.closest('.cmd-card').style.display === 'none') return;
+        const codeContainers = document.querySelectorAll('.cmd-code-text');
+        codeContainers.forEach(container => {
+            const card = container.closest('.cmd-card');
+            if (!card || card.style.display === 'none') return;
             
-            block.style.fontSize = '1.1rem';
+            // 定位到内部存放真实代码的 span
+            const textSpan = container.querySelector('span[id^="code-text-"]');
+            if (!textSpan) return;
+
+            textSpan.style.fontSize = '1.1rem';
             let currentSize = 1.1;
             
-            while (block.scrollWidth > block.clientWidth + 2 && currentSize > 0.65) {
+            // 减去右侧图标的空间(约100px)进行对比，防止撑破
+            while (textSpan.scrollWidth > container.clientWidth - 100 && currentSize > 0.65) {
                 currentSize -= 0.05;
-                block.style.fontSize = `${currentSize}rem`;
+                textSpan.style.fontSize = `${currentSize}rem`;
             }
         });
     }
 
     function copyCommand(index) {
-        const textToCopy = document.getElementById(`code-preview-${index}`).innerText;
+        // 核心修改：只提取 code-text 里的纯文本，不包含后面的✏️图标
+        const textToCopy = document.getElementById(`code-text-${index}`).innerText;
         navigator.clipboard.writeText(textToCopy).then(() => {
             showToast("代码复制成功！");
         }).catch(err => {
