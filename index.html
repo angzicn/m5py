@@ -34,14 +34,18 @@
         .layout-container { display: flex; flex-wrap: wrap; gap: 24px; max-width: 1600px; width: 96%; margin: 0 auto; align-items: flex-start; }
         .box { background: var(--box-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; }
         
+        /* 框1 基础样式 */
         .box1 { flex: 1; min-width: 260px; max-width: 320px; position: sticky; top: 20px; max-height: 95vh; display: flex; flex-direction: column; }
         
         .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: nowrap; overflow: hidden; flex-shrink: 0; }
         
         .team-logo { height: 22px; width: auto; object-fit: contain; flex-shrink: 0; display: block; } 
         
-        .box1 h2 { margin: 0; color: #334155; font-size: 22px; font-weight: bold; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; letter-spacing: 0.5px; border: none; padding: 0; line-height: 22px; white-space: nowrap; flex-shrink: 1; }
+        .box1 h2 { margin: 0; color: #334155; font-size: 22px; font-weight: bold; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; letter-spacing: 0.5px; border: none; padding: 0; line-height: 22px; white-space: nowrap; flex-shrink: 1; display: flex; align-items: center;}
         
+        /* ============== 新增：移动端折叠小箭头（默认电脑端隐藏） ============== */
+        .mobile-toggle-icon { display: none; }
+
         .box2 { flex: 3; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
         
         .top-controls { display: flex; gap: 20px; width: 100%; }
@@ -64,12 +68,9 @@
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; background-color: #fff; }
 
-        /* ============== 核心修改：榨干目录横向空间 ============== */
         .toc-container { margin-bottom: 20px; padding: 10px 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; flex-grow: 1; overflow-y: auto; }
         .toc-title { font-size: 0.9rem; font-weight: bold; color: #64748b; margin-bottom: 8px; padding: 0 4px 5px 4px; border-bottom: 1px dashed #cbd5e1; }
         .toc-list { list-style: none; padding: 0; margin: 0; }
-        
-        /* 统一缩减 padding，对齐上面的标题，移除占据空间的左侧 border */
         .toc-item { font-size: 0.95rem; color: #3b82f6; padding: 6px 4px; margin-bottom: 2px; border-radius: 6px; cursor: pointer; transition: all 0.2s; }
         .toc-item:hover { background-color: #eff6ff; color: #1d4ed8; }
         
@@ -110,9 +111,30 @@
         
         .tool-panel { flex-shrink: 0; margin-top: auto; padding-top: 20px; border-top: 2px dashed var(--border-color); }
 
+        /* ============== 核心更新：移动端窄屏自适应与动画逻辑 ============== */
         @media (max-width: 768px) {
-            .box1 { position: static; max-width: 100%; max-height: none; }
+            /* 1. 让框1悬浮吸顶，并加重阴影使其浮在最上面 */
+            .box1 { position: sticky; top: 10px; z-index: 999; max-width: 100%; max-height: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); margin-bottom: 20px;}
             .box1, .box2 { flex: 1 1 100%; min-width: 100%; }
+            
+            /* 2. 标题区变为可点击的按钮 */
+            .header-title { cursor: pointer; border-bottom: none; padding-bottom: 0; margin-bottom: 0; user-select: none; transition: padding 0.3s, margin 0.3s; }
+            .mobile-toggle-icon { display: block; margin-left: auto; color: #64748b; transition: transform 0.3s ease; }
+            
+            /* 展开状态下的标题区样式 */
+            .box1.expanded .header-title { border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
+            .box1.expanded .mobile-toggle-icon { transform: rotate(180deg); color: #3b82f6; }
+            
+            /* 3. 使用 CSS Grid 黑科技实现高度动画平滑展开/收起 */
+            .box1-content-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
+            .box1.expanded .box1-content-wrapper { grid-template-rows: 1fr; }
+            
+            /* 必须配合 overflow: hidden 才能让 Grid 动画生效 */
+            .box1-content-inner { overflow: hidden; }
+            
+            /* 限制内部最大高度，防止下拉菜单太长导致无法滑动 */
+            .box1-scroll-area { max-height: 70vh; overflow-y: auto; padding-bottom: 5px; }
+
             .top-controls { flex-direction: column; gap: 15px; }
             .cmd-header { flex-direction: column; align-items: stretch; }
             .copy-btn { width: 100%; }
@@ -124,59 +146,66 @@
 <body>
 
 <div class="layout-container">
-    <div class="box box1">
-        <div class="header-title">
+    <div class="box box1 expanded" id="main-box1">
+        
+        <div class="header-title" onclick="toggleMobileBox1()">
             <img src="beijiq.svg" alt="BEIJIQ Logo" class="team-logo">
             <h2>M5代码助手</h2>
+            <svg class="mobile-toggle-icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="6 9 12 15 18 9"></polyline>
+            </svg>
         </div>
         
-        <div class="form-group">
-            <label for="category">对象类别：</label>
-            <select id="category" onchange="updateObjectNames()"><option>等待连接...</option></select>
-        </div>
-        <div class="form-group">
-            <label for="object-name">对象名称：</label>
-            <select id="object-name" onchange="renderCommandCards()"><option>等待连接...</option></select>
-        </div>
-
-        <div class="toc-container" id="toc-container" style="display: none;">
-            <div class="toc-title">📑 本页目录</div>
-            <ul class="toc-list" id="toc-list">
-                </ul>
-        </div>
-
-        <div class="tool-panel">
-            <div class="form-group" style="margin-bottom: 10px;">
-                <label for="tool-select">🛠️ 扩展工具栏：</label>
-                <select id="tool-select" onchange="toggleTool()">
-                    <option value="none">【可选择小工具】</option>
-                    <option value="color_picker">🎨 实时取色器</option>
-                </select>
-            </div>
-            
-            <div id="tool-color-picker" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; animation: fadein 0.3s;">
-                <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">点击下方色块打开画板：</label>
-                <input type="color" id="native-color" value="#00FF00" style="width: 100%; height: 50px; border: none; border-radius: 8px; cursor: pointer; padding: 0; margin-bottom: 15px; background: none;">
-
-                <div class="form-group" style="margin-bottom: 12px;">
-                    <label style="font-size: 0.85rem; margin-bottom: 4px;">16进制 (HEX)</label>
-                    <div class="tool-input-group" style="display: flex;">
-                        <input type="text" id="hex-input" value="0x00FF00" style="font-family: Consolas, monospace;">
-                        <button class="copy-btn tool-copy-btn" onclick="copyToolValue('hex-input', 'HEX 代码')">复制</button>
+        <div class="box1-content-wrapper">
+            <div class="box1-content-inner">
+                <div class="box1-scroll-area">
+                    
+                    <div class="form-group">
+                        <label for="category">对象类别：</label>
+                        <select id="category" onchange="updateObjectNames()"><option>等待连接...</option></select>
                     </div>
-                </div>
-
-                <div class="form-group" style="margin-bottom: 0;">
-                    <label style="font-size: 0.85rem; margin-bottom: 4px;">RGB 数组</label>
-                    <div class="tool-input-group" style="display: flex;">
-                        <input type="text" id="rgb-input" value="0, 255, 0" style="font-family: Consolas, monospace;">
-                        <button class="copy-btn tool-copy-btn" onclick="copyToolValue('rgb-input', 'RGB 数组')">复制</button>
+                    <div class="form-group">
+                        <label for="object-name">对象名称：</label>
+                        <select id="object-name" onchange="renderCommandCards()"><option>等待连接...</option></select>
                     </div>
-                </div>
-            </div>
-        </div>
 
-    </div>
+                    <div class="toc-container" id="toc-container" style="display: none;">
+                        <div class="toc-title">📑 本页目录</div>
+                        <ul class="toc-list" id="toc-list">
+                            </ul>
+                    </div>
+
+                    <div class="tool-panel">
+                        <div class="form-group" style="margin-bottom: 10px;">
+                            <label for="tool-select">🛠️ 扩展工具栏：</label>
+                            <select id="tool-select" onchange="toggleTool()">
+                                <option value="none">【可选择小工具】</option>
+                                <option value="color_picker">🎨 实时取色器</option>
+                            </select>
+                        </div>
+                        
+                        <div id="tool-color-picker" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; animation: fadein 0.3s;">
+                            <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">点击下方色块打开画板：</label>
+                            <input type="color" id="native-color" value="#00FF00" style="width: 100%; height: 50px; border: none; border-radius: 8px; cursor: pointer; padding: 0; margin-bottom: 15px; background: none;">
+
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label style="font-size: 0.85rem; margin-bottom: 4px;">16进制 (HEX)</label>
+                                <div class="tool-input-group" style="display: flex;">
+                                    <input type="text" id="hex-input" value="0x00FF00" style="font-family: Consolas, monospace;">
+                                    <button class="copy-btn tool-copy-btn" onclick="copyToolValue('hex-input', 'HEX 代码')">复制</button>
+                                </div>
+                            </div>
+
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.85rem; margin-bottom: 4px;">RGB 数组</label>
+                                <div class="tool-input-group" style="display: flex;">
+                                    <input type="text" id="rgb-input" value="0, 255, 0" style="font-family: Consolas, monospace;">
+                                    <button class="copy-btn tool-copy-btn" onclick="copyToolValue('rgb-input', 'RGB 数组')">复制</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> </div> </div> </div>
 
     <div class="box2">
         <div class="top-controls" id="top-controls" style="display: none;">
@@ -211,6 +240,10 @@
 
     window.addEventListener('resize', () => {
         adjustCodeFontSizes();
+        // 如果用户在移动端收起了框1，然后横屏或拉长浏览器窗口，强制让它展开
+        if (window.innerWidth > 768) {
+            document.getElementById('main-box1').classList.add('expanded');
+        }
     });
 
     window.onload = function() {
@@ -237,6 +270,13 @@
             }
         });
     };
+
+    // ============== 新增：移动端手动折叠开关 ==============
+    function toggleMobileBox1() {
+        if (window.innerWidth <= 768) {
+            document.getElementById('main-box1').classList.toggle('expanded');
+        }
+    }
 
     function initCategoryDropdown() {
         const catSelect = document.getElementById("category");
@@ -309,6 +349,11 @@
         tocList.innerHTML = tocContent; 
         
         updateDisplay(); 
+
+        // ============== 智能收起：手机端成功渲染列表后，自动折起框1 ==============
+        if (window.innerWidth <= 768 && currentObjectCommands.length > 0) {
+            document.getElementById('main-box1').classList.remove('expanded');
+        }
     }
 
     function scrollToCard(index) {
@@ -326,11 +371,13 @@
 
         setTimeout(() => {
             targetCard.classList.add('highlight-active');
-            
-            setTimeout(() => {
-                targetCard.classList.remove('highlight-active');
-            }, 1600);
+            setTimeout(() => { targetCard.classList.remove('highlight-active'); }, 1600);
         }, 100); 
+
+        // ============== 智能收起：点击目录跳转后，自动折起框1，让出视野 ==============
+        if (window.innerWidth <= 768) {
+            document.getElementById('main-box1').classList.remove('expanded');
+        }
     }
 
     function highlightSafe(htmlString, query) {
