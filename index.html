@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BEIJIQ M5 Python助手</title>
+    <title>M5Py助手</title>
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <style>
         :root {
@@ -11,11 +11,15 @@
             --box-bg: #ffffff;
             --text-main: #334155;
             --border-color: #cbd5e1;
+            /* 代码块配色 */
             --code-bg: #0f172a; 
-            --code-text: #34d399; 
+            --code-text: #34d399; /* 主体代码颜色：青绿色 */
+            --code-param: #fbbf24; /* 括号内参数高亮颜色：橙黄色 */
+            /* 参数框配色 */
             --param-bg: #fffbeb; 
             --param-border: #f59e0b;
             --param-text: #92400e;
+            /* 示例块配色 */
             --example-bg: #1e293b;
             --example-text: #bae6fd;
         }
@@ -25,21 +29,26 @@
         .layout-container { display: flex; flex-wrap: wrap; gap: 24px; max-width: 1200px; margin: 0 auto; align-items: flex-start; }
         .box { background: var(--box-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; }
         
-        /* 优化点1：让左侧框1变窄，且固定最大宽度 */
         .box1 { flex: 1; min-width: 240px; max-width: 280px; position: sticky; top: 20px; }
-        .box1 h2 { margin-top: 0; color: #1e293b; border-bottom: 2px solid var(--border-color); padding-bottom: 10px; font-size: 1.5rem; text-align: center; }
         
-        /* 优化点2：让右侧框2占比变大 (flex: 3) */
+        /* ============== 新增：Logo与标题样式 ============== */
+        .team-logo { display: block; max-width: 80px; margin: 0 auto 10px auto; }
+        .box1 h2 { margin-top: 0; color: #1e293b; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; font-size: 1.15rem; text-align: center; letter-spacing: 1px; }
+        
         .box2 { flex: 3; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
 
         .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; }
-        select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 16px; background-color: #f8fafc; }
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 0.95rem;}
+        select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; outline: none; background-color: #fff; }
 
         .cmd-card { background: var(--box-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .cmd-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
         .cmd-code { background: var(--code-bg); color: var(--code-text); padding: 12px 18px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 1.1rem; flex-grow: 1; overflow-x: auto; white-space: nowrap; margin: 0; }
+        
+        /* ============== 新增：参数高亮类 ============== */
+        .param-hl { color: var(--code-param); }
+
         .copy-btn { background-color: #3b82f6; color: white; border: none; padding: 12px 20px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
         .copy-btn:hover { background-color: #2563eb; }
         .cmd-desc { margin-bottom: 15px; font-size: 1rem; color: #334155; }
@@ -53,7 +62,6 @@
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         
-        /* 优化点3：确保在手机窄屏时，左侧框解除 max-width 限制，铺满屏幕 */
         @media (max-width: 768px) {
             .box1 { position: static; max-width: 100%; }
             .box1, .box2 { flex: 1 1 100%; min-width: 100%; }
@@ -66,7 +74,9 @@
 
 <div class="layout-container">
     <div class="box box1">
-        <h2>BEIJIQ M5 Python助手</h2>
+        <img src="beijiq.svg" alt="BEIJIQ Logo" class="team-logo">
+        <h2>M5Py助手</h2>
+        
         <div class="form-group">
             <label for="category">对象类别：</label>
             <select id="category" onchange="updateObjectNames()"><option>等待连接...</option></select>
@@ -170,6 +180,9 @@
         updateAllDynamicCodes(); 
     }
 
+    // ==========================================
+    // 核心更新：实时正则匹配并给括号内参数加上颜色
+    // ==========================================
     function updateAllDynamicCodes() {
         const instanceVal = document.getElementById("instance-name").value.trim() || 'YOUR_INSTANCE';
         
@@ -177,6 +190,7 @@
             let finalCode = cmd.command_template || '';
             const needsInstance = String(cmd.requires_instance).toUpperCase() === 'TRUE';
             
+            // 1. 替换实例名称
             if (needsInstance) {
                 finalCode = finalCode.replace(/{instance}/g, instanceVal);
             } else {
@@ -185,12 +199,17 @@
             
             const codeBlock = document.getElementById(`code-preview-${index}`);
             if (codeBlock) {
-                codeBlock.innerText = finalCode;
+                // 2. 正则表达式：找到 "(" 和 ")" 之间的内容，给它包上 .param-hl 类
+                let highlightedCode = finalCode.replace(/\((.*?)\)/g, '(<span class="param-hl">$1</span>)');
+                
+                // 3. 使用 innerHTML 渲染（为了让 span 标签生效）
+                codeBlock.innerHTML = highlightedCode;
             }
         });
     }
 
     function copyCommand(index) {
+        // innerText 会忽略上面的 span 标签，只提取纯代码文字，保证复制的代码是纯净的
         const textToCopy = document.getElementById(`code-preview-${index}`).innerText;
         navigator.clipboard.writeText(textToCopy).then(() => {
             const toast = document.getElementById("toast");
