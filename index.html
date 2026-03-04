@@ -34,25 +34,13 @@
         .layout-container { display: flex; flex-wrap: wrap; gap: 24px; max-width: 1600px; width: 96%; margin: 0 auto; align-items: flex-start; }
         .box { background: var(--box-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; }
         
-        .box1 { flex: 1; min-width: 260px; max-width: 320px; position: sticky; top: 20px; }
+        .box1 { flex: 1; min-width: 260px; max-width: 320px; position: sticky; top: 20px; max-height: 95vh; display: flex; flex-direction: column; }
         
-        .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: nowrap; overflow: hidden; }
+        .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: nowrap; overflow: hidden; flex-shrink: 0; }
         
         .team-logo { height: 22px; width: auto; object-fit: contain; flex-shrink: 0; display: block; } 
         
-        .box1 h2 { 
-            margin: 0; 
-            color: #334155; 
-            font-size: 22px; 
-            font-weight: bold; 
-            font-family: "Microsoft YaHei", "PingFang SC", sans-serif; 
-            letter-spacing: 0.5px; 
-            border: none; 
-            padding: 0; 
-            line-height: 22px; 
-            white-space: nowrap; 
-            flex-shrink: 1; 
-        }
+        .box1 h2 { margin: 0; color: #334155; font-size: 22px; font-weight: bold; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; letter-spacing: 0.5px; border: none; padding: 0; line-height: 22px; white-space: nowrap; flex-shrink: 1; }
         
         .box2 { flex: 3; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
         
@@ -69,44 +57,45 @@
 
         #commands-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
 
-        .form-group { margin-bottom: 20px; }
+        .form-group { margin-bottom: 20px; flex-shrink: 0; }
         .box2 .form-group { margin-bottom: 0; } 
         
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 0.95rem;}
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; background-color: #fff; }
 
-        .cmd-card { background: var(--box-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
+        /* ============== 新增：目录样式 ============== */
+        .toc-container { margin-bottom: 20px; padding: 10px 15px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; flex-grow: 1; overflow-y: auto; }
+        .toc-title { font-size: 0.9rem; font-weight: bold; color: #64748b; margin-bottom: 10px; padding-bottom: 5px; border-bottom: 1px dashed #cbd5e1; }
+        .toc-list { list-style: none; padding: 0; margin: 0; }
+        .toc-item { font-size: 0.95rem; color: #3b82f6; padding: 6px 8px; margin-bottom: 4px; border-radius: 6px; cursor: pointer; transition: all 0.2s; border-left: 3px solid transparent; }
+        .toc-item:hover { background-color: #eff6ff; color: #1d4ed8; border-left-color: #3b82f6; }
+        /* 隐藏滚动条让左侧更美观 */
+        .toc-container::-webkit-scrollbar { width: 4px; }
+        .toc-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
+
+        .cmd-card { background: var(--box-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: all 0.3s ease; }
         
+        /* ============== 新增：目标高亮闪烁动画 ============== */
+        @keyframes flashFocus {
+            0% { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); transform: translateY(-2px); }
+            50% { border-color: #e2e8f0; box-shadow: 0 2px 4px rgba(0,0,0,0.05); transform: translateY(0); }
+            100% { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); transform: translateY(-2px); }
+        }
+        .highlight-active { animation: flashFocus 0.8s ease 2 alternate; border-color: #3b82f6 !important; }
+
         .cmd-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: nowrap; }
         
-        .cmd-code { 
-            background: var(--code-bg); 
-            color: var(--code-text); 
-            border: 1px solid var(--code-border); 
-            padding: 12px 18px; 
-            border-radius: 8px; 
-            font-family: 'Consolas', monospace; 
-            font-size: 1.1rem; 
-            font-weight: 600; 
-            flex-grow: 1; 
-            min-width: 0; 
-            overflow-x: auto; 
-            white-space: nowrap; 
-            margin: 0; 
-        }
+        .cmd-code { background: var(--code-bg); color: var(--code-text); border: 1px solid var(--code-border); padding: 12px 18px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 1.1rem; font-weight: 600; flex-grow: 1; min-width: 0; overflow-x: auto; white-space: nowrap; margin: 0; }
         
         .param-hl { color: var(--code-param); }
         .search-hl { background-color: var(--search-hl-bg); color: var(--search-hl-text); border-radius: 3px; padding: 0 2px; font-weight: bold; }
 
         .copy-btn { background-color: #3b82f6; color: white; border: none; padding: 12px 20px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; flex-shrink: 0; }
         .copy-btn:hover { background-color: #2563eb; }
-        
         .tool-copy-btn { padding: 10px 15px; font-size: 13px; margin-left: 8px; }
 
-        /* ====== 核心修改：增加 font-weight: bold; 让中文描述加粗 ====== */
         .cmd-desc { margin-bottom: 15px; font-size: 1rem; color: #334155; font-weight: bold; }
-        
         .cmd-params { background: var(--param-bg); border-left: 4px solid var(--param-border); color: var(--param-text); padding: 12px 15px; border-radius: 4px 8px 8px 4px; margin-bottom: 15px; font-size: 0.95rem; }
         .cmd-params strong { display: block; margin-bottom: 5px; color: #b45309; }
         
@@ -118,8 +107,10 @@
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         
+        .tool-panel { flex-shrink: 0; margin-top: auto; padding-top: 20px; border-top: 2px dashed var(--border-color); }
+
         @media (max-width: 768px) {
-            .box1 { position: static; max-width: 100%; }
+            .box1 { position: static; max-width: 100%; max-height: none; }
             .box1, .box2 { flex: 1 1 100%; min-width: 100%; }
             .top-controls { flex-direction: column; gap: 15px; }
             .cmd-header { flex-direction: column; align-items: stretch; }
@@ -147,7 +138,13 @@
             <select id="object-name" onchange="renderCommandCards()"><option>等待连接...</option></select>
         </div>
 
-        <div style="margin-top: 35px; border-top: 2px dashed var(--border-color); padding-top: 25px;">
+        <div class="toc-container" id="toc-container" style="display: none;">
+            <div class="toc-title">📑 本页目录</div>
+            <ul class="toc-list" id="toc-list">
+                </ul>
+        </div>
+
+        <div class="tool-panel">
             <div class="form-group" style="margin-bottom: 10px;">
                 <label for="tool-select">🛠️ 扩展工具栏：</label>
                 <select id="tool-select" onchange="toggleTool()">
@@ -264,16 +261,20 @@
         const selectedCat = document.getElementById("category").value;
         const selectedObj = document.getElementById("object-name").value;
         const container = document.getElementById("commands-container");
+        const tocList = document.getElementById("toc-list");
+        const tocContainer = document.getElementById("toc-container");
         
         currentObjectCommands = commandDatabase.filter(item => item.category === selectedCat && item.object_name === selectedObj);
         
         if (currentObjectCommands.length === 0) {
             container.innerHTML = '<div class="box">该对象下暂无命令数据。</div>';
             document.getElementById("top-controls").style.display = 'none';
+            tocContainer.style.display = 'none';
             return;
         }
 
         document.getElementById("top-controls").style.display = 'flex';
+        tocContainer.style.display = 'block'; // 显示目录
 
         let needsInstance = currentObjectCommands.some(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE');
         if (needsInstance) {
@@ -285,7 +286,15 @@
         }
 
         let htmlContent = '';
+        let tocContent = ''; // 存放目录的 HTML
+
         currentObjectCommands.forEach((cmd, index) => {
+            // ============== 新增：构建目录项 ==============
+            // 如果表格没有 command_title 列或没填，则兜底使用代码模板
+            let title = cmd.command_title || cmd.command_template || `命令 ${index + 1}`;
+            tocContent += `<li class="toc-item" onclick="scrollToCard(${index})">📌 ${title}</li>`;
+
+            // 构建卡片
             htmlContent += `
             <div class="cmd-card" id="cmd-card-${index}">
                 <div class="cmd-header">
@@ -299,7 +308,37 @@
         });
 
         container.innerHTML = htmlContent;
+        tocList.innerHTML = tocContent; // 渲染目录
+        
         updateDisplay(); 
+    }
+
+    // ============== 新增：平滑滚动与高亮动画逻辑 ==============
+    function scrollToCard(index) {
+        const targetCard = document.getElementById(`cmd-card-${index}`);
+        if (!targetCard) return;
+
+        // 如果用户之前用搜索功能把卡片隐藏了，点击目录时强制清空搜索并显示所有卡片
+        if (targetCard.style.display === 'none') {
+            document.getElementById("search-input").value = '';
+            updateDisplay();
+        }
+
+        // 1. 平滑滚动到卡片位置（在视口居中）
+        targetCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        // 2. 移除所有卡片的闪烁类，确保动画可以重新触发
+        document.querySelectorAll('.cmd-card').forEach(card => card.classList.remove('highlight-active'));
+
+        // 3. 给目标卡片加上闪烁动画类
+        setTimeout(() => {
+            targetCard.classList.add('highlight-active');
+            
+            // 动画播放完毕后（1.6秒），移除类名，保证下次点击还能再闪
+            setTimeout(() => {
+                targetCard.classList.remove('highlight-active');
+            }, 1600);
+        }, 100); // 轻微延迟，等待滚动开始
     }
 
     function highlightSafe(htmlString, query) {
@@ -319,8 +358,9 @@
 
             const codeTemplate = (cmd.command_template || '').toLowerCase();
             const description = (cmd.description || '').toLowerCase();
+            const title = (cmd.command_title || '').toLowerCase(); // 搜索也顺便支持标题
 
-            if (query === '' || codeTemplate.includes(query) || description.includes(query)) {
+            if (query === '' || codeTemplate.includes(query) || description.includes(query) || title.includes(query)) {
                 card.style.display = 'block';
 
                 const descElem = document.getElementById(`cmd-desc-${index}`);
