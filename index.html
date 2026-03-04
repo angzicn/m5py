@@ -104,7 +104,9 @@
         
         .tool-copy-btn { padding: 10px 15px; font-size: 13px; margin-left: 8px; }
 
-        .cmd-desc { margin-bottom: 15px; font-size: 1rem; color: #334155; }
+        /* ====== 核心修改：增加 font-weight: bold; 让中文描述加粗 ====== */
+        .cmd-desc { margin-bottom: 15px; font-size: 1rem; color: #334155; font-weight: bold; }
+        
         .cmd-params { background: var(--param-bg); border-left: 4px solid var(--param-border); color: var(--param-text); padding: 12px 15px; border-radius: 4px 8px 8px 4px; margin-bottom: 15px; font-size: 0.95rem; }
         .cmd-params strong { display: block; margin-bottom: 5px; color: #b45309; }
         
@@ -371,9 +373,6 @@
         });
     }
 
-    // ==========================================
-    // 核心更新：全面支持 UIFlow2 的 0x 十六进制格式
-    // ==========================================
     function toggleTool() {
         const tool = document.getElementById('tool-select').value;
         const cp = document.getElementById('tool-color-picker');
@@ -388,7 +387,6 @@
     const hexInput = document.getElementById('hex-input');
     const rgbInput = document.getElementById('rgb-input');
 
-    // 智能转换：支持 # 或 0x 前缀，提取纯 HEX 计算 RGB
     function hexToRgb(hex) {
         let pureHex = hex.replace(/^#|^0x/i, '');
         let r = 0, g = 0, b = 0;
@@ -404,42 +402,34 @@
         return `${r}, ${g}, ${b}`;
     }
 
-    // 输出标准的 UIFlow 格式：0xRRGGBB
     function rgbToHex(r, g, b) {
         return "0x" + (1 << 24 | r << 16 | g << 8 | b).toString(16).slice(1).toUpperCase();
     }
 
-    // 1. 鼠标选色 -> 同步到输入框 (转换为 0x)
     nativeColor.addEventListener('input', (e) => {
-        const standardHex = e.target.value.toUpperCase(); // 取色器底层永远返回 #RRGGBB
-        const uiflowHex = standardHex.replace('#', '0x'); // 瞬间换皮变成 0xRRGGBB
+        const standardHex = e.target.value.toUpperCase(); 
+        const uiflowHex = standardHex.replace('#', '0x'); 
         hexInput.value = uiflowHex;
         rgbInput.value = hexToRgb(uiflowHex);
     });
 
-    // 2. 修改 0x 输入框 -> 同步到画板和 RGB
     hexInput.addEventListener('input', (e) => {
         let hex = e.target.value.trim();
-        // 如果手滑只输入了 FF0000，自动在前面补上 0x
         if (!hex.toLowerCase().startsWith('0x') && !hex.startsWith('#')) {
             hex = '0x' + hex;
         }
-        // 剥离前缀，只验证后面的 6 位字符是否合法
         let pureHex = hex.replace(/^#|^0x/i, '');
         if (/^[0-9A-F]{6}$/i.test(pureHex)) { 
-            // 喂给底层原生画板时，必须转换回 # 格式
             nativeColor.value = '#' + pureHex.toUpperCase();
             rgbInput.value = hexToRgb(hex);
         }
     });
 
-    // 3. 修改 RGB 数组 -> 同步到画板和 0x 框
     rgbInput.addEventListener('input', (e) => {
         const rgbStr = e.target.value.trim();
         const rgbArr = rgbStr.split(',').map(n => parseInt(n.trim()));
         if (rgbArr.length === 3 && rgbArr.every(n => !isNaN(n) && n >= 0 && n <= 255)) {
             const uiflowHex = rgbToHex(rgbArr[0], rgbArr[1], rgbArr[2]);
-            // 同样，喂给底层原生画板时，把 0x 替换为 #
             nativeColor.value = uiflowHex.replace(/0x/i, '#');
             hexInput.value = uiflowHex;
         }
