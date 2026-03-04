@@ -12,22 +12,21 @@
             --text-main: #334155;
             --border-color: #cbd5e1;
             
-            /* ============== 优化 2：护眼浅色代码主题 ============== */
-            /* 主代码块配色 */
-            --code-bg: #eff6ff;     /* 极浅的蓝底 */
-            --code-border: #bfdbfe; /* 浅蓝边框 */
-            --code-text: #1e3a8a;   /* 深藏青色代码 */
-            --code-param: #c2410c;  /* 深铁锈橙参数 */
+            /* 主代码块浅色配色 */
+            --code-bg: #eff6ff;     
+            --code-border: #bfdbfe; 
+            --code-text: #1e3a8a;   
+            --code-param: #c2410c;  
             
-            /* 参数框配色保持暖色警告感 */
+            /* 参数框配色 */
             --param-bg: #fffbeb; 
             --param-border: #f59e0b;
             --param-text: #92400e;
             
             /* 示例块配色 */
-            --example-bg: #f8fafc;     /* 极浅石板灰 */
-            --example-border: #cbd5e1; /* 灰色虚线边框 */
-            --example-text: #475569;   /* 深灰色代码 */
+            --example-bg: #f8fafc;     
+            --example-border: #cbd5e1; 
+            --example-text: #475569;   
         }
 
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--primary-bg); color: var(--text-main); padding: 20px; margin: 0; line-height: 1.6; }
@@ -37,37 +36,55 @@
         
         .box1 { flex: 1; min-width: 240px; max-width: 280px; position: sticky; top: 20px; }
         
-        /* ============== 优化 1：Logo 与标题字体调整 ============== */
-        .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; }
-        .team-logo { width: 40px; height: auto; display: block; }
+        /* ============== 优化 1：Logo 放大与标题比例调整 ============== */
+        .header-title { display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 2px solid var(--border-color); padding-bottom: 18px; margin-bottom: 20px; }
+        .team-logo { width: 55px; height: auto; display: block; } /* Logo 放大了 */
+        
         .box1 h2 { 
             margin: 0; 
-            color: #1e293b; 
-            font-size: 1.1rem; /* 缩小字号 */
-            font-weight: 700; 
-            /* 强制指定中英混排表现更好的字体栈 */
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, "PingFang SC", "Microsoft YaHei", sans-serif;
+            color: #0f172a; 
+            font-size: 1.5rem; /* 英文字母更大 */
+            font-weight: 800; 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             letter-spacing: 0.5px; 
             border: none; 
             padding: 0; 
+            display: flex;
+            align-items: baseline; /* 底部基线对齐 */
+        }
+        .box1 h2 .sub-title {
+            font-size: 0.65em; /* 中文“助手”比英文小 */
+            font-weight: 600;
+            color: #475569;
+            margin-left: 4px;
         }
         
         .box2 { flex: 3; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
-        #commands-container { display: flex; flex-direction: column; gap: 20px; }
-
-        .form-group { margin-bottom: 20px; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 0.95rem;}
-        select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; }
-        select:focus, input[type="text"]:focus { border-color: #3b82f6; outline: none; background-color: #fff; }
-
-        .instance-box { padding: 15px 25px; margin-bottom: 0; background-color: #e0f2fe; border-left: 5px solid #0ea5e9; }
+        
+        /* ============== 优化 2：顶部控制台（实例 + 搜索） ============== */
+        .top-controls { display: flex; gap: 20px; width: 100%; }
+        .control-box { flex: 1; padding: 18px 20px; border-radius: 12px; box-sizing: border-box; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+        
+        .instance-box { background-color: #e0f2fe; border-left: 5px solid #0ea5e9; }
         .instance-box label { color: #0369a1; }
-        .instance-box input { border-color: #7dd3fc; }
+        .instance-box input { border-color: #7dd3fc; background-color: #fff; }
+
+        .search-box { background-color: #ffffff; border: 1px solid #e2e8f0; }
+        .search-box label { color: #475569; }
+        .search-box input { border-color: #cbd5e1; }
+
+        #commands-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
+
+        .form-group { margin-bottom: 0; /* 在控制盒子里去掉了底边距 */ }
+        .box1 .form-group { margin-bottom: 20px; } /* 但左侧菜单保留 */
+        
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 0.95rem;}
+        select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
+        select:focus, input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; background-color: #fff; }
 
         .cmd-card { background: var(--box-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .cmd-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
         
-        /* 更新代码块浅色样式 */
         .cmd-code { background: var(--code-bg); color: var(--code-text); border: 1px solid var(--code-border); padding: 12px 18px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 1.1rem; font-weight: 600; flex-grow: 1; overflow-x: auto; white-space: nowrap; margin: 0; }
         .param-hl { color: var(--code-param); }
 
@@ -78,7 +95,6 @@
         .cmd-params { background: var(--param-bg); border-left: 4px solid var(--param-border); color: var(--param-text); padding: 12px 15px; border-radius: 4px 8px 8px 4px; margin-bottom: 15px; font-size: 0.95rem; }
         .cmd-params strong { display: block; margin-bottom: 5px; color: #b45309; }
         
-        /* 更新示例块浅色样式 */
         .cmd-example { background: var(--example-bg); color: var(--example-text); border: 1px dashed var(--example-border); padding: 15px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 0.95rem; overflow-x: auto; white-space: pre-wrap; margin: 0; }
         .cmd-example .example-label { display: block; margin-bottom: 8px; color: #64748b; font-family: sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
 
@@ -87,9 +103,11 @@
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         
+        /* 手机端窄屏适配：控制台上下折叠 */
         @media (max-width: 768px) {
             .box1 { position: static; max-width: 100%; }
             .box1, .box2 { flex: 1 1 100%; min-width: 100%; }
+            .top-controls { flex-direction: column; gap: 15px; }
             .cmd-header { flex-direction: column; align-items: stretch; }
             .copy-btn { width: 100%; }
         }
@@ -101,7 +119,7 @@
     <div class="box box1">
         <div class="header-title">
             <img src="beijiq.svg" alt="BEIJIQ Logo" class="team-logo">
-            <h2>M5Py助手</h2>
+            <h2>M5Py<span class="sub-title">助手</span></h2>
         </div>
         
         <div class="form-group">
@@ -115,11 +133,22 @@
     </div>
 
     <div class="box2">
-        <div class="box instance-box" id="instance-settings" style="display: none;">
-            <div class="form-group" style="margin-bottom: 0;">
-                <label for="instance-name">当前实例名称（如需修改，请在此输入）：</label>
-                <input type="text" id="instance-name" oninput="updateAllDynamicCodes()">
+        <div class="top-controls" id="top-controls" style="display: none;">
+            
+            <div class="control-box instance-box" id="instance-settings" style="display: none;">
+                <div class="form-group">
+                    <label for="instance-name">实例名称 (自动替换前缀)：</label>
+                    <input type="text" id="instance-name" oninput="updateAllDynamicCodes()">
+                </div>
             </div>
+
+            <div class="control-box search-box" id="search-settings">
+                <div class="form-group">
+                    <label for="search-input">快速搜索当前对象命令：</label>
+                    <input type="text" id="search-input" placeholder="输入代码或中文解释..." oninput="filterCommands()">
+                </div>
+            </div>
+
         </div>
 
         <div id="commands-container">
@@ -176,6 +205,9 @@
         const uniqueObjects = [...new Set(filteredData.map(item => item.object_name).filter(Boolean))];
         
         objSelect.innerHTML = uniqueObjects.map(obj => `<option value="${obj}">${obj}</option>`).join('');
+        
+        // 每次切换对象时，清空搜索框的内容
+        document.getElementById("search-input").value = '';
         renderCommandCards();
     }
 
@@ -188,23 +220,29 @@
         
         if (currentObjectCommands.length === 0) {
             container.innerHTML = '<div class="box">该对象下暂无命令数据。</div>';
-            document.getElementById("instance-settings").style.display = 'none';
+            document.getElementById("top-controls").style.display = 'none';
             return;
         }
 
+        // 显示顶部控制台区域
+        document.getElementById("top-controls").style.display = 'flex';
+
+        // 检查是否需要实例，控制实例框显隐
         let needsInstance = currentObjectCommands.some(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE');
         if (needsInstance) {
             let defaultName = currentObjectCommands.find(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE' && cmd.default_instance)?.default_instance || 'obj';
             document.getElementById("instance-settings").style.display = 'block';
             document.getElementById("instance-name").value = defaultName;
         } else {
+            // 如果该对象全都不需要实例（如 time），就隐藏实例框，搜索框会自动占满整行
             document.getElementById("instance-settings").style.display = 'none';
         }
 
         let htmlContent = '';
         currentObjectCommands.forEach((cmd, index) => {
+            // 给每张卡片加上 ID，方便后面搜索过滤时控制显隐
             htmlContent += `
-            <div class="cmd-card">
+            <div class="cmd-card" id="cmd-card-${index}">
                 <div class="cmd-header">
                     <div class="cmd-code" id="code-preview-${index}"></div>
                     <button class="copy-btn" onclick="copyCommand(${index})">复制</button>
@@ -217,6 +255,7 @@
 
         container.innerHTML = htmlContent;
         updateAllDynamicCodes(); 
+        filterCommands(); // 渲染后执行一次过滤（防备有残留输入）
     }
 
     function updateAllDynamicCodes() {
@@ -236,6 +275,29 @@
             if (codeBlock) {
                 let highlightedCode = finalCode.replace(/\((.*?)\)/g, '(<span class="param-hl">$1</span>)');
                 codeBlock.innerHTML = highlightedCode;
+            }
+        });
+    }
+
+    // ==========================================
+    // 核心新增：实时搜索与过滤卡片显示
+    // ==========================================
+    function filterCommands() {
+        const query = document.getElementById("search-input").value.toLowerCase();
+        
+        currentObjectCommands.forEach((cmd, index) => {
+            // 提取目标命令的代码模板和中文解析，转换为小写用于模糊匹配
+            const codeTemplate = (cmd.command_template || '').toLowerCase();
+            const description = (cmd.description || '').toLowerCase();
+            const card = document.getElementById(`cmd-card-${index}`);
+            
+            if (!card) return;
+            
+            // 如果搜索词为空，或者搜索词包含在代码/解析中，则显示该卡片
+            if (query === '' || codeTemplate.includes(query) || description.includes(query)) {
+                card.style.display = 'block';
+            } else {
+                card.style.display = 'none'; // 否则隐藏
             }
         });
     }
