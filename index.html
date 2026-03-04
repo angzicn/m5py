@@ -11,15 +11,12 @@
             --box-bg: #ffffff;
             --text-main: #334155;
             --border-color: #cbd5e1;
-            /* 代码块配色 */
             --code-bg: #0f172a; 
-            --code-text: #34d399; /* 主体代码颜色：青绿色 */
-            --code-param: #fbbf24; /* 括号内参数高亮颜色：橙黄色 */
-            /* 参数框配色 */
+            --code-text: #34d399; 
+            --code-param: #fbbf24; 
             --param-bg: #fffbeb; 
             --param-border: #f59e0b;
             --param-text: #92400e;
-            /* 示例块配色 */
             --example-bg: #1e293b;
             --example-text: #bae6fd;
         }
@@ -31,22 +28,30 @@
         
         .box1 { flex: 1; min-width: 240px; max-width: 280px; position: sticky; top: 20px; }
         
-        /* ============== 新增：Logo与标题样式 ============== */
-        .team-logo { display: block; max-width: 80px; margin: 0 auto 10px auto; }
-        .box1 h2 { margin-top: 0; color: #1e293b; border-bottom: 2px solid var(--border-color); padding-bottom: 12px; font-size: 1.15rem; text-align: center; letter-spacing: 1px; }
+        /* ============== 优化 1：Logo 和标题同排 ============== */
+        .header-title { display: flex; align-items: center; justify-content: center; gap: 12px; border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 20px; }
+        .team-logo { width: 45px; height: auto; display: block; }
+        .box1 h2 { margin: 0; color: #1e293b; font-size: 1.3rem; font-weight: bold; letter-spacing: 1px; border: none; padding: 0; }
         
         .box2 { flex: 3; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
+        
+        /* 内部小卡片容器的缝隙 */
+        #commands-container { display: flex; flex-direction: column; gap: 20px; }
 
         .form-group { margin-bottom: 20px; }
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 0.95rem;}
-        select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; }
+        select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; outline: none; background-color: #fff; }
+
+        /* 特化：实例输入框的样式 */
+        .instance-box { padding: 15px 25px; margin-bottom: 0; background-color: #e0f2fe; border-left: 5px solid #0ea5e9; }
+        .instance-box label { color: #0369a1; }
+        .instance-box input { border-color: #7dd3fc; }
 
         .cmd-card { background: var(--box-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; }
         .cmd-header { display: flex; justify-content: space-between; align-items: center; gap: 15px; margin-bottom: 15px; flex-wrap: wrap; }
         .cmd-code { background: var(--code-bg); color: var(--code-text); padding: 12px 18px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 1.1rem; flex-grow: 1; overflow-x: auto; white-space: nowrap; margin: 0; }
         
-        /* ============== 新增：参数高亮类 ============== */
         .param-hl { color: var(--code-param); }
 
         .copy-btn { background-color: #3b82f6; color: white; border: none; padding: 12px 20px; font-size: 15px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; }
@@ -74,8 +79,10 @@
 
 <div class="layout-container">
     <div class="box box1">
-        <img src="beijiq.svg" alt="BEIJIQ Logo" class="team-logo">
-        <h2>M5Py助手</h2>
+        <div class="header-title">
+            <img src="beijiq.svg" alt="BEIJIQ Logo" class="team-logo">
+            <h2>M5Py助手</h2>
+        </div>
         
         <div class="form-group">
             <label for="category">对象类别：</label>
@@ -85,15 +92,21 @@
             <label for="object-name">对象名称：</label>
             <select id="object-name" onchange="renderCommandCards()"><option>等待连接...</option></select>
         </div>
-        
-        <div class="form-group" id="instance-group">
-            <label for="instance-name">当前实例名称：</label>
-            <input type="text" id="instance-name" placeholder="例如: rgb" oninput="updateAllDynamicCodes()">
-        </div>
     </div>
 
-    <div class="box2" id="commands-container">
-        <div class="box" style="color:#3b82f6; font-weight:bold;">⏳ 正在连接 Google Sheets 获取数据...</div>
+    <div class="box2">
+        
+        <div class="box instance-box" id="instance-settings" style="display: none;">
+            <div class="form-group" style="margin-bottom: 0;">
+                <label for="instance-name">当前实例名称（如需修改，请在此输入）：</label>
+                <input type="text" id="instance-name" oninput="updateAllDynamicCodes()">
+            </div>
+        </div>
+
+        <div id="commands-container">
+            <div class="box" style="color:#3b82f6; font-weight:bold;">⏳ 正在连接 Google Sheets 获取数据...</div>
+        </div>
+        
     </div>
 </div>
 
@@ -115,13 +128,11 @@
                     document.getElementById("commands-container").innerHTML = '<div class="box" style="color:red;">❌ 表格无数据，请检查。</div>';
                     return;
                 }
-
                 const firstRowKeys = Object.keys(results.data[0]);
                 if (!firstRowKeys.includes('category') || !firstRowKeys.includes('object_name')) {
                     document.getElementById("commands-container").innerHTML = '<div class="box" style="color:red;">❌ 表头格式错误，请检查第一行是否为严格的英文表头。</div>';
                     return;
                 }
-
                 commandDatabase = results.data;
                 initCategoryDropdown();
             },
@@ -159,9 +170,25 @@
         
         if (currentObjectCommands.length === 0) {
             container.innerHTML = '<div class="box">该对象下暂无命令数据。</div>';
+            document.getElementById("instance-settings").style.display = 'none';
             return;
         }
 
+        // ==========================================
+        // 核心逻辑：判断是否需要实例框，并读取默认值
+        // ==========================================
+        let needsInstance = currentObjectCommands.some(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE');
+        if (needsInstance) {
+            // 找到包含 default_instance 的第一条数据，提取其默认值（如果没填，则默认用 obj）
+            let defaultName = currentObjectCommands.find(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE' && cmd.default_instance)?.default_instance || 'obj';
+            
+            document.getElementById("instance-settings").style.display = 'block';
+            document.getElementById("instance-name").value = defaultName;
+        } else {
+            document.getElementById("instance-settings").style.display = 'none';
+        }
+
+        // 渲染卡片 HTML
         let htmlContent = '';
         currentObjectCommands.forEach((cmd, index) => {
             htmlContent += `
@@ -177,12 +204,11 @@
         });
 
         container.innerHTML = htmlContent;
+        
+        // 渲染完框架后，立刻触发一次代码填入
         updateAllDynamicCodes(); 
     }
 
-    // ==========================================
-    // 核心更新：实时正则匹配并给括号内参数加上颜色
-    // ==========================================
     function updateAllDynamicCodes() {
         const instanceVal = document.getElementById("instance-name").value.trim() || 'YOUR_INSTANCE';
         
@@ -190,7 +216,6 @@
             let finalCode = cmd.command_template || '';
             const needsInstance = String(cmd.requires_instance).toUpperCase() === 'TRUE';
             
-            // 1. 替换实例名称
             if (needsInstance) {
                 finalCode = finalCode.replace(/{instance}/g, instanceVal);
             } else {
@@ -199,17 +224,13 @@
             
             const codeBlock = document.getElementById(`code-preview-${index}`);
             if (codeBlock) {
-                // 2. 正则表达式：找到 "(" 和 ")" 之间的内容，给它包上 .param-hl 类
                 let highlightedCode = finalCode.replace(/\((.*?)\)/g, '(<span class="param-hl">$1</span>)');
-                
-                // 3. 使用 innerHTML 渲染（为了让 span 标签生效）
                 codeBlock.innerHTML = highlightedCode;
             }
         });
     }
 
     function copyCommand(index) {
-        // innerText 会忽略上面的 span 标签，只提取纯代码文字，保证复制的代码是纯净的
         const textToCopy = document.getElementById(`code-preview-${index}`).innerText;
         navigator.clipboard.writeText(textToCopy).then(() => {
             const toast = document.getElementById("toast");
