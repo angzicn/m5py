@@ -31,29 +31,27 @@
 
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background-color: var(--primary-bg); color: var(--text-main); padding: 20px 0; margin: 0; line-height: 1.6; }
         
-        /* ============== 优化 1：宽屏布局铺满屏幕 ============== */
         .layout-container { display: flex; flex-wrap: wrap; gap: 24px; max-width: 1600px; width: 96%; margin: 0 auto; align-items: flex-start; }
         .box { background: var(--box-bg); padding: 25px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); box-sizing: border-box; }
         
-        /* 左侧菜单栏也稍微放宽一点 */
         .box1 { flex: 1; min-width: 260px; max-width: 320px; position: sticky; top: 20px; }
         
-        /* ============== 优化 2：Logo与标题 1:1 像素级对齐 ============== */
+        /* ============== 优化：高度精简 10px ============== */
         .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: nowrap; overflow: hidden; }
         
-        /* 强制 32px 绝对高度 */
-        .team-logo { height: 32px; width: auto; object-fit: contain; flex-shrink: 0; display: block; } 
+        /* 高度精确缩减为 22px */
+        .team-logo { height: 22px; width: auto; object-fit: contain; flex-shrink: 0; display: block; } 
         
         .box1 h2 { 
             margin: 0; 
             color: #334155; 
-            font-size: 26px; /* 使用绝对像素字号 */
+            font-size: 22px; /* 字号同步缩小，保持 1:1 */
             font-weight: bold; 
             font-family: "Microsoft YaHei", "PingFang SC", sans-serif; 
             letter-spacing: 0.5px; 
             border: none; 
             padding: 0; 
-            line-height: 32px; /* 行高与Logo高度完全一致 */
+            line-height: 22px; /* 行高同步锁定为 22px */
             white-space: nowrap; 
             flex-shrink: 1; 
         }
@@ -73,13 +71,11 @@
 
         #commands-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
 
-        .form-group { margin-bottom: 0; }
+        /* ============== 恢复：上下堆叠的间距 ============== */
+        .form-group { margin-bottom: 20px; }
+        .box2 .form-group { margin-bottom: 0; } /* 顶部的控制台不需要底边距 */
         
-        .dropdown-row { display: flex; gap: 12px; width: 100%; margin-bottom: 20px; }
-        .dropdown-row .form-group { flex: 1; min-width: 0; }
-        .dropdown-row select { padding: 10px 8px; font-size: 14px; } 
-        
-        label { display: block; margin-bottom: 6px; font-weight: 600; color: #475569; font-size: 0.95rem;}
+        label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 0.95rem;}
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; background-color: #fff; }
 
@@ -139,15 +135,13 @@
             <h2>M5代码助手</h2>
         </div>
         
-        <div class="dropdown-row">
-            <div class="form-group">
-                <label for="category">类别</label>
-                <select id="category" onchange="updateObjectNames()"><option>...</option></select>
-            </div>
-            <div class="form-group">
-                <label for="object-name">名称</label>
-                <select id="object-name" onchange="renderCommandCards()"><option>...</option></select>
-            </div>
+        <div class="form-group">
+            <label for="category">对象类别：</label>
+            <select id="category" onchange="updateObjectNames()"><option>...</option></select>
+        </div>
+        <div class="form-group">
+            <label for="object-name">对象名称：</label>
+            <select id="object-name" onchange="renderCommandCards()"><option>...</option></select>
         </div>
     </div>
 
