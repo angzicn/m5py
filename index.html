@@ -47,11 +47,19 @@
         .box2 { flex: 3; min-width: 350px; display: flex; flex-direction: column; gap: 20px; background: transparent; padding: 0; box-shadow: none; }
         
         .top-controls { display: flex; gap: 20px; width: 100%; }
-        .control-box { flex: 1; padding: 18px 20px; border-radius: 12px; box-sizing: border-box; box-shadow: 0 2px 4px rgba(0,0,0,0.04); }
+        .control-box { flex: 1; padding: 18px 20px; border-radius: 12px; box-sizing: border-box; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: all 0.3s ease;}
         
+        /* ============== 核心修改：实例名称框的蓝/黄双模样式 ============== */
+        /* 默认可编辑模式（蓝色系） */
         .instance-box { background-color: #e0f2fe; border-left: 5px solid #0ea5e9; }
-        .instance-box label { color: #0369a1; }
-        .instance-box input { border-color: #7dd3fc; background-color: #fff; }
+        .instance-box label { color: #0369a1; transition: color 0.3s; }
+        .instance-box input { border-color: #7dd3fc; background-color: #fff; transition: all 0.3s; }
+        
+        /* 固定不可改模式（暖黄色系警告） */
+        .instance-box.fixed-mode { background-color: #fffbeb; border-left-color: #f59e0b; }
+        .instance-box.fixed-mode label { color: #b45309; }
+        .instance-box.fixed-mode input { border-color: #fde68a; background-color: #fef3c7; color: #92400e; cursor: not-allowed; outline: none; }
+        .instance-box.fixed-mode input:focus { box-shadow: none; }
 
         .search-box { background-color: #ffffff; border: 1px solid #e2e8f0; }
         .search-box label { color: #475569; }
@@ -66,7 +74,6 @@
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; background-color: #fff; }
 
-        /* ============== 新增：三级分类菜单动画容器 ============== */
         .function-group-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease; }
         .function-group-wrapper.show { grid-template-rows: 1fr; }
         .function-group-inner { overflow: hidden; }
@@ -241,7 +248,7 @@
         <div class="top-controls" id="top-controls" style="display: none;">
             <div class="control-box instance-box" id="instance-settings" style="display: none;">
                 <div class="form-group">
-                    <label for="instance-name">实例名称 (自动替换前缀)：</label>
+                    <label id="instance-label" for="instance-name">实例名称 (自动替换前缀)：</label>
                     <input type="text" id="instance-name" oninput="updateDisplay()">
                 </div>
             </div>
@@ -322,11 +329,9 @@
         
         objSelect.innerHTML = uniqueObjects.map(obj => `<option value="${obj}">${obj}</option>`).join('');
         
-        // 名字更新后，触发三级功能菜单的检测
         updateObjectFunctions();
     }
 
-    // ============== 新增：检测并更新三级分类菜单 ==============
     function updateObjectFunctions() {
         const selectedCat = document.getElementById("category").value;
         const selectedObj = document.getElementById("object-name").value;
@@ -335,21 +340,17 @@
 
         const filteredData = commandDatabase.filter(item => item.category === selectedCat && item.object_name === selectedObj);
         
-        // 提取所有非空的功能分类名称，并去重
         const uniqueFunctions = [...new Set(filteredData.map(item => (item.object_function || '').trim()).filter(Boolean))];
 
         if (uniqueFunctions.length > 0) {
-            // 如果存在功能分类，则组装选项并展现菜单
             funcSelect.innerHTML = `<option value="ALL">显示全部功能</option>` + 
                                    uniqueFunctions.map(func => `<option value="${func}">${func}</option>`).join('');
             funcWrapper.classList.add('show');
         } else {
-            // 如果都不存在，强制选为 ALL 并折叠隐藏菜单
             funcSelect.innerHTML = `<option value="ALL">无</option>`;
             funcWrapper.classList.remove('show');
         }
 
-        // 每次切换结构后，清空搜索框并重新渲染卡片
         document.getElementById("search-input").value = '';
         renderCommandCards();
     }
@@ -358,17 +359,14 @@
         const selectedCat = document.getElementById("category").value;
         const selectedObj = document.getElementById("object-name").value;
         const selectedFunc = document.getElementById("object-function").value;
-        // 检查三级菜单是否处于显示状态
         const isFuncVisible = document.getElementById("function-group-wrapper").classList.contains("show");
 
         const container = document.getElementById("commands-container");
         const tocList = document.getElementById("toc-list");
         const tocContainer = document.getElementById("toc-container");
         
-        // 过滤数据：同时匹配二级名称和三级功能（如果启用了的话）
         currentObjectCommands = commandDatabase.filter(item => {
             if (item.category !== selectedCat || item.object_name !== selectedObj) return false;
-            // 如果三级菜单显示，并且用户选的不是“全部”，那么必须严格匹配功能列
             if (isFuncVisible && selectedFunc !== "ALL") {
                 return (item.object_function || '').trim() === selectedFunc;
             }
@@ -385,11 +383,32 @@
         document.getElementById("top-controls").style.display = 'flex';
         tocContainer.style.display = 'block'; 
 
+        // ============== 核心修改：检测并渲染实例框的“只读固定模式” ==============
         let needsInstance = currentObjectCommands.some(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE');
         if (needsInstance) {
+            // 找到包含 default_instance 的第一条数据，提取其默认值
             let defaultName = currentObjectCommands.find(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE' && cmd.default_instance)?.default_instance || 'obj';
-            document.getElementById("instance-settings").style.display = 'block';
-            document.getElementById("instance-name").value = defaultName;
+            // 检测是否有任意一条数据规定了实例不可修改
+            let isFixed = currentObjectCommands.some(cmd => String(cmd.is_instance_fixed).toUpperCase() === 'TRUE');
+
+            const instanceSettings = document.getElementById("instance-settings");
+            const instanceInput = document.getElementById("instance-name");
+            const instanceLabel = document.getElementById("instance-label");
+
+            instanceSettings.style.display = 'block';
+            instanceInput.value = defaultName;
+
+            if (isFixed) {
+                // 如果是固定的，切换为黄色警告模式并锁定输入
+                instanceSettings.classList.add('fixed-mode');
+                instanceInput.readOnly = true;
+                instanceLabel.innerText = "实例名称 (硬件固定，不可修改)：";
+            } else {
+                // 如果不是固定的，恢复为蓝色可编辑模式
+                instanceSettings.classList.remove('fixed-mode');
+                instanceInput.readOnly = false;
+                instanceLabel.innerText = "实例名称 (自动替换前缀)：";
+            }
         } else {
             document.getElementById("instance-settings").style.display = 'none';
         }
