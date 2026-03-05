@@ -83,7 +83,6 @@
         }
         .highlight-active { animation: flashFocus 0.8s ease 2 alternate; border-color: #3b82f6 !important; }
 
-        /* ============== 核心重构：代码区与参数编辑器样式 ============== */
         .cmd-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 15px; margin-bottom: 15px; flex-wrap: nowrap; }
         
         .cmd-code-container { flex-grow: 1; min-width: 0; background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 8px; overflow: hidden; }
@@ -91,14 +90,12 @@
         .cmd-code-text { display: flex; justify-content: space-between; align-items: center; padding: 12px 18px; color: var(--code-text); font-family: 'Consolas', monospace; font-weight: 600; overflow-x: auto; white-space: nowrap; transition: background-color 0.2s; }
         .cmd-code-text span { font-size: 1.1rem; }
         
-        /* 只有带参数的才会有 hover 效果和手型指针 */
         .cmd-code-text.clickable { cursor: pointer; }
         .cmd-code-text.clickable:hover { background-color: #e0f2fe; }
         
         .edit-hint { font-size: 0.95rem; opacity: 0; transition: opacity 0.2s; margin-left: 10px; filter: grayscale(100%); }
         .cmd-code-text.clickable:hover .edit-hint { opacity: 1; }
 
-        /* 参数折叠区黑科技 */
         .params-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
         .params-wrapper.open { grid-template-rows: 1fr; }
         .params-inner { overflow: hidden; }
@@ -107,7 +104,10 @@
         .param-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .param-row:last-child { margin-bottom: 0; }
         .param-label { font-family: Consolas, monospace; color: #1e3a8a; font-weight: bold; font-size: 0.95rem; width: 100px; text-align: right; flex-shrink: 0; }
+        
+        /* 稍微加深了 placeholder 的颜色，让提示文字更清晰可见 */
         .param-input { flex-grow: 1; padding: 8px 10px; border: 1px solid #bfdbfe; border-radius: 6px; font-family: Consolas, monospace; font-size: 0.95rem; color: #1e3a8a; background: #ffffff; transition: border-color 0.2s; box-sizing: border-box;}
+        .param-input::placeholder { color: #94a3b8; font-family: 'Segoe UI', sans-serif; }
         .param-input:focus { border-color: #3b82f6; outline: none; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2); }
 
         .param-hl { color: var(--code-param); }
@@ -343,21 +343,50 @@
             let title = cmd.command_title || cmd.command_template || `命令 ${index + 1}`;
             tocContent += `<li class="toc-item" onclick="scrollToCard(${index})">📌 ${title}</li>`;
 
-            // ============== 核心修改：动态识别参数并生成输入框 ==============
             let hasParams = false;
             let paramInputsHtml = '';
             
-            // 提取括号内的默认参数 (例如 index, color_hex)
             const paramMatch = (cmd.command_template || '').match(/\((.*)\)/);
             if (paramMatch && paramMatch[1].trim() !== '') {
                 const params = paramMatch[1].split(',').map(p => p.trim());
                 if (params.length > 0) {
                     hasParams = true;
                     params.forEach((p, pIdx) => {
+                        
+                        // ============== 核心提取逻辑：在 params 中抓取数据类型 ==============
+                        let typePlaceholder = `默认: ${p}`; // 兜底文字
+                        if (cmd.params) {
+                            // 按照换行符切割多行文本
+                            const lines = cmd.params.split(/\r?\n/);
+                            for (let line of lines) {
+                                let cleanLine = line.trim();
+                                // 匹配参数名加上中英文冒号（例如 "r:" 或 "r："）
+                                if (cleanLine.startsWith(p + ':') || cleanLine.startsWith(p + '：')) {
+                                    // 截取冒号后面的所有字符串
+                                    let colonIndex = cleanLine.indexOf(':');
+                                    if (colonIndex === -1) colonIndex = cleanLine.indexOf('：');
+                                    
+                                    let afterColon = cleanLine.substring(colonIndex + 1).trim();
+                                    
+                                    // 按逗号切分
+                                    let parts = afterColon.split(/[，,]/);
+                                    
+                                    // 提取第一和第二个逗号之间的内容 (索引1)
+                                    if (parts.length >= 2) {
+                                        typePlaceholder = parts[1].trim();
+                                    } else if (parts.length === 1) {
+                                        typePlaceholder = parts[0].trim();
+                                    }
+                                    break; // 找到了就跳出循环
+                                }
+                            }
+                        }
+                        // ==========================================================
+
                         paramInputsHtml += `
                             <div class="param-row">
                                 <span class="param-label">${p}:</span>
-                                <input type="text" class="param-input" id="param-input-${index}-${pIdx}" placeholder="默认: ${p}" oninput="updateDisplay()">
+                                <input type="text" class="param-input" id="param-input-${index}-${pIdx}" placeholder="需要填入: ${typePlaceholder}" oninput="updateDisplay()">
                             </div>
                         `;
                     });
@@ -404,7 +433,6 @@
         }
     }
 
-    // 展开/收起参数面板控制
     function toggleParamsPanel(index, hasParams) {
         if (!hasParams) return;
         const wrapper = document.getElementById(`params-wrapper-${index}`);
@@ -464,14 +492,12 @@
                 let finalCode = cmd.command_template || '';
                 const needsInstance = String(cmd.requires_instance).toUpperCase() === 'TRUE';
                 
-                // 1. 替换实例名称
                 if (needsInstance) {
                     finalCode = finalCode.replace(/{instance}/g, instanceVal);
                 } else {
                     finalCode = finalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
                 }
 
-                // 2. 核心：读取参数框输入，替换原始参数
                 const paramMatch = (cmd.command_template || '').match(/\((.*)\)/);
                 if (paramMatch && paramMatch[1].trim() !== '') {
                     const defaultParams = paramMatch[1].split(',').map(p => p.trim());
@@ -481,14 +507,12 @@
                         if (inputEl && inputEl.value.trim() !== '') {
                             currentParams.push(inputEl.value.trim());
                         } else {
-                            currentParams.push(defaultParams[i]); // 空则保留默认名字
+                            currentParams.push(defaultParams[i]); 
                         }
                     }
-                    // 精准替换括号内的内容
                     finalCode = finalCode.replace(/\((.*)\)/, `(${currentParams.join(', ')})`);
                 }
                 
-                // 3. 上色与高亮
                 let highlightedCode = finalCode.replace(/\((.*?)\)/g, '(<span class="param-hl">$1</span>)');
                 highlightedCode = highlightSafe(highlightedCode, query);
 
@@ -509,14 +533,12 @@
             const card = container.closest('.cmd-card');
             if (!card || card.style.display === 'none') return;
             
-            // 定位到内部存放真实代码的 span
             const textSpan = container.querySelector('span[id^="code-text-"]');
             if (!textSpan) return;
 
             textSpan.style.fontSize = '1.1rem';
             let currentSize = 1.1;
             
-            // 减去右侧图标的空间(约100px)进行对比，防止撑破
             while (textSpan.scrollWidth > container.clientWidth - 100 && currentSize > 0.65) {
                 currentSize -= 0.05;
                 textSpan.style.fontSize = `${currentSize}rem`;
@@ -525,7 +547,6 @@
     }
 
     function copyCommand(index) {
-        // 核心修改：只提取 code-text 里的纯文本，不包含后面的✏️图标
         const textToCopy = document.getElementById(`code-text-${index}`).innerText;
         navigator.clipboard.writeText(textToCopy).then(() => {
             showToast("代码复制成功！");
