@@ -49,16 +49,15 @@
         .top-controls { display: flex; gap: 20px; width: 100%; }
         .control-box { flex: 1; padding: 18px 20px; border-radius: 12px; box-sizing: border-box; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: all 0.3s ease;}
         
-        /* ============== 核心修改：实例名称框的蓝/黄双模样式 ============== */
         /* 默认可编辑模式（蓝色系） */
         .instance-box { background-color: #e0f2fe; border-left: 5px solid #0ea5e9; }
         .instance-box label { color: #0369a1; transition: color 0.3s; }
         .instance-box input { border-color: #7dd3fc; background-color: #fff; transition: all 0.3s; }
         
-        /* 固定不可改模式（暖黄色系警告） */
-        .instance-box.fixed-mode { background-color: #fffbeb; border-left-color: #f59e0b; }
-        .instance-box.fixed-mode label { color: #b45309; }
-        .instance-box.fixed-mode input { border-color: #fde68a; background-color: #fef3c7; color: #92400e; cursor: not-allowed; outline: none; }
+        /* ============== 核心修改：固定不可改模式改为“浅红色系” ============== */
+        .instance-box.fixed-mode { background-color: #fef2f2; border-left-color: #ef4444; }
+        .instance-box.fixed-mode label { color: #b91c1c; }
+        .instance-box.fixed-mode input { border-color: #fecaca; background-color: #fee2e2; color: #991b1b; cursor: not-allowed; outline: none; }
         .instance-box.fixed-mode input:focus { box-shadow: none; }
 
         .search-box { background-color: #ffffff; border: 1px solid #e2e8f0; }
@@ -383,12 +382,9 @@
         document.getElementById("top-controls").style.display = 'flex';
         tocContainer.style.display = 'block'; 
 
-        // ============== 核心修改：检测并渲染实例框的“只读固定模式” ==============
         let needsInstance = currentObjectCommands.some(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE');
         if (needsInstance) {
-            // 找到包含 default_instance 的第一条数据，提取其默认值
             let defaultName = currentObjectCommands.find(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE' && cmd.default_instance)?.default_instance || 'obj';
-            // 检测是否有任意一条数据规定了实例不可修改
             let isFixed = currentObjectCommands.some(cmd => String(cmd.is_instance_fixed).toUpperCase() === 'TRUE');
 
             const instanceSettings = document.getElementById("instance-settings");
@@ -399,12 +395,10 @@
             instanceInput.value = defaultName;
 
             if (isFixed) {
-                // 如果是固定的，切换为黄色警告模式并锁定输入
                 instanceSettings.classList.add('fixed-mode');
                 instanceInput.readOnly = true;
                 instanceLabel.innerText = "实例名称 (硬件固定，不可修改)：";
             } else {
-                // 如果不是固定的，恢复为蓝色可编辑模式
                 instanceSettings.classList.remove('fixed-mode');
                 instanceInput.readOnly = false;
                 instanceLabel.innerText = "实例名称 (自动替换前缀)：";
