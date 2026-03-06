@@ -49,12 +49,10 @@
         .top-controls { display: flex; gap: 20px; width: 100%; }
         .control-box { flex: 1; padding: 18px 20px; border-radius: 12px; box-sizing: border-box; box-shadow: 0 2px 4px rgba(0,0,0,0.04); transition: all 0.3s ease;}
         
-        /* 默认可编辑模式（蓝色系） */
         .instance-box { background-color: #e0f2fe; border-left: 5px solid #0ea5e9; }
         .instance-box label { color: #0369a1; transition: color 0.3s; }
         .instance-box input { border-color: #7dd3fc; background-color: #fff; transition: all 0.3s; }
         
-        /* 固定不可改模式改为“浅红色系” */
         .instance-box.fixed-mode { background-color: #fef2f2; border-left-color: #ef4444; }
         .instance-box.fixed-mode label { color: #b91c1c; }
         .instance-box.fixed-mode input { border-color: #fecaca; background-color: #fee2e2; color: #991b1b; cursor: not-allowed; outline: none; }
@@ -129,16 +127,28 @@
 
         .cmd-desc { margin-bottom: 15px; font-size: 1rem; color: #334155; font-weight: bold; }
         
-        /* ============== 新增：返回值样式 & 参数说明样式 ============== */
         .cmd-params { background: var(--param-bg); border-left: 4px solid var(--param-border); color: var(--param-text); padding: 12px 15px; border-radius: 4px 8px 8px 4px; margin-bottom: 15px; font-size: 0.95rem; }
         .cmd-params strong { display: block; margin-bottom: 5px; color: #b45309; }
         
         .cmd-returns { background: #f0fdf4; border-left: 4px solid #22c55e; color: #166534; padding: 12px 15px; border-radius: 4px 8px 8px 4px; margin-bottom: 15px; font-size: 0.95rem; }
         .cmd-returns strong { display: block; margin-bottom: 5px; color: #15803d; }
-        /* ========================================================== */
+        
+        /* ============== 核心新增：折叠示例区域样式 ============== */
+        .example-section { margin-top: 10px; }
+        
+        /* 胶囊形状的触发按钮，宽度自适应文本 */
+        .example-trigger { display: inline-flex; align-items: center; gap: 6px; background-color: #f1f5f9; color: #475569; padding: 8px 16px; border-radius: 20px; font-size: 0.9rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; user-select: none; border: 1px solid #e2e8f0; }
+        .example-trigger:hover { background-color: #e2e8f0; color: #1e293b; border-color: #cbd5e1; }
+        .example-trigger svg { transition: transform 0.3s ease; }
+        .example-trigger.open svg { transform: rotate(180deg); color: #3b82f6; }
+        
+        /* 示例展开动画框 */
+        .example-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
+        .example-wrapper.open { grid-template-rows: 1fr; margin-top: 12px; }
+        .example-inner { overflow: hidden; }
         
         .cmd-example { background: var(--example-bg); color: var(--example-text); border: 1px dashed var(--example-border); padding: 15px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 0.95rem; overflow-x: auto; white-space: pre-wrap; margin: 0; }
-        .cmd-example .example-label { display: block; margin-bottom: 8px; color: #64748b; font-family: sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
+        /* ======================================================= */
 
         #toast { visibility: hidden; min-width: 200px; background-color: #10b981; color: #fff; text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 100; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         #toast.show { visibility: visible; animation: fadein 0.3s, fadeout 0.3s 2s; }
@@ -459,9 +469,9 @@
                 }
             }
 
-            // ============== 核心修改：安全的显示检测逻辑 ==============
             const hasParamsDesc = cmd.params && cmd.params.trim() !== '';
             const hasReturnDesc = cmd.return_value && cmd.return_value.trim() !== '';
+            const hasExample = cmd.example && cmd.example.trim() !== '';
 
             htmlContent += `
             <div class="cmd-card" id="cmd-card-${index}">
@@ -492,7 +502,21 @@
                 ${hasParamsDesc ? `<div class="cmd-params"><strong>参数说明:</strong>${cmd.params.replace(/\n/g, '<br>')}</div>` : ''}
                 ${hasReturnDesc ? `<div class="cmd-returns"><strong>返回值:</strong>${cmd.return_value.replace(/\n/g, '<br>')}</div>` : ''}
                 
-                ${cmd.example ? `<div class="cmd-example"><span class="example-label">具体示例</span>${cmd.example}</div>` : ''}
+                ${hasExample ? `
+                <div class="example-section">
+                    <div class="example-trigger" id="example-trigger-${index}" onclick="toggleExamplePanel(${index})">
+                        💡 查看示例代码
+                        <svg viewBox="0 0 24 24" width="16" height="16" stroke="currentColor" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                    </div>
+                    <div class="example-wrapper" id="example-wrapper-${index}">
+                        <div class="example-inner">
+                            <div class="cmd-example">${cmd.example}</div>
+                        </div>
+                    </div>
+                </div>
+                ` : ''}
             </div>`;
         });
 
@@ -511,6 +535,16 @@
         const wrapper = document.getElementById(`params-wrapper-${index}`);
         if (wrapper) {
             wrapper.classList.toggle('open');
+        }
+    }
+
+    // ============== 新增：控制示例代码折叠的 JS 逻辑 ==============
+    function toggleExamplePanel(index) {
+        const wrapper = document.getElementById(`example-wrapper-${index}`);
+        const trigger = document.getElementById(`example-trigger-${index}`);
+        if (wrapper && trigger) {
+            wrapper.classList.toggle('open');
+            trigger.classList.toggle('open');
         }
     }
 
