@@ -54,7 +54,7 @@
         .instance-box label { color: #0369a1; transition: color 0.3s; }
         .instance-box input { border-color: #7dd3fc; background-color: #fff; transition: all 0.3s; }
         
-        /* ============== 核心修改：固定不可改模式改为“浅红色系” ============== */
+        /* 固定不可改模式改为“浅红色系” */
         .instance-box.fixed-mode { background-color: #fef2f2; border-left-color: #ef4444; }
         .instance-box.fixed-mode label { color: #b91c1c; }
         .instance-box.fixed-mode input { border-color: #fecaca; background-color: #fee2e2; color: #991b1b; cursor: not-allowed; outline: none; }
@@ -128,8 +128,14 @@
         .tool-copy-btn { padding: 10px 15px; font-size: 13px; margin-left: 8px; }
 
         .cmd-desc { margin-bottom: 15px; font-size: 1rem; color: #334155; font-weight: bold; }
+        
+        /* ============== 新增：返回值样式 & 参数说明样式 ============== */
         .cmd-params { background: var(--param-bg); border-left: 4px solid var(--param-border); color: var(--param-text); padding: 12px 15px; border-radius: 4px 8px 8px 4px; margin-bottom: 15px; font-size: 0.95rem; }
         .cmd-params strong { display: block; margin-bottom: 5px; color: #b45309; }
+        
+        .cmd-returns { background: #f0fdf4; border-left: 4px solid #22c55e; color: #166534; padding: 12px 15px; border-radius: 4px 8px 8px 4px; margin-bottom: 15px; font-size: 0.95rem; }
+        .cmd-returns strong { display: block; margin-bottom: 5px; color: #15803d; }
+        /* ========================================================== */
         
         .cmd-example { background: var(--example-bg); color: var(--example-text); border: 1px dashed var(--example-border); padding: 15px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 0.95rem; overflow-x: auto; white-space: pre-wrap; margin: 0; }
         .cmd-example .example-label { display: block; margin-bottom: 8px; color: #64748b; font-family: sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
@@ -453,6 +459,10 @@
                 }
             }
 
+            // ============== 核心修改：安全的显示检测逻辑 ==============
+            const hasParamsDesc = cmd.params && cmd.params.trim() !== '';
+            const hasReturnDesc = cmd.return_value && cmd.return_value.trim() !== '';
+
             htmlContent += `
             <div class="cmd-card" id="cmd-card-${index}">
                 <div class="cmd-header">
@@ -478,7 +488,10 @@
                     <button class="copy-btn" onclick="copyCommand(${index})">复制</button>
                 </div>
                 <div class="cmd-desc" id="cmd-desc-${index}"></div>
-                ${cmd.params ? `<div class="cmd-params"><strong>参数说明:</strong>${cmd.params.replace(/\n/g, '<br>')}</div>` : ''}
+                
+                ${hasParamsDesc ? `<div class="cmd-params"><strong>参数说明:</strong>${cmd.params.replace(/\n/g, '<br>')}</div>` : ''}
+                ${hasReturnDesc ? `<div class="cmd-returns"><strong>返回值:</strong>${cmd.return_value.replace(/\n/g, '<br>')}</div>` : ''}
+                
                 ${cmd.example ? `<div class="cmd-example"><span class="example-label">具体示例</span>${cmd.example}</div>` : ''}
             </div>`;
         });
