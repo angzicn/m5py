@@ -96,7 +96,6 @@
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; background-color: #fff; }
 
-        /* 左侧菜单展开动画 */
         .function-group-wrapper, .tag-group-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
         .function-group-wrapper.show, .tag-group-wrapper.show { grid-template-rows: 1fr; }
         .function-group-inner, .tag-group-inner { overflow: hidden; }
@@ -109,7 +108,6 @@
         .toc-container::-webkit-scrollbar { width: 4px; }
         .toc-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-        /* 卡片整体加载动画 */
         @keyframes cardFadeIn {
             from { opacity: 0; transform: translateY(12px); }
             to { opacity: 1; transform: translateY(0); }
@@ -135,19 +133,29 @@
 
         .btn-group { display: flex; gap: 8px; flex-shrink: 0; align-items: flex-start;}
 
-        /* ============== 精美定制：标签按钮主题 ============== */
-        .tag-btn { height: 48px; padding: 0 15px; font-size: 0.95rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
+        /* ============== 核心修改：固定标签按钮宽度，防止长短不一 ============== */
+        .tag-btn { 
+            height: 48px; 
+            width: 80px; /* 强制固定宽度，容纳2-3个字刚刚好 */
+            padding: 0; 
+            font-size: 0.95rem; 
+            font-weight: bold; 
+            border-radius: 8px; 
+            cursor: pointer; 
+            transition: all 0.3s ease; 
+            border: 1px solid transparent; 
+            display: inline-flex; 
+            align-items: center; 
+            justify-content: center; 
+            box-sizing: border-box; 
+            white-space: nowrap; /* 禁止文字换行 */
+        }
         .tag-btn:hover { filter: brightness(0.95); transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
         
-        /* 初始化: 极客靛蓝色 */
         .tag-init { background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe; }
-        /* 写入: 安全翠绿色 */
         .tag-write { background-color: #d1fae5; color: #047857; border-color: #a7f3d0; }
-        /* 读取: 柔和橙黄色 */
         .tag-read { background-color: #fef3c7; color: #b45309; border-color: #fde68a; }
-        /* 其他: 默认灰蓝色 */
         .tag-default { background-color: #f1f5f9; color: #475569; border-color: #e2e8f0; }
-        /* ================================================= */
 
         .example-btn { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; height: 48px; padding: 0 15px; font-size: 1.1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
         .example-btn:hover { background-color: #e2e8f0; border-color: #94a3b8; }
@@ -216,9 +224,8 @@
             .object-thumbnail-box { display: none !important; }
             .cmd-header { flex-direction: column; align-items: stretch; }
             
-            /* 手机端按钮完美适配：标签缩小，示例缩小，复制占满剩余 */
             .btn-group { width: 100%; display: flex; gap: 10px; }
-            .tag-btn { width: auto; flex-shrink: 0; padding: 0 12px;}
+            .tag-btn { width: 72px; flex-shrink: 0; padding: 0;} /* 移动端也固定宽度 */
             .example-btn { width: 60px; flex-shrink: 0;} 
             .copy-btn { flex-grow: 1; }  
             
@@ -266,11 +273,12 @@
                     <div class="tag-group-wrapper" id="tag-group-wrapper">
                         <div class="tag-group-inner">
                             <div class="form-group" style="margin-bottom: 20px;">
-                                <label for="object-tag">🏷️ 动作标签：</label>
+                                <label for="object-tag">🏷️ 标签：</label>
                                 <select id="object-tag" onchange="renderCommandCards()"><option value="ALL">显示全部</option></select>
                             </div>
                         </div>
                     </div>
+
                     <div class="toc-container" id="toc-container" style="display: none;">
                         <div class="toc-title">📑 本页目录</div>
                         <ul class="toc-list" id="toc-list">
@@ -424,11 +432,9 @@
             funcWrapper.classList.remove('show');
         }
 
-        // 调用更新标签的方法
         updateObjectTags();
     }
 
-    // ============== 新增：智能刷新标签下拉菜单 ==============
     function updateObjectTags() {
         const selectedCat = document.getElementById("category").value;
         const selectedObj = document.getElementById("object-name").value;
@@ -436,7 +442,6 @@
         const selectedFunc = document.getElementById("object-function").value;
         const isFuncVisible = funcWrapper.classList.contains("show");
 
-        // 仅在当前分类和功能下提取存在的标签
         const filteredData = commandDatabase.filter(item => {
             if (item.category !== selectedCat || item.object_name !== selectedObj) return false;
             if (isFuncVisible && selectedFunc !== "ALL") {
@@ -449,14 +454,13 @@
         const tagSelect = document.getElementById("object-tag");
         const tagWrapper = document.getElementById("tag-group-wrapper");
 
-        // 记录用户之前选中的标签
         const currentSelection = tagSelect.value;
 
         if (uniqueTags.length > 0) {
             tagSelect.innerHTML = `<option value="ALL">显示全部</option>` + 
                                    uniqueTags.map(t => `<option value="${t}">${t}</option>`).join('');
             tagWrapper.classList.add('show');
-            // 如果原来的标签在新的列表里还有，就保留；否则归零
+            
             if (uniqueTags.includes(currentSelection)) {
                 tagSelect.value = currentSelection;
             } else {
@@ -471,9 +475,7 @@
         document.getElementById("search-input").value = '';
         renderCommandCards();
     }
-    // =====================================================
 
-    // 根据标签名称返回对应的主题颜色class
     function getTagClass(tag) {
         if (tag === '初始化') return 'tag-init';
         if (tag === '写入') return 'tag-write';
@@ -481,14 +483,13 @@
         return 'tag-default';
     }
 
-    // 点击右侧卡片标签按钮时触发的联动函数
     function selectTag(tag) {
         const tagSelect = document.getElementById("object-tag");
         if (tagSelect) {
             tagSelect.value = tag;
-            document.getElementById("search-input").value = ''; // 清空搜索以确保显示全景
+            document.getElementById("search-input").value = ''; 
             renderCommandCards();
-            window.scrollTo({ top: 0, behavior: 'smooth' }); // 平滑回到顶部
+            window.scrollTo({ top: 0, behavior: 'smooth' }); 
         }
     }
 
@@ -508,7 +509,6 @@
         const tocList = document.getElementById("toc-list");
         const tocContainer = document.getElementById("toc-container");
         
-        // ============== 核心修改：三级精准过滤 (含标签) ==============
         currentObjectCommands = commandDatabase.filter(item => {
             if (item.category !== selectedCat || item.object_name !== selectedObj) return false;
             if (isFuncVisible && selectedFunc !== "ALL") {
@@ -619,10 +619,22 @@
             const hasReturnDesc = cmd.return_value && cmd.return_value.trim() !== '';
             const hasExample = cmd.example && cmd.example.trim() !== '';
             
-            // 提取当前条目的标签信息
             const hasTag = cmd.tag && cmd.tag.trim() !== '';
             const tagText = hasTag ? cmd.tag.trim() : '';
             const tagClass = hasTag ? getTagClass(tagText) : '';
+
+            // ============== 核心修改：智能切换标签按钮的文字和功能 ==============
+            let displayTagText = tagText;
+            let tagOnClick = `selectTag('${tagText}')`;
+            let tagTitle = `点击只看[${tagText}]标签`;
+
+            // 如果当前正好已经在这个标签的过滤状态下，把按钮变成“全部(重置)”按钮
+            if (hasTag && selectedTag === tagText) {
+                displayTagText = "全部";
+                tagOnClick = `selectTag('ALL')`;
+                tagTitle = "点击显示全部条目";
+            }
+            // ================================================================
 
             htmlContent += `
             <div class="cmd-card" id="cmd-card-${index}">
@@ -647,7 +659,7 @@
                     </div>
                     
                     <div class="btn-group">
-                        ${hasTag ? `<button class="tag-btn ${tagClass}" onclick="selectTag('${tagText}')" title="点击只看该标签">${tagText}</button>` : ''}
+                        ${hasTag ? `<button class="tag-btn ${tagClass}" onclick="${tagOnClick}" title="${tagTitle}">${displayTagText}</button>` : ''}
                         
                         ${hasExample ? `<button class="example-btn" id="example-btn-${index}" onclick="toggleExamplePanel(${index})" title="查看示例代码">💡</button>` : ''}
                         <button class="copy-btn" onclick="copyCommand(${index})">复制</button>
