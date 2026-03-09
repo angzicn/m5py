@@ -51,8 +51,8 @@
         
         /* ============== 核心修复：强制约束缩略图框大小，防止大图片撑爆布局 ============== */
         .object-thumbnail-box {
-            flex: 0 0 105px; /* 强制锁定宽度 105px，不参与伸缩 */
-            height: 105px;   /* 强制锁定高度 105px，与右侧输入框自然高度完美对齐 */
+            flex: 0 0 auto; 
+            aspect-ratio: 1 / 1;
             padding: 8px;
             background-color: #ffffff;
             border: 1px solid #e2e8f0;
@@ -786,3 +786,4 @@
 
 </body>
 </html>
+
