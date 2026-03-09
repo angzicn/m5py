@@ -52,21 +52,21 @@
         /* ============== 核心修复：强制约束缩略图框大小，防止大图片撑爆布局 ============== */
         .object-thumbnail-box {
             flex: 0 0 auto; 
-            aspect-ratio: 1 / 1;
-            padding: 8px;
+            aspect-ratio: 1 / 1; /* 根据拉伸后的高度，自动计算出相等的宽度 */
             background-color: #ffffff;
             border: 1px solid #e2e8f0;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            transition: opacity 0.3s ease;
-            border-radius: 12px; /* 和右侧框保持一样的圆角 */
+            border-radius: 12px; 
             box-sizing: border-box;
+            position: relative; /* 关键 1：设为相对参照物，让内部图片无从作乱 */
+            transition: opacity 0.3s ease;
         }
         .object-thumbnail-box img {
-            max-width: 100%;
-            max-height: 100%;
-            object-fit: contain; /* 图片无论多大，都会等比例乖乖缩放到框内 */
+            position: absolute; /* 关键 2：绝对定位脱离文档流，绝对不再撑开父元素 */
+            top: 10px;
+            left: 10px;
+            width: calc(100% - 20px); /* 减去两侧留白 */
+            height: calc(100% - 20px); /* 减去上下留白 */
+            object-fit: contain; 
             border-radius: 6px;
         }
         /* 动态隐藏类：当图片加载失败时激活 */
@@ -786,4 +786,5 @@
 
 </body>
 </html>
+
 
