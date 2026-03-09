@@ -133,10 +133,10 @@
 
         .btn-group { display: flex; gap: 8px; flex-shrink: 0; align-items: flex-start;}
 
-        /* ============== 核心修改：固定标签按钮宽度，防止长短不一 ============== */
+        /* ============== 核心交互动画修改 ============== */
         .tag-btn { 
             height: 48px; 
-            width: 80px; /* 强制固定宽度，容纳2-3个字刚刚好 */
+            width: 80px; 
             padding: 0; 
             font-size: 0.95rem; 
             font-weight: bold; 
@@ -148,10 +148,15 @@
             align-items: center; 
             justify-content: center; 
             box-sizing: border-box; 
-            white-space: nowrap; /* 禁止文字换行 */
+            white-space: nowrap; 
         }
         .tag-btn:hover { filter: brightness(0.95); transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
         
+        /* 悬浮文字替换逻辑 */
+        .tag-btn .btn-text-hover { display: none; } /* 默认隐藏“全部” */
+        .tag-btn.active-filter:hover .btn-text-normal { display: none; } /* 悬浮时隐藏原标签 */
+        .tag-btn.active-filter:hover .btn-text-hover { display: inline; } /* 悬浮时显示“全部” */
+
         .tag-init { background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe; }
         .tag-write { background-color: #d1fae5; color: #047857; border-color: #a7f3d0; }
         .tag-read { background-color: #fef3c7; color: #b45309; border-color: #fde68a; }
@@ -225,7 +230,7 @@
             .cmd-header { flex-direction: column; align-items: stretch; }
             
             .btn-group { width: 100%; display: flex; gap: 10px; }
-            .tag-btn { width: 72px; flex-shrink: 0; padding: 0;} /* 移动端也固定宽度 */
+            .tag-btn { width: 72px; flex-shrink: 0; padding: 0;}
             .example-btn { width: 60px; flex-shrink: 0;} 
             .copy-btn { flex-grow: 1; }  
             
@@ -623,18 +628,11 @@
             const tagText = hasTag ? cmd.tag.trim() : '';
             const tagClass = hasTag ? getTagClass(tagText) : '';
 
-            // ============== 核心修改：智能切换标签按钮的文字和功能 ==============
-            let displayTagText = tagText;
-            let tagOnClick = `selectTag('${tagText}')`;
-            let tagTitle = `点击只看[${tagText}]标签`;
-
-            // 如果当前正好已经在这个标签的过滤状态下，把按钮变成“全部(重置)”按钮
-            if (hasTag && selectedTag === tagText) {
-                displayTagText = "全部";
-                tagOnClick = `selectTag('ALL')`;
-                tagTitle = "点击显示全部条目";
-            }
-            // ================================================================
+            // ============== 悬浮文字切换与过滤器状态控制 ==============
+            let isCurrentFilter = (hasTag && selectedTag === tagText);
+            let tagOnClick = isCurrentFilter ? `selectTag('ALL')` : `selectTag('${tagText}')`;
+            let tagTitle = isCurrentFilter ? "点击显示全部条目" : `点击只看[${tagText}]标签`;
+            let activeClass = isCurrentFilter ? "active-filter" : "";
 
             htmlContent += `
             <div class="cmd-card" id="cmd-card-${index}">
@@ -659,7 +657,11 @@
                     </div>
                     
                     <div class="btn-group">
-                        ${hasTag ? `<button class="tag-btn ${tagClass}" onclick="${tagOnClick}" title="${tagTitle}">${displayTagText}</button>` : ''}
+                        ${hasTag ? `
+                        <button class="tag-btn ${tagClass} ${activeClass}" onclick="${tagOnClick}" title="${tagTitle}">
+                            <span class="btn-text-normal">${tagText}</span>
+                            <span class="btn-text-hover">全部</span>
+                        </button>` : ''}
                         
                         ${hasExample ? `<button class="example-btn" id="example-btn-${index}" onclick="toggleExamplePanel(${index})" title="查看示例代码">💡</button>` : ''}
                         <button class="copy-btn" onclick="copyCommand(${index})">复制</button>
