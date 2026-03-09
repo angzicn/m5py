@@ -48,29 +48,22 @@
         
         .top-controls { display: flex; gap: 20px; width: 100%; }
         
-        /* ============== 最终版修复：恢复完美内边距，安全锁死高度 ============== */
         .control-box { 
             flex: 1; 
-            padding: 18px 20px; /* 恢复原版内边距！保证文字顶部留白一致 */
+            padding: 18px 20px; 
             border-radius: 12px; 
             box-sizing: border-box; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.04); 
             transition: all 0.3s ease;
         }
 
-        /* 仅在电脑宽屏下执行“暴力锁死”，保护移动端布局 */
         @media (min-width: 769px) {
-            .control-box {
-                height: 110px; /* 三个框统一高度 */
-            }
-            .object-thumbnail-box {
-                flex: 0 0 110px !important; /* 强制锁定图片框宽度与高度一致 */
-                width: 110px !important;
-            }
+            .control-box { height: 110px; }
+            .object-thumbnail-box { flex: 0 0 110px !important; width: 110px !important; }
         }
         
         .object-thumbnail-box {
-            padding: 10px !important; /* 图片的内边距 */
+            padding: 10px !important; 
             background-color: #ffffff;
             border: 1px solid #e2e8f0;
             display: flex;
@@ -78,17 +71,8 @@
             align-items: center;
         }
         
-        .object-thumbnail-box img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain; /* 图片在方块内等比缩放，绝不撑爆 */
-            border-radius: 6px;
-        }
-        
-        .object-thumbnail-box.hidden-by-error {
-            display: none !important;
-        }
-        /* ============================================================== */
+        .object-thumbnail-box img { width: 100%; height: 100%; object-fit: contain; border-radius: 6px; }
+        .object-thumbnail-box.hidden-by-error { display: none !important; }
 
         .instance-box { background-color: #e0f2fe; border-left: 5px solid #0ea5e9; }
         .instance-box label { color: #0369a1; transition: color 0.3s; }
@@ -112,9 +96,10 @@
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; background-color: #fff; }
 
-        .function-group-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.3s ease; }
-        .function-group-wrapper.show { grid-template-rows: 1fr; }
-        .function-group-inner { overflow: hidden; }
+        /* 左侧菜单展开动画 */
+        .function-group-wrapper, .tag-group-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
+        .function-group-wrapper.show, .tag-group-wrapper.show { grid-template-rows: 1fr; }
+        .function-group-inner, .tag-group-inner { overflow: hidden; }
 
         .toc-container { margin-bottom: 20px; padding: 10px 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; flex-grow: 1; overflow-y: auto; }
         .toc-title { font-size: 0.9rem; font-weight: bold; color: #64748b; margin-bottom: 8px; padding: 0 4px 5px 4px; border-bottom: 1px dashed #cbd5e1; }
@@ -124,7 +109,12 @@
         .toc-container::-webkit-scrollbar { width: 4px; }
         .toc-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-        .cmd-card { background: var(--box-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: all 0.3s ease; }
+        /* 卡片整体加载动画 */
+        @keyframes cardFadeIn {
+            from { opacity: 0; transform: translateY(12px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .cmd-card { background: var(--box-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: all 0.3s ease; animation: cardFadeIn 0.3s ease-out forwards; }
         
         @keyframes flashFocus {
             0% { border-color: #3b82f6; box-shadow: 0 0 0 4px rgba(59, 130, 246, 0.3); transform: translateY(-2px); }
@@ -144,6 +134,20 @@
         .cmd-code-text.clickable:hover { background-color: #e0f2fe; }
 
         .btn-group { display: flex; gap: 8px; flex-shrink: 0; align-items: flex-start;}
+
+        /* ============== 精美定制：标签按钮主题 ============== */
+        .tag-btn { height: 48px; padding: 0 15px; font-size: 0.95rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
+        .tag-btn:hover { filter: brightness(0.95); transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
+        
+        /* 初始化: 极客靛蓝色 */
+        .tag-init { background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe; }
+        /* 写入: 安全翠绿色 */
+        .tag-write { background-color: #d1fae5; color: #047857; border-color: #a7f3d0; }
+        /* 读取: 柔和橙黄色 */
+        .tag-read { background-color: #fef3c7; color: #b45309; border-color: #fde68a; }
+        /* 其他: 默认灰蓝色 */
+        .tag-default { background-color: #f1f5f9; color: #475569; border-color: #e2e8f0; }
+        /* ================================================= */
 
         .example-btn { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; height: 48px; padding: 0 15px; font-size: 1.1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
         .example-btn:hover { background-color: #e2e8f0; border-color: #94a3b8; }
@@ -209,13 +213,13 @@
             .box1-scroll-area { max-height: 70vh; overflow-y: auto; padding-bottom: 5px; }
 
             .top-controls { flex-direction: column; gap: 15px; }
-            
             .object-thumbnail-box { display: none !important; }
-
             .cmd-header { flex-direction: column; align-items: stretch; }
             
+            /* 手机端按钮完美适配：标签缩小，示例缩小，复制占满剩余 */
             .btn-group { width: 100%; display: flex; gap: 10px; }
-            .example-btn { width: 60px; } 
+            .tag-btn { width: auto; flex-shrink: 0; padding: 0 12px;}
+            .example-btn { width: 60px; flex-shrink: 0;} 
             .copy-btn { flex-grow: 1; }  
             
             .tool-copy-btn { margin-left: 0; margin-top: 8px; width: 100%; }
@@ -254,11 +258,19 @@
                         <div class="function-group-inner">
                             <div class="form-group" style="margin-bottom: 20px;">
                                 <label for="object-function">对象功能：</label>
-                                <select id="object-function" onchange="renderCommandCards()"><option>等待加载...</option></select>
+                                <select id="object-function" onchange="updateObjectTags()"><option>等待加载...</option></select>
                             </div>
                         </div>
                     </div>
 
+                    <div class="tag-group-wrapper" id="tag-group-wrapper">
+                        <div class="tag-group-inner">
+                            <div class="form-group" style="margin-bottom: 20px;">
+                                <label for="object-tag">🏷️ 动作标签：</label>
+                                <select id="object-tag" onchange="renderCommandCards()"><option value="ALL">显示全部</option></select>
+                            </div>
+                        </div>
+                    </div>
                     <div class="toc-container" id="toc-container" style="display: none;">
                         <div class="toc-title">📑 本页目录</div>
                         <ul class="toc-list" id="toc-list">
@@ -401,7 +413,6 @@
         const funcSelect = document.getElementById("object-function");
 
         const filteredData = commandDatabase.filter(item => item.category === selectedCat && item.object_name === selectedObj);
-        
         const uniqueFunctions = [...new Set(filteredData.map(item => (item.object_function || '').trim()).filter(Boolean))];
 
         if (uniqueFunctions.length > 0) {
@@ -413,30 +424,104 @@
             funcWrapper.classList.remove('show');
         }
 
+        // 调用更新标签的方法
+        updateObjectTags();
+    }
+
+    // ============== 新增：智能刷新标签下拉菜单 ==============
+    function updateObjectTags() {
+        const selectedCat = document.getElementById("category").value;
+        const selectedObj = document.getElementById("object-name").value;
+        const funcWrapper = document.getElementById("function-group-wrapper");
+        const selectedFunc = document.getElementById("object-function").value;
+        const isFuncVisible = funcWrapper.classList.contains("show");
+
+        // 仅在当前分类和功能下提取存在的标签
+        const filteredData = commandDatabase.filter(item => {
+            if (item.category !== selectedCat || item.object_name !== selectedObj) return false;
+            if (isFuncVisible && selectedFunc !== "ALL") {
+                if ((item.object_function || '').trim() !== selectedFunc) return false;
+            }
+            return true;
+        });
+        
+        const uniqueTags = [...new Set(filteredData.map(item => (item.tag || '').trim()).filter(Boolean))];
+        const tagSelect = document.getElementById("object-tag");
+        const tagWrapper = document.getElementById("tag-group-wrapper");
+
+        // 记录用户之前选中的标签
+        const currentSelection = tagSelect.value;
+
+        if (uniqueTags.length > 0) {
+            tagSelect.innerHTML = `<option value="ALL">显示全部</option>` + 
+                                   uniqueTags.map(t => `<option value="${t}">${t}</option>`).join('');
+            tagWrapper.classList.add('show');
+            // 如果原来的标签在新的列表里还有，就保留；否则归零
+            if (uniqueTags.includes(currentSelection)) {
+                tagSelect.value = currentSelection;
+            } else {
+                tagSelect.value = "ALL";
+            }
+        } else {
+            tagSelect.innerHTML = `<option value="ALL">无</option>`;
+            tagWrapper.classList.remove('show');
+            tagSelect.value = "ALL";
+        }
+
         document.getElementById("search-input").value = '';
         renderCommandCards();
+    }
+    // =====================================================
+
+    // 根据标签名称返回对应的主题颜色class
+    function getTagClass(tag) {
+        if (tag === '初始化') return 'tag-init';
+        if (tag === '写入') return 'tag-write';
+        if (tag === '读取') return 'tag-read';
+        return 'tag-default';
+    }
+
+    // 点击右侧卡片标签按钮时触发的联动函数
+    function selectTag(tag) {
+        const tagSelect = document.getElementById("object-tag");
+        if (tagSelect) {
+            tagSelect.value = tag;
+            document.getElementById("search-input").value = ''; // 清空搜索以确保显示全景
+            renderCommandCards();
+            window.scrollTo({ top: 0, behavior: 'smooth' }); // 平滑回到顶部
+        }
     }
 
     function renderCommandCards() {
         const selectedCat = document.getElementById("category").value;
         const selectedObj = document.getElementById("object-name").value;
+        
+        const funcWrapper = document.getElementById("function-group-wrapper");
         const selectedFunc = document.getElementById("object-function").value;
-        const isFuncVisible = document.getElementById("function-group-wrapper").classList.contains("show");
+        const isFuncVisible = funcWrapper.classList.contains("show");
+        
+        const tagWrapper = document.getElementById("tag-group-wrapper");
+        const selectedTag = document.getElementById("object-tag").value;
+        const isTagVisible = tagWrapper.classList.contains("show");
 
         const container = document.getElementById("commands-container");
         const tocList = document.getElementById("toc-list");
         const tocContainer = document.getElementById("toc-container");
         
+        // ============== 核心修改：三级精准过滤 (含标签) ==============
         currentObjectCommands = commandDatabase.filter(item => {
             if (item.category !== selectedCat || item.object_name !== selectedObj) return false;
             if (isFuncVisible && selectedFunc !== "ALL") {
-                return (item.object_function || '').trim() === selectedFunc;
+                if ((item.object_function || '').trim() !== selectedFunc) return false;
+            }
+            if (isTagVisible && selectedTag !== "ALL") {
+                if ((item.tag || '').trim() !== selectedTag) return false;
             }
             return true;
         });
         
         if (currentObjectCommands.length === 0) {
-            container.innerHTML = '<div class="box">该对象下暂无命令数据。</div>';
+            container.innerHTML = '<div class="box">该分类/标签下暂无命令数据。</div>';
             document.getElementById("top-controls").style.display = 'none';
             tocContainer.style.display = 'none';
             return;
@@ -533,6 +618,11 @@
             const hasParamsDesc = cmd.params && cmd.params.trim() !== '';
             const hasReturnDesc = cmd.return_value && cmd.return_value.trim() !== '';
             const hasExample = cmd.example && cmd.example.trim() !== '';
+            
+            // 提取当前条目的标签信息
+            const hasTag = cmd.tag && cmd.tag.trim() !== '';
+            const tagText = hasTag ? cmd.tag.trim() : '';
+            const tagClass = hasTag ? getTagClass(tagText) : '';
 
             htmlContent += `
             <div class="cmd-card" id="cmd-card-${index}">
@@ -557,6 +647,8 @@
                     </div>
                     
                     <div class="btn-group">
+                        ${hasTag ? `<button class="tag-btn ${tagClass}" onclick="selectTag('${tagText}')" title="点击只看该标签">${tagText}</button>` : ''}
+                        
                         ${hasExample ? `<button class="example-btn" id="example-btn-${index}" onclick="toggleExamplePanel(${index})" title="查看示例代码">💡</button>` : ''}
                         <button class="copy-btn" onclick="copyCommand(${index})">复制</button>
                     </div>
