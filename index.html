@@ -566,11 +566,9 @@
         return 'tag-default';
     }
 
-    // ============== 核心修复：点击标签时的联动逻辑 ==============
     function selectTag(tag) {
         const tagSelect = document.getElementById("object-tag");
         if (tagSelect) {
-            // 如果是在全局搜索下点击了某个以前没加载到下拉框里的标签，动态帮它加上这个选项
             let optionExists = Array.from(tagSelect.options).some(opt => opt.value === tag);
             if (!optionExists && tag !== 'ALL') {
                 const newOption = document.createElement("option");
@@ -581,7 +579,6 @@
             
             tagSelect.value = tag;
             
-            // 核心修复！在全局搜索模式下，绝不能清空搜索框，否则直接退回欢迎页！
             if (!isGlobalSearchMode) {
                 document.getElementById("search-input").value = ''; 
             }
@@ -593,9 +590,10 @@
 
     function handleSearch() {
         const selectedCat = document.getElementById("category").value;
+        const selectedObj = document.getElementById("object-name").value;
         const query = document.getElementById("search-input").value.trim();
         
-        if (selectedCat === "") {
+        if (selectedCat === "" || selectedObj === "") {
             if (query === "" && isGlobalSearchMode) {
                 renderCommandCards();
             } else if (query !== "" && !isGlobalSearchMode) {
@@ -666,7 +664,6 @@
                 
                 currentObjectCommands = commandDatabase.filter(item => {
                     if (!hasContent(item.command_template)) return false;
-                    // 全局搜索下同样支持标签过滤筛选！
                     if (selectedTag !== "ALL" && String(item.tag || '').trim() !== selectedTag) return false;
                     return true;
                 });
@@ -779,26 +776,40 @@
             let paramInputsHtml = '';
             
             const paramMatch = String(cmd.command_template || '').match(/\((.*)\)/);
+            
+            // =================================================================
+            // 核心交互模式升级：解析并应用基于 "name=default" 的模板默认值
+            // =================================================================
+            let parsedDefaultParams = [];
+            
             if (paramMatch && hasContent(paramMatch[1])) {
-                const params = paramMatch[1].split(',').map(p => p.trim());
-                if (params.length > 0) {
+                const rawParams = paramMatch[1].split(',').map(p => p.trim());
+                if (rawParams.length > 0) {
                     hasParams = true;
-                    params.forEach((p, pIdx) => {
-                        let typePlaceholder = `默认: ${p}`; 
+                    rawParams.forEach((rawP, pIdx) => {
+                        let pName = rawP;
+                        let pDefault = rawP; // 默认情况下，无默认值则显示变量名本身
+
+                        // 解析 "x=0" 结构
+                        if (rawP.includes('=')) {
+                            let parts = rawP.split('=');
+                            pName = parts[0].trim();
+                            pDefault = parts.slice(1).join('=').trim(); 
+                        }
+                        parsedDefaultParams.push(pDefault);
+
+                        let typePlaceholder = pDefault !== pName ? `默认值: ${pDefault}` : `需要填入: ${pName}`;
+                        
+                        // 从 params 列提取额外说明（用于 title 提示，保持 UI 简洁）
+                        let descText = "";
                         if (hasContent(cmd.params)) {
                             const lines = String(cmd.params).split(/\r?\n/);
                             for (let line of lines) {
                                 let cleanLine = line.trim();
-                                if (cleanLine.startsWith(p + ':') || cleanLine.startsWith(p + '：')) {
+                                if (cleanLine.startsWith(pName + ':') || cleanLine.startsWith(pName + '：')) {
                                     let colonIndex = cleanLine.indexOf(':');
                                     if (colonIndex === -1) colonIndex = cleanLine.indexOf('：');
-                                    let afterColon = cleanLine.substring(colonIndex + 1).trim();
-                                    let parts = afterColon.split(/[，,]/);
-                                    if (parts.length >= 2) {
-                                        typePlaceholder = parts[1].trim();
-                                    } else if (parts.length === 1) {
-                                        typePlaceholder = parts[0].trim();
-                                    }
+                                    descText = cleanLine.substring(colonIndex + 1).trim();
                                     break; 
                                 }
                             }
@@ -806,8 +817,8 @@
 
                         paramInputsHtml += `
                             <div class="param-row">
-                                <span class="param-label">${escapeHtml(p)}:</span>
-                                <input type="text" class="param-input" id="param-input-${index}-${pIdx}" placeholder="需要填入: ${typePlaceholder}" oninput="updateDisplay()">
+                                <span class="param-label" title="${escapeHtml(descText)}">${escapeHtml(pName)}:</span>
+                                <input type="text" class="param-input" id="param-input-${index}-${pIdx}" placeholder="${escapeHtml(typePlaceholder)}" data-default="${escapeHtml(pDefault)}" data-name="${escapeHtml(pName)}" oninput="updateDisplay()">
                             </div>
                         `;
                     });
@@ -828,9 +839,9 @@
                 initialFinalCode = initialFinalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
             }
 
+            // 初始代码展示时，直接剥离 "=" 赋权，采用纯净默认值渲染
             if (paramMatch && hasContent(paramMatch[1])) {
-                const defaultParams = paramMatch[1].split(',').map(p => p.trim());
-                initialFinalCode = initialFinalCode.replace(/\((.*)\)/, `(${defaultParams.join(', ')})`);
+                initialFinalCode = initialFinalCode.replace(/\((.*)\)/, `(${parsedDefaultParams.join(', ')})`);
             }
             
             let initialEscapedCode = escapeHtml(initialFinalCode);
@@ -845,8 +856,7 @@
             const tagText = hasTag ? String(cmd.tag).trim() : '';
             const tagClass = hasTag ? getTagClass(tagText) : '';
 
-            // ============== 去掉了 !isGlobalSearchMode，让全局下标签按钮正常联动 ==============
-            let isCurrentFilter = (hasTag && selectedTag === tagText);
+            let isCurrentFilter = (!isGlobalSearchMode && hasTag && selectedTag === tagText);
             let tagOnClick = isCurrentFilter ? `selectTag('ALL')` : `selectTag('${tagText}')`;
             let tagTitle = isCurrentFilter ? "点击显示全部条目" : `点击只看[${tagText}]标签`;
             let activeClass = isCurrentFilter ? "active-filter" : "";
@@ -1017,16 +1027,25 @@
                     finalCode = finalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
                 }
 
+                // =================================================================
+                // 实时渲染交互升级：读取 data-default 获取默认值
+                // =================================================================
                 const paramMatch = String(cmd.command_template || '').match(/\((.*)\)/);
                 if (paramMatch && hasContent(paramMatch[1])) {
-                    const defaultParams = paramMatch[1].split(',').map(p => p.trim());
+                    const rawParams = paramMatch[1].split(',').map(p => p.trim());
                     let currentParams = [];
-                    for (let i = 0; i < defaultParams.length; i++) {
+                    for (let i = 0; i < rawParams.length; i++) {
                         const inputEl = document.getElementById(`param-input-${index}-${i}`);
-                        if (inputEl && inputEl.value.trim() !== '') {
-                            currentParams.push(inputEl.value.trim());
+                        if (inputEl) {
+                            if (inputEl.value.trim() !== '') {
+                                currentParams.push(inputEl.value.trim()); 
+                            } else {
+                                // 如果没填，使用预先存在DOM上的 data-default
+                                currentParams.push(inputEl.getAttribute('data-default'));
+                            }
                         } else {
-                            currentParams.push(defaultParams[i]); 
+                            // 降级处理，不应该发生
+                            currentParams.push(rawParams[i].split('=')[0].trim());
                         }
                     }
                     finalCode = finalCode.replace(/\((.*)\)/, `(${currentParams.join(', ')})`);
