@@ -190,6 +190,23 @@
         .cmd-example { background: var(--example-bg); color: var(--example-text); border: 1px dashed var(--example-border); padding: 15px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 0.95rem; overflow-x: auto; white-space: pre-wrap; margin: 0; }
         .cmd-example .example-label { display: block; margin-bottom: 8px; color: #64748b; font-family: sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
 
+        /* ============== 核心优化③：全局搜索的底部面包屑样式 ============== */
+        .cmd-breadcrumb {
+            margin-top: 15px;
+            padding-top: 12px;
+            border-top: 1px dashed #e2e8f0;
+            font-size: 0.85rem;
+            color: #64748b;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .cmd-breadcrumb span {
+            color: #0ea5e9;
+            font-weight: bold;
+        }
+        /* =============================================================== */
+
         #toast { visibility: hidden; min-width: 200px; background-color: #10b981; color: #fff; text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 100; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         #toast.show { visibility: visible; animation: fadein 0.3s, fadeout 0.3s 2s; }
         @keyframes fadein { from {bottom: 0; opacity: 0;} to {bottom: 30px; opacity: 1;} }
@@ -372,7 +389,6 @@
     let currentObjectCommands = [];
     let isGlobalSearchMode = false; 
 
-    // 严苛的空数据识别：支持填入 NONE、NULL、- 或者直接留空
     function hasContent(val) {
         if (val === undefined || val === null) return false;
         let str = String(val).trim();
@@ -380,7 +396,6 @@
         return true;
     }
 
-    // 代码转义器，防止 <> 这种符号被当作 HTML 执行
     function escapeHtml(unsafe) {
         if (!hasContent(unsafe)) return '';
         return String(unsafe)
@@ -461,7 +476,6 @@
         const filteredData = commandDatabase.filter(item => item.category === selectedCat);
         const uniqueObjects = [...new Set(filteredData.map(item => item.object_name).filter(hasContent))];
         
-        // 核心优化 1：强制手动选择对象名称，不再默认跳到第一个
         objSelect.innerHTML = `<option value="">-- 请选择硬件名称 --</option>` + 
                               uniqueObjects.map(obj => `<option value="${obj}">${obj}</option>`).join('');
         objSelect.value = ""; 
@@ -589,8 +603,6 @@
         
         const container = document.getElementById("commands-container");
         const tocContainer = document.getElementById("toc-container");
-        // 核心修复 Bug 1 缺少的定义：目录的ul列表元素获取
-        const tocList = document.getElementById("toc-list"); 
         const topControls = document.getElementById("top-controls");
         
         if (selectedCat === "" || selectedObj === "") {
@@ -603,36 +615,38 @@
                 instanceSettings.style.display = 'none'; 
                 tocContainer.style.display = 'none';
                 
-                // 核心优化 2：精简欢迎框文字防止换行
-                container.innerHTML = `
-                <div class="welcome-box" id="welcome-box">
-                    <div class="welcome-header">
-                        <span class="welcome-icon">👋</span>
-                        <h3>欢迎使用 M5PY 助手</h3>
-                    </div>
-                    <p class="welcome-subtitle">由 北极圈机器人 (BEIJIQ) 倾力打造的 MicroPython 编程利器</p>
-                    <div class="welcome-features">
-                        <div class="feature-item">
-                            <div class="feature-icon">🔍</div>
-                            <div class="feature-text"><strong>全局检索</strong><br>快速查找所有硬件指令</div>
+                // --- 核心优化①：防抖动画！如果欢迎框已经存在，就不重新渲染HTML ---
+                if (!document.getElementById("welcome-box")) {
+                    container.innerHTML = `
+                    <div class="welcome-box" id="welcome-box">
+                        <div class="welcome-header">
+                            <span class="welcome-icon">👋</span>
+                            <h3>欢迎使用 M5PY 助手</h3>
                         </div>
-                        <div class="feature-item">
-                            <div class="feature-icon">🗂️</div>
-                            <div class="feature-text"><strong>分类浏览</strong><br>按类别精准定位代码</div>
+                        <p class="welcome-subtitle">由 北极圈机器人 (BEIJIQ) 倾力打造的 MicroPython 编程利器</p>
+                        <div class="welcome-features">
+                            <div class="feature-item">
+                                <div class="feature-icon">🔍</div>
+                                <div class="feature-text"><strong>全局检索</strong><br>快速查找所有硬件指令</div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">🗂️</div>
+                                <div class="feature-text"><strong>分类浏览</strong><br>按类别精准定位代码</div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">✍️</div>
+                                <div class="feature-text"><strong>智能修改</strong><br>自定义参数，实时更新</div>
+                            </div>
+                            <div class="feature-item">
+                                <div class="feature-icon">📋</div>
+                                <div class="feature-text"><strong>一键复制</strong><br>结合工具，高效编程</div>
+                            </div>
                         </div>
-                        <div class="feature-item">
-                            <div class="feature-icon">✍️</div>
-                            <div class="feature-text"><strong>智能修改</strong><br>自定义参数，实时更新</div>
+                        <div class="welcome-footer">
+                            👈 请在左侧选择硬件类别和名称，或直接在上方全局搜索
                         </div>
-                        <div class="feature-item">
-                            <div class="feature-icon">📋</div>
-                            <div class="feature-text"><strong>一键复制</strong><br>结合工具，高效编程</div>
-                        </div>
-                    </div>
-                    <div class="welcome-footer">
-                        👈 请在左侧选择硬件类别和名称，或直接在上方全局搜索
-                    </div>
-                </div>`;
+                    </div>`;
+                }
                 return;
             } else {
                 isGlobalSearchMode = true;
@@ -781,13 +795,14 @@
                 }
             }
             
-            // 核心修复 Bug 1：同步直接写入代码，取消所有异步等待，彻底告别空显示
             let initialFinalCode = String(cmd.command_template || '');
             let needsInstanceForThisCmd = hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE';
             
             if (needsInstanceForThisCmd) {
+                // --- 核心优化②：保护 is_instance_fixed 的卡片不被全局输入覆盖 ---
+                let isFixedForThisCmd = hasContent(cmd.is_instance_fixed) && String(cmd.is_instance_fixed).toUpperCase() === 'TRUE';
                 let itemInstance = globalInstanceInput;
-                if (itemInstance === "") {
+                if (isFixedForThisCmd || itemInstance === "") {
                     itemInstance = hasContent(cmd.default_instance) ? cmd.default_instance : 'obj';
                 }
                 initialFinalCode = initialFinalCode.replace(/{instance}/g, itemInstance);
@@ -816,6 +831,16 @@
             let tagOnClick = isCurrentFilter ? `selectTag('ALL')` : `selectTag('${tagText}')`;
             let tagTitle = isCurrentFilter ? "点击显示全部条目" : `点击只看[${tagText}]标签`;
             let activeClass = isCurrentFilter ? "active-filter" : "";
+
+            // --- 核心优化③：为全局搜索生成精美的底部面包屑导航 ---
+            let breadcrumbHtml = '';
+            if (isGlobalSearchMode) {
+                let pathText = `${escapeHtml(cmd.category)} - ${escapeHtml(cmd.object_name)}`;
+                if (hasContent(cmd.object_function)) {
+                    pathText += ` - ${escapeHtml(cmd.object_function)}`;
+                }
+                breadcrumbHtml = `<div class="cmd-breadcrumb">🗂️ 所属模块：<span>${pathText}</span></div>`;
+            }
 
             htmlContent += `
             <div class="cmd-card" id="cmd-card-${index}">
@@ -863,18 +888,19 @@
                     </div>
                 </div>
                 ` : ''}
+
+                ${breadcrumbHtml}
                 
             </div>`;
         });
 
         container.innerHTML = htmlContent;
         
-        // 全局搜索不显示目录，仅分类搜索显示目录
         if (isGlobalSearchMode) {
             tocContainer.style.display = 'none';
         } else {
             tocContainer.style.display = 'block';
-            tocList.innerHTML = tocContent; // 关键修复：写入目录数据
+            document.getElementById("toc-list").innerHTML = tocContent; 
         }
         
         updateDisplay(); 
@@ -963,8 +989,10 @@
                 const needsInstance = hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE';
                 
                 if (needsInstance) {
+                    // --- 核心优化②：动态替换时，同样保护 is_instance_fixed 的卡片 ---
+                    let isFixed = hasContent(cmd.is_instance_fixed) && String(cmd.is_instance_fixed).toUpperCase() === 'TRUE';
                     let itemInstance = globalInstanceInput;
-                    if (itemInstance === "") {
+                    if (isFixed || itemInstance === "") {
                         itemInstance = hasContent(cmd.default_instance) ? cmd.default_instance : 'obj';
                     }
                     finalCode = finalCode.replace(/{instance}/g, itemInstance);
