@@ -372,10 +372,18 @@
     let currentObjectCommands = [];
     let isGlobalSearchMode = false; 
 
-    // 核心安全转义函数：防止代码里的 <int> 被浏览器当成标签吃掉
+    // ============== 核心修复：极致安全的空数据判定，支持表格里填 NONE 或留空 ==============
+    function hasContent(val) {
+        if (val === undefined || val === null) return false;
+        let str = String(val).trim();
+        if (str === '' || str.toUpperCase() === 'NONE' || str.toUpperCase() === 'NULL' || str === '-') return false;
+        return true;
+    }
+
+    // 核心安全转义函数：防止代码里的 <int> 被浏览器当成标签吃掉导致代码隐身
     function escapeHtml(unsafe) {
-        if (unsafe === undefined || unsafe === null) return '';
-        return unsafe.toString()
+        if (!hasContent(unsafe)) return '';
+        return String(unsafe)
              .replace(/&/g, "&amp;")
              .replace(/</g, "&lt;")
              .replace(/>/g, "&gt;");
@@ -428,7 +436,7 @@
 
     function initCategoryDropdown() {
         const catSelect = document.getElementById("category");
-        const uniqueCategories = [...new Set(commandDatabase.map(item => item.category).filter(Boolean))];
+        const uniqueCategories = [...new Set(commandDatabase.map(item => item.category).filter(hasContent))];
         
         catSelect.innerHTML = `<option value="">-- 请选择硬件类别 --</option>` + 
                               uniqueCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
@@ -451,7 +459,7 @@
         }
 
         const filteredData = commandDatabase.filter(item => item.category === selectedCat);
-        const uniqueObjects = [...new Set(filteredData.map(item => item.object_name).filter(Boolean))];
+        const uniqueObjects = [...new Set(filteredData.map(item => item.object_name).filter(hasContent))];
         
         objSelect.innerHTML = uniqueObjects.map(obj => `<option value="${obj}">${obj}</option>`).join('');
         
@@ -472,7 +480,7 @@
         }
 
         const filteredData = commandDatabase.filter(item => item.category === selectedCat && item.object_name === selectedObj);
-        const uniqueFunctions = [...new Set(filteredData.map(item => (item.object_function || '').trim()).filter(Boolean))];
+        const uniqueFunctions = [...new Set(filteredData.map(item => item.object_function).filter(hasContent))];
 
         if (uniqueFunctions.length > 0) {
             funcSelect.innerHTML = `<option value="ALL">显示全部功能</option>` + 
@@ -505,14 +513,15 @@
         const isFuncVisible = funcWrapper.classList.contains("show");
 
         const filteredData = commandDatabase.filter(item => {
+            if (!hasContent(item.command_template)) return false;
             if (item.category !== selectedCat || item.object_name !== selectedObj) return false;
             if (isFuncVisible && selectedFunc !== "ALL") {
-                if ((item.object_function || '').trim() !== selectedFunc) return false;
+                if (String(item.object_function || '').trim() !== selectedFunc) return false;
             }
             return true;
         });
         
-        const uniqueTags = [...new Set(filteredData.map(item => (item.tag || '').trim()).filter(Boolean))];
+        const uniqueTags = [...new Set(filteredData.map(item => item.tag).filter(hasContent))];
         const currentSelection = tagSelect.value;
 
         if (uniqueTags.length > 0) {
@@ -557,8 +566,10 @@
         const query = document.getElementById("search-input").value.trim();
         
         if (selectedCat === "") {
-            // 从空搜索进入全局搜索，或者退回欢迎页，必须重新渲染卡片
-            if ((query === "" && isGlobalSearchMode) || (query !== "" && !isGlobalSearchMode)) {
+            // 在全局搜索模式下，如果清空了搜索框则返回欢迎页，否则直接触发视图更新
+            if (query === "" && isGlobalSearchMode) {
+                renderCommandCards();
+            } else if (query !== "" && !isGlobalSearchMode) {
                 renderCommandCards();
             } else {
                 updateDisplay(); 
@@ -577,14 +588,15 @@
         
         if (selectedCat === "") {
             if (query === "") {
-                // 渲染欢迎页
                 isGlobalSearchMode = false;
                 topControls.style.display = 'flex';
-                tocContainer.style.display = 'none'; // 确保欢迎页没有目录
                 document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
                 
                 const instanceSettings = document.getElementById("instance-settings");
                 instanceSettings.style.display = 'none'; 
+                
+                // 确保欢迎页没有目录
+                tocContainer.style.display = 'none';
                 
                 container.innerHTML = `
                 <div class="welcome-box" id="welcome-box">
@@ -617,21 +629,19 @@
                 </div>`;
                 return;
             } else {
-                // 进入全局搜索模式
                 isGlobalSearchMode = true;
                 
-                // 核心修复Bug1：全局过滤掉那些表格中空缺 command_template 的幽灵行，防止渲染出空白卡片
-                currentObjectCommands = commandDatabase.filter(item => item.command_template && item.command_template.trim() !== '');
+                // 全局搜索：装载所有有效代码
+                currentObjectCommands = commandDatabase.filter(item => hasContent(item.command_template));
                 
                 topControls.style.display = 'flex';
-                tocContainer.style.display = 'none'; // 全局搜索时强行隐藏目录，解决Bug2
                 document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
                 
                 const instanceSettings = document.getElementById("instance-settings");
                 const instanceInput = document.getElementById("instance-name");
                 const instanceLabel = document.getElementById("instance-label");
                 
-                let needsInstance = currentObjectCommands.some(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE');
+                let needsInstance = currentObjectCommands.some(cmd => hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE');
                 if (needsInstance) {
                     instanceSettings.style.display = 'flex';
                     instanceSettings.classList.remove('fixed-mode');
@@ -648,7 +658,6 @@
                 }
             }
         } else {
-            // 正常左侧菜单分类渲染
             isGlobalSearchMode = false;
             const selectedObj = document.getElementById("object-name").value;
             const funcWrapper = document.getElementById("function-group-wrapper");
@@ -660,14 +669,13 @@
             const isTagVisible = tagWrapper.classList.contains("show");
 
             currentObjectCommands = commandDatabase.filter(item => {
-                // 核心修复Bug1：分类模式下同样拦截空缺数据的幽灵行
-                if (!item.command_template || item.command_template.trim() === '') return false;
+                if (!hasContent(item.command_template)) return false;
                 if (item.category !== selectedCat || item.object_name !== selectedObj) return false;
                 if (isFuncVisible && selectedFunc !== "ALL") {
-                    if ((item.object_function || '').trim() !== selectedFunc) return false;
+                    if (String(item.object_function || '').trim() !== selectedFunc) return false;
                 }
                 if (isTagVisible && selectedTag !== "ALL") {
-                    if ((item.tag || '').trim() !== selectedTag) return false;
+                    if (String(item.tag || '').trim() !== selectedTag) return false;
                 }
                 return true;
             });
@@ -680,14 +688,14 @@
             thumbImg.onerror = function() { thumbBox.classList.add('hidden-by-error'); };
             thumbImg.src = `image/${selectedObj}.jpg`;
 
-            let needsInstance = currentObjectCommands.some(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE');
+            let needsInstance = currentObjectCommands.some(cmd => hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE');
             const instanceSettings = document.getElementById("instance-settings");
             const instanceInput = document.getElementById("instance-name");
             const instanceLabel = document.getElementById("instance-label");
 
             if (needsInstance) {
-                let defaultName = currentObjectCommands.find(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE' && cmd.default_instance)?.default_instance || 'obj';
-                let isFixed = currentObjectCommands.some(cmd => String(cmd.is_instance_fixed).toUpperCase() === 'TRUE');
+                let defaultName = currentObjectCommands.find(cmd => hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE' && hasContent(cmd.default_instance))?.default_instance || 'obj';
+                let isFixed = currentObjectCommands.some(cmd => hasContent(cmd.is_instance_fixed) && String(cmd.is_instance_fixed).toUpperCase() === 'TRUE');
 
                 instanceSettings.style.display = 'flex';
                 
@@ -718,33 +726,26 @@
             return;
         }
 
-        // 全局搜索不显示目录，分类搜索才显示目录
-        if (!isGlobalSearchMode) {
-            tocContainer.style.display = 'block'; 
-        }
-        
         let htmlContent = '';
         let tocContent = ''; 
-
         const selectedTag = document.getElementById("object-tag").value;
 
         currentObjectCommands.forEach((cmd, index) => {
             let title = cmd.command_title || cmd.command_template || `命令 ${index + 1}`;
-            // 这里加入 escapeHtml 确保特殊字符不会破坏目录结构
             tocContent += `<li class="toc-item" onclick="scrollToCard(${index})">📌 ${escapeHtml(title)}</li>`;
 
             let hasParams = false;
             let paramInputsHtml = '';
             
             const paramMatch = (cmd.command_template || '').match(/\((.*)\)/);
-            if (paramMatch && paramMatch[1].trim() !== '') {
+            if (paramMatch && hasContent(paramMatch[1])) {
                 const params = paramMatch[1].split(',').map(p => p.trim());
                 if (params.length > 0) {
                     hasParams = true;
                     params.forEach((p, pIdx) => {
                         let typePlaceholder = `默认: ${p}`; 
-                        if (cmd.params) {
-                            const lines = cmd.params.split(/\r?\n/);
+                        if (hasContent(cmd.params)) {
+                            const lines = String(cmd.params).split(/\r?\n/);
                             for (let line of lines) {
                                 let cleanLine = line.trim();
                                 if (cleanLine.startsWith(p + ':') || cleanLine.startsWith(p + '：')) {
@@ -764,7 +765,7 @@
 
                         paramInputsHtml += `
                             <div class="param-row">
-                                <span class="param-label">${p}:</span>
+                                <span class="param-label">${escapeHtml(p)}:</span>
                                 <input type="text" class="param-input" id="param-input-${index}-${pIdx}" placeholder="需要填入: ${typePlaceholder}" oninput="updateDisplay()">
                             </div>
                         `;
@@ -772,12 +773,12 @@
                 }
             }
 
-            const hasParamsDesc = cmd.params && cmd.params.trim() !== '';
-            const hasReturnDesc = cmd.return_value && cmd.return_value.trim() !== '';
-            const hasExample = cmd.example && cmd.example.trim() !== '';
+            const hasParamsDesc = hasContent(cmd.params);
+            const hasReturnDesc = hasContent(cmd.return_value);
+            const hasExample = hasContent(cmd.example);
             
-            const hasTag = cmd.tag && cmd.tag.trim() !== '';
-            const tagText = hasTag ? cmd.tag.trim() : '';
+            const hasTag = hasContent(cmd.tag);
+            const tagText = hasTag ? String(cmd.tag).trim() : '';
             const tagClass = hasTag ? getTagClass(tagText) : '';
 
             let isCurrentFilter = (!isGlobalSearchMode && hasTag && selectedTag === tagText);
@@ -835,16 +836,22 @@
             </div>`;
         });
 
+        // 强力注入 HTML，随后立即同步执行 updateDisplay，杜绝一切异步白屏 Bug
         container.innerHTML = htmlContent;
-        tocList.innerHTML = tocContent; 
         
-        // 核心修复Bug1：使用 setTimeout 保证 DOM 树已经完全挂载完毕后，再进行 DOM 节点的获取和填充
-        setTimeout(() => {
-            updateDisplay(); 
-            if (window.innerWidth <= 768 && currentObjectCommands.length > 0) {
-                document.getElementById('main-box1').classList.remove('expanded');
-            }
-        }, 0);
+        // 核心修复：完全受控的目录显示逻辑
+        if (isGlobalSearchMode) {
+            tocContainer.style.display = 'none';
+        } else {
+            tocContainer.style.display = 'block';
+            tocList.innerHTML = tocContent; 
+        }
+
+        updateDisplay(); 
+
+        if (window.innerWidth <= 768 && currentObjectCommands.length > 0) {
+            document.getElementById('main-box1').classList.remove('expanded');
+        }
     }
 
     function toggleParamsPanel(index, hasParams) {
@@ -891,7 +898,7 @@
         if (!query) return htmlString;
         const escapedQuery = escapeHtml(query).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const regex = new RegExp(`(${escapedQuery})(?![^<]*>)`, 'gi');
-        return htmlString.replace(regex, '<mark class="search-hl">$1</mark>');
+        return String(htmlString).replace(regex, '<mark class="search-hl">$1</mark>');
     }
 
     function updateDisplay() {
@@ -903,33 +910,36 @@
             const card = document.getElementById(`cmd-card-${index}`);
             if (!card) return;
 
-            const codeTemplate = (cmd.command_template || '').toLowerCase();
-            const description = (cmd.description || '').toLowerCase();
-            const title = (cmd.command_title || '').toLowerCase(); 
+            const codeTemplate = String(cmd.command_template || '').toLowerCase();
+            const description = String(cmd.description || '').toLowerCase();
+            const title = String(cmd.command_title || '').toLowerCase(); 
 
-            // 全局搜索由于在 render 里已经把 DB 完全放进去了，这里通过样式来隐藏不匹配的卡片
-            if (!isGlobalSearchMode || query === '' || codeTemplate.includes(query) || description.includes(query) || title.includes(query)) {
+            let isMatch = true;
+            if (isGlobalSearchMode && query !== '') {
+                isMatch = codeTemplate.includes(query) || description.includes(query) || title.includes(query);
+            }
+
+            if (isMatch && (!isGlobalSearchMode || query === '' || codeTemplate.includes(query) || description.includes(query) || title.includes(query))) {
                 card.style.display = 'block';
 
                 const descElem = document.getElementById(`cmd-desc-${index}`);
                 descElem.innerHTML = highlightSafe(escapeHtml(cmd.description || '暂无详细说明。'), safeQuery);
 
                 let finalCode = cmd.command_template || '';
-                const needsInstance = String(cmd.requires_instance).toUpperCase() === 'TRUE';
+                const needsInstance = hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE';
                 
                 if (needsInstance) {
                     let itemInstance = globalInstanceInput;
-                    // 如果用户没有打字，就采用该指令原生的默认实例名
                     if (itemInstance === "") {
-                        itemInstance = cmd.default_instance || 'obj';
+                        itemInstance = hasContent(cmd.default_instance) ? cmd.default_instance : 'obj';
                     }
                     finalCode = finalCode.replace(/{instance}/g, itemInstance);
                 } else {
                     finalCode = finalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
                 }
 
-                const paramMatch = (cmd.command_template || '').match(/\((.*)\)/);
-                if (paramMatch && paramMatch[1].trim() !== '') {
+                const paramMatch = String(cmd.command_template || '').match(/\((.*)\)/);
+                if (paramMatch && hasContent(paramMatch[1])) {
                     const defaultParams = paramMatch[1].split(',').map(p => p.trim());
                     let currentParams = [];
                     for (let i = 0; i < defaultParams.length; i++) {
