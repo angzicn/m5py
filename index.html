@@ -133,7 +133,6 @@
 
         .btn-group { display: flex; gap: 8px; flex-shrink: 0; align-items: flex-start;}
 
-        /* ============== 核心交互动画修改 ============== */
         .tag-btn { 
             height: 48px; 
             width: 80px; 
@@ -152,10 +151,9 @@
         }
         .tag-btn:hover { filter: brightness(0.95); transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
         
-        /* 悬浮文字替换逻辑 */
-        .tag-btn .btn-text-hover { display: none; } /* 默认隐藏“全部” */
-        .tag-btn.active-filter:hover .btn-text-normal { display: none; } /* 悬浮时隐藏原标签 */
-        .tag-btn.active-filter:hover .btn-text-hover { display: inline; } /* 悬浮时显示“全部” */
+        .tag-btn .btn-text-hover { display: none; } 
+        .tag-btn.active-filter:hover .btn-text-normal { display: none; } 
+        .tag-btn.active-filter:hover .btn-text-hover { display: inline; } 
 
         .tag-init { background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe; }
         .tag-write { background-color: #d1fae5; color: #047857; border-color: #a7f3d0; }
@@ -208,6 +206,29 @@
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         
         .tool-panel { flex-shrink: 0; margin-top: auto; padding-top: 20px; border-top: 2px dashed var(--border-color); }
+
+        /* ============== 新增：空状态(欢迎页)专属样式 ============== */
+        .welcome-box {
+            background: var(--box-bg); padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
+            text-align: center; border: 1px solid #e2e8f0; animation: cardFadeIn 0.4s ease-out forwards;
+        }
+        .welcome-header { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
+        .welcome-icon { font-size: 2.8rem; animation: wave 2s infinite; transform-origin: 70% 70%; }
+        @keyframes wave { 
+            0% { transform: rotate(0deg); } 10% { transform: rotate(14deg); } 20% { transform: rotate(-8deg); } 
+            30% { transform: rotate(14deg); } 40% { transform: rotate(-4deg); } 50% { transform: rotate(10deg); } 
+            60%, 100% { transform: rotate(0deg); }
+        }
+        .welcome-box h3 { margin: 0; font-size: 1.8rem; color: #1e293b; letter-spacing: 1px;}
+        .welcome-subtitle { color: #64748b; font-size: 1.05rem; margin-bottom: 40px; }
+        .welcome-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px; }
+        .feature-item { background: #f8fafc; padding: 25px 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; gap: 15px; transition: transform 0.3s, box-shadow 0.3s; }
+        .feature-item:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08); border-color: #cbd5e1; }
+        .feature-icon { font-size: 2.2rem; }
+        .feature-text { font-size: 0.95rem; color: #475569; line-height: 1.6; }
+        .feature-text strong { color: #334155; font-size: 1.1rem; display: block; margin-bottom: 5px; }
+        .welcome-footer { display: inline-block; background: #eff6ff; color: #1d4ed8; padding: 12px 25px; border-radius: 30px; font-weight: bold; font-size: 0.95rem; border: 1px solid #bfdbfe;}
+        /* ======================================================= */
 
         @media (max-width: 768px) {
             .box1 { position: sticky; top: 10px; z-index: 999; max-width: 100%; max-height: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); margin-bottom: 20px; overflow-y: visible; }
@@ -342,8 +363,8 @@
 
             <div class="control-box search-box" id="search-settings">
                 <div class="form-group">
-                    <label for="search-input">快速搜索当前对象命令：</label>
-                    <input type="text" id="search-input" placeholder="输入代码或中文解释..." oninput="updateDisplay()">
+                    <label for="search-input">快速搜索指令：</label>
+                    <input type="text" id="search-input" placeholder="输入代码或中文解释..." oninput="handleSearch()">
                 </div>
             </div>
         </div>
@@ -361,6 +382,7 @@
 
     let commandDatabase = [];
     let currentObjectCommands = [];
+    let isGlobalSearchMode = false; // 新增：全局搜索状态标识
 
     window.addEventListener('resize', () => {
         adjustCodeFontSizes();
@@ -403,7 +425,15 @@
     function initCategoryDropdown() {
         const catSelect = document.getElementById("category");
         const uniqueCategories = [...new Set(commandDatabase.map(item => item.category).filter(Boolean))];
-        catSelect.innerHTML = uniqueCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        
+        // 核心修改：新增默认空选项
+        catSelect.innerHTML = `<option value="">-- 请选择硬件类别 --</option>` + 
+                              uniqueCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
+        catSelect.value = ""; // 默认不选
+        
+        isGlobalSearchMode = false;
+        document.getElementById("search-input").value = "";
+        
         updateObjectNames(); 
     }
 
@@ -411,6 +441,13 @@
         const selectedCat = document.getElementById("category").value;
         const objSelect = document.getElementById("object-name");
         
+        // 核心修改：分类为空时的拦截
+        if (selectedCat === "") {
+            objSelect.innerHTML = `<option value="">👈 选择类别后可选</option>`;
+            updateObjectFunctions();
+            return;
+        }
+
         const filteredData = commandDatabase.filter(item => item.category === selectedCat);
         const uniqueObjects = [...new Set(filteredData.map(item => item.object_name).filter(Boolean))];
         
@@ -424,6 +461,13 @@
         const selectedObj = document.getElementById("object-name").value;
         const funcWrapper = document.getElementById("function-group-wrapper");
         const funcSelect = document.getElementById("object-function");
+
+        if (selectedCat === "") {
+            funcSelect.innerHTML = `<option value="ALL">无</option>`;
+            funcWrapper.classList.remove('show');
+            updateObjectTags();
+            return;
+        }
 
         const filteredData = commandDatabase.filter(item => item.category === selectedCat && item.object_name === selectedObj);
         const uniqueFunctions = [...new Set(filteredData.map(item => (item.object_function || '').trim()).filter(Boolean))];
@@ -442,6 +486,17 @@
 
     function updateObjectTags() {
         const selectedCat = document.getElementById("category").value;
+        const tagSelect = document.getElementById("object-tag");
+        const tagWrapper = document.getElementById("tag-group-wrapper");
+
+        if (selectedCat === "") {
+            tagSelect.innerHTML = `<option value="ALL">显示全部</option>`;
+            tagWrapper.classList.remove('show');
+            tagSelect.value = "ALL";
+            renderCommandCards();
+            return;
+        }
+
         const selectedObj = document.getElementById("object-name").value;
         const funcWrapper = document.getElementById("function-group-wrapper");
         const selectedFunc = document.getElementById("object-function").value;
@@ -456,9 +511,6 @@
         });
         
         const uniqueTags = [...new Set(filteredData.map(item => (item.tag || '').trim()).filter(Boolean))];
-        const tagSelect = document.getElementById("object-tag");
-        const tagWrapper = document.getElementById("tag-group-wrapper");
-
         const currentSelection = tagSelect.value;
 
         if (uniqueTags.length > 0) {
@@ -494,39 +546,129 @@
             tagSelect.value = tag;
             document.getElementById("search-input").value = ''; 
             renderCommandCards();
+            // 平滑滚动回顶部体验更好
             window.scrollTo({ top: 0, behavior: 'smooth' }); 
+        }
+    }
+
+    // ============== 新增：智能响应全局搜索与空状态的统一收口 ==============
+    function handleSearch() {
+        const selectedCat = document.getElementById("category").value;
+        const query = document.getElementById("search-input").value.trim();
+        
+        if (selectedCat === "") {
+            // 在未选分类状态下，文字变更触发 全局搜索 或 返回欢迎页
+            if ((query === "" && isGlobalSearchMode) || (query !== "" && !isGlobalSearchMode)) {
+                renderCommandCards();
+            } else {
+                updateDisplay(); // 保持全局搜索时的字词过滤
+            }
+        } else {
+            updateDisplay(); // 正常局部过滤
         }
     }
 
     function renderCommandCards() {
         const selectedCat = document.getElementById("category").value;
-        const selectedObj = document.getElementById("object-name").value;
-        
-        const funcWrapper = document.getElementById("function-group-wrapper");
-        const selectedFunc = document.getElementById("object-function").value;
-        const isFuncVisible = funcWrapper.classList.contains("show");
-        
-        const tagWrapper = document.getElementById("tag-group-wrapper");
-        const selectedTag = document.getElementById("object-tag").value;
-        const isTagVisible = tagWrapper.classList.contains("show");
-
+        const query = document.getElementById("search-input").value.trim().toLowerCase();
         const container = document.getElementById("commands-container");
-        const tocList = document.getElementById("toc-list");
         const tocContainer = document.getElementById("toc-container");
+        const topControls = document.getElementById("top-controls");
         
-        currentObjectCommands = commandDatabase.filter(item => {
-            if (item.category !== selectedCat || item.object_name !== selectedObj) return false;
-            if (isFuncVisible && selectedFunc !== "ALL") {
-                if ((item.object_function || '').trim() !== selectedFunc) return false;
+        // 核心一：判定空状态 (显示欢迎页) 还是 全局搜索 还是 正常浏览
+        if (selectedCat === "") {
+            if (query === "") {
+                isGlobalSearchMode = false;
+                
+                // 渲染精美欢迎页
+                topControls.style.display = 'flex';
+                tocContainer.style.display = 'none';
+                document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
+                
+                const instanceSettings = document.getElementById("instance-settings");
+                const instanceInput = document.getElementById("instance-name");
+                const instanceLabel = document.getElementById("instance-label");
+                instanceSettings.style.display = 'block';
+                instanceSettings.classList.remove('fixed-mode');
+                instanceInput.readOnly = false;
+                instanceInput.placeholder = "请输入实例名"; // 提示文字
+                instanceLabel.innerText = "实例名称 (全局检索自动替换)：";
+                
+                container.innerHTML = `
+                <div class="welcome-box" id="welcome-box">
+                    <div class="welcome-header">
+                        <span class="welcome-icon">👋</span>
+                        <h3>欢迎使用 M5PY 助手</h3>
+                    </div>
+                    <p class="welcome-subtitle">由 北极圈机器人 (BEIJIQ) 倾力打造的 UIFlow2 / MicroPython 编程利器</p>
+                    <div class="welcome-features">
+                        <div class="feature-item">
+                            <div class="feature-icon">🔍</div>
+                            <div class="feature-text"><strong>随心检索</strong><br>全局搜索 M5Stack 硬件指令与用法</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">🗂️</div>
+                            <div class="feature-text"><strong>分类查阅</strong><br>通过左侧面板按类别精准定位代码</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">✍️</div>
+                            <div class="feature-text"><strong>智能修改</strong><br>自定义实例名与参数，代码自动更新</div>
+                        </div>
+                        <div class="feature-item">
+                            <div class="feature-icon">📋</div>
+                            <div class="feature-text"><strong>一键复制</strong><br>提取完美排版代码，附带扩展工具</div>
+                        </div>
+                    </div>
+                    <div class="welcome-footer">
+                        👈 请在左侧选择硬件类别，或直接在上方搜索框输入指令
+                    </div>
+                </div>`;
+                return;
+            } else {
+                // 全局搜索模式！放开所有数据
+                isGlobalSearchMode = true;
+                currentObjectCommands = commandDatabase;
+                
+                topControls.style.display = 'flex';
+                document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
+                const instanceSettings = document.getElementById("instance-settings");
+                const instanceInput = document.getElementById("instance-name");
+                const instanceLabel = document.getElementById("instance-label");
+                instanceSettings.style.display = 'block';
+                instanceSettings.classList.remove('fixed-mode');
+                instanceInput.readOnly = false;
+                // 仅重置 Placeholder
+                if (instanceInput.placeholder !== "请输入实例名") {
+                    instanceInput.placeholder = "请输入实例名";
+                    instanceLabel.innerText = "实例名称 (全局检索自动替换)：";
+                }
             }
-            if (isTagVisible && selectedTag !== "ALL") {
-                if ((item.tag || '').trim() !== selectedTag) return false;
-            }
-            return true;
-        });
+        } else {
+            // 正常类别浏览过滤
+            isGlobalSearchMode = false;
+            const selectedObj = document.getElementById("object-name").value;
+            const funcWrapper = document.getElementById("function-group-wrapper");
+            const selectedFunc = document.getElementById("object-function").value;
+            const isFuncVisible = funcWrapper.classList.contains("show");
+            
+            const tagWrapper = document.getElementById("tag-group-wrapper");
+            const selectedTag = document.getElementById("object-tag").value;
+            const isTagVisible = tagWrapper.classList.contains("show");
+
+            currentObjectCommands = commandDatabase.filter(item => {
+                if (item.category !== selectedCat || item.object_name !== selectedObj) return false;
+                if (isFuncVisible && selectedFunc !== "ALL") {
+                    if ((item.object_function || '').trim() !== selectedFunc) return false;
+                }
+                if (isTagVisible && selectedTag !== "ALL") {
+                    if ((item.tag || '').trim() !== selectedTag) return false;
+                }
+                return true;
+            });
+        }
         
         if (currentObjectCommands.length === 0) {
-            container.innerHTML = '<div class="box">该分类/标签下暂无命令数据。</div>';
+            container.innerHTML = '<div class="box">未检索到任何符合条件的指令数据。</div>';
             document.getElementById("top-controls").style.display = 'none';
             tocContainer.style.display = 'none';
             return;
@@ -535,47 +677,49 @@
         document.getElementById("top-controls").style.display = 'flex';
         tocContainer.style.display = 'block'; 
 
-        const thumbBox = document.getElementById("object-thumbnail-box");
-        const thumbImg = document.getElementById("object-thumbnail-img");
-        
-        thumbBox.classList.add('hidden-by-error');
-        
-        thumbImg.onload = function() {
-            thumbBox.classList.remove('hidden-by-error');
-        };
-        thumbImg.onerror = function() {
+        // 在非全局检索时，配置缩略图和专属实例名
+        if (!isGlobalSearchMode) {
+            const selectedObj = document.getElementById("object-name").value;
+            const thumbBox = document.getElementById("object-thumbnail-box");
+            const thumbImg = document.getElementById("object-thumbnail-img");
+            
             thumbBox.classList.add('hidden-by-error');
-        };
-        
-        thumbImg.src = `image/${selectedObj}.jpg`;
+            thumbImg.onload = function() { thumbBox.classList.remove('hidden-by-error'); };
+            thumbImg.onerror = function() { thumbBox.classList.add('hidden-by-error'); };
+            thumbImg.src = `image/${selectedObj}.jpg`;
 
-        let needsInstance = currentObjectCommands.some(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE');
-        if (needsInstance) {
-            let defaultName = currentObjectCommands.find(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE' && cmd.default_instance)?.default_instance || 'obj';
-            let isFixed = currentObjectCommands.some(cmd => String(cmd.is_instance_fixed).toUpperCase() === 'TRUE');
+            let needsInstance = currentObjectCommands.some(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE');
+            if (needsInstance) {
+                let defaultName = currentObjectCommands.find(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE' && cmd.default_instance)?.default_instance || 'obj';
+                let isFixed = currentObjectCommands.some(cmd => String(cmd.is_instance_fixed).toUpperCase() === 'TRUE');
 
-            const instanceSettings = document.getElementById("instance-settings");
-            const instanceInput = document.getElementById("instance-name");
-            const instanceLabel = document.getElementById("instance-label");
+                const instanceSettings = document.getElementById("instance-settings");
+                const instanceInput = document.getElementById("instance-name");
+                const instanceLabel = document.getElementById("instance-label");
 
-            instanceSettings.style.display = 'block';
-            instanceInput.value = defaultName;
+                instanceSettings.style.display = 'block';
+                instanceInput.value = defaultName;
 
-            if (isFixed) {
-                instanceSettings.classList.add('fixed-mode');
-                instanceInput.readOnly = true;
-                instanceLabel.innerText = "实例名称 (硬件固定，不可修改)：";
+                if (isFixed) {
+                    instanceSettings.classList.add('fixed-mode');
+                    instanceInput.readOnly = true;
+                    instanceLabel.innerText = "实例名称 (硬件固定，不可修改)：";
+                } else {
+                    instanceSettings.classList.remove('fixed-mode');
+                    instanceInput.readOnly = false;
+                    instanceLabel.innerText = "实例名称 (自动替换前缀)：";
+                }
             } else {
-                instanceSettings.classList.remove('fixed-mode');
-                instanceInput.readOnly = false;
-                instanceLabel.innerText = "实例名称 (自动替换前缀)：";
+                document.getElementById("instance-settings").style.display = 'none';
             }
-        } else {
-            document.getElementById("instance-settings").style.display = 'none';
         }
 
         let htmlContent = '';
         let tocContent = ''; 
+
+        // ================= 获取当前侧边栏选中标签 =================
+        const selectedTag = document.getElementById("object-tag").value;
+        // =======================================================
 
         currentObjectCommands.forEach((cmd, index) => {
             let title = cmd.command_title || cmd.command_template || `命令 ${index + 1}`;
@@ -628,8 +772,7 @@
             const tagText = hasTag ? cmd.tag.trim() : '';
             const tagClass = hasTag ? getTagClass(tagText) : '';
 
-            // ============== 悬浮文字切换与过滤器状态控制 ==============
-            let isCurrentFilter = (hasTag && selectedTag === tagText);
+            let isCurrentFilter = (!isGlobalSearchMode && hasTag && selectedTag === tagText);
             let tagOnClick = isCurrentFilter ? `selectTag('ALL')` : `selectTag('${tagText}')`;
             let tagTitle = isCurrentFilter ? "点击显示全部条目" : `点击只看[${tagText}]标签`;
             let activeClass = isCurrentFilter ? "active-filter" : "";
@@ -743,7 +886,12 @@
 
     function updateDisplay() {
         const query = document.getElementById("search-input").value.trim().toLowerCase();
-        const instanceVal = document.getElementById("instance-name").value.trim() || 'YOUR_INSTANCE';
+        
+        // 核心修改：如果是未填写的状态，直接利用 Placeholder 作为代码中的替换词
+        let instanceVal = document.getElementById("instance-name").value.trim();
+        if (instanceVal === "") {
+            instanceVal = document.getElementById("instance-name").placeholder;
+        }
         
         currentObjectCommands.forEach((cmd, index) => {
             const card = document.getElementById(`cmd-card-${index}`);
