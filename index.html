@@ -190,7 +190,6 @@
         .cmd-example { background: var(--example-bg); color: var(--example-text); border: 1px dashed var(--example-border); padding: 15px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 0.95rem; overflow-x: auto; white-space: pre-wrap; margin: 0; }
         .cmd-example .example-label { display: block; margin-bottom: 8px; color: #64748b; font-family: sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
 
-        /* ============== 核心优化③：全局搜索的底部面包屑样式 ============== */
         .cmd-breadcrumb {
             margin-top: 15px;
             padding-top: 12px;
@@ -205,7 +204,6 @@
             color: #0ea5e9;
             font-weight: bold;
         }
-        /* =============================================================== */
 
         #toast { visibility: hidden; min-width: 200px; background-color: #10b981; color: #fff; text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 100; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         #toast.show { visibility: visible; animation: fadein 0.3s, fadeout 0.3s 2s; }
@@ -568,11 +566,26 @@
         return 'tag-default';
     }
 
+    // ============== 核心修复：点击标签时的联动逻辑 ==============
     function selectTag(tag) {
         const tagSelect = document.getElementById("object-tag");
         if (tagSelect) {
+            // 如果是在全局搜索下点击了某个以前没加载到下拉框里的标签，动态帮它加上这个选项
+            let optionExists = Array.from(tagSelect.options).some(opt => opt.value === tag);
+            if (!optionExists && tag !== 'ALL') {
+                const newOption = document.createElement("option");
+                newOption.value = tag;
+                newOption.text = tag;
+                tagSelect.appendChild(newOption);
+            }
+            
             tagSelect.value = tag;
-            document.getElementById("search-input").value = ''; 
+            
+            // 核心修复！在全局搜索模式下，绝不能清空搜索框，否则直接退回欢迎页！
+            if (!isGlobalSearchMode) {
+                document.getElementById("search-input").value = ''; 
+            }
+            
             renderCommandCards();
             window.scrollTo({ top: 0, behavior: 'smooth' }); 
         }
@@ -580,10 +593,9 @@
 
     function handleSearch() {
         const selectedCat = document.getElementById("category").value;
-        const selectedObj = document.getElementById("object-name").value;
         const query = document.getElementById("search-input").value.trim();
         
-        if (selectedCat === "" || selectedObj === "") {
+        if (selectedCat === "") {
             if (query === "" && isGlobalSearchMode) {
                 renderCommandCards();
             } else if (query !== "" && !isGlobalSearchMode) {
@@ -603,6 +615,7 @@
         
         const container = document.getElementById("commands-container");
         const tocContainer = document.getElementById("toc-container");
+        const tocList = document.getElementById("toc-list"); 
         const topControls = document.getElementById("top-controls");
         
         if (selectedCat === "" || selectedObj === "") {
@@ -615,7 +628,6 @@
                 instanceSettings.style.display = 'none'; 
                 tocContainer.style.display = 'none';
                 
-                // --- 核心优化①：防抖动画！如果欢迎框已经存在，就不重新渲染HTML ---
                 if (!document.getElementById("welcome-box")) {
                     container.innerHTML = `
                     <div class="welcome-box" id="welcome-box">
@@ -650,7 +662,14 @@
                 return;
             } else {
                 isGlobalSearchMode = true;
-                currentObjectCommands = commandDatabase.filter(item => hasContent(item.command_template));
+                const selectedTag = document.getElementById("object-tag").value;
+                
+                currentObjectCommands = commandDatabase.filter(item => {
+                    if (!hasContent(item.command_template)) return false;
+                    // 全局搜索下同样支持标签过滤筛选！
+                    if (selectedTag !== "ALL" && String(item.tag || '').trim() !== selectedTag) return false;
+                    return true;
+                });
                 
                 topControls.style.display = 'flex';
                 document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
@@ -799,7 +818,6 @@
             let needsInstanceForThisCmd = hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE';
             
             if (needsInstanceForThisCmd) {
-                // --- 核心优化②：保护 is_instance_fixed 的卡片不被全局输入覆盖 ---
                 let isFixedForThisCmd = hasContent(cmd.is_instance_fixed) && String(cmd.is_instance_fixed).toUpperCase() === 'TRUE';
                 let itemInstance = globalInstanceInput;
                 if (isFixedForThisCmd || itemInstance === "") {
@@ -827,12 +845,12 @@
             const tagText = hasTag ? String(cmd.tag).trim() : '';
             const tagClass = hasTag ? getTagClass(tagText) : '';
 
-            let isCurrentFilter = (!isGlobalSearchMode && hasTag && selectedTag === tagText);
+            // ============== 去掉了 !isGlobalSearchMode，让全局下标签按钮正常联动 ==============
+            let isCurrentFilter = (hasTag && selectedTag === tagText);
             let tagOnClick = isCurrentFilter ? `selectTag('ALL')` : `selectTag('${tagText}')`;
             let tagTitle = isCurrentFilter ? "点击显示全部条目" : `点击只看[${tagText}]标签`;
             let activeClass = isCurrentFilter ? "active-filter" : "";
 
-            // --- 核心优化③：为全局搜索生成精美的底部面包屑导航 ---
             let breadcrumbHtml = '';
             if (isGlobalSearchMode) {
                 let pathText = `${escapeHtml(cmd.category)} - ${escapeHtml(cmd.object_name)}`;
@@ -900,7 +918,7 @@
             tocContainer.style.display = 'none';
         } else {
             tocContainer.style.display = 'block';
-            document.getElementById("toc-list").innerHTML = tocContent; 
+            tocList.innerHTML = tocContent; 
         }
         
         updateDisplay(); 
@@ -989,7 +1007,6 @@
                 const needsInstance = hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE';
                 
                 if (needsInstance) {
-                    // --- 核心优化②：动态替换时，同样保护 is_instance_fixed 的卡片 ---
                     let isFixed = hasContent(cmd.is_instance_fixed) && String(cmd.is_instance_fixed).toUpperCase() === 'TRUE';
                     let itemInstance = globalInstanceInput;
                     if (isFixed || itemInstance === "") {
