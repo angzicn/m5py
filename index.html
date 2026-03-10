@@ -372,7 +372,7 @@
     let currentObjectCommands = [];
     let isGlobalSearchMode = false; 
 
-    // ============== 核心修复：极致安全的空数据判定，支持表格里填 NONE 或留空 ==============
+    // ============== 核心修复：极致安全的空数据判定，支持表格里填 NONE / NULL / 留空 ==============
     function hasContent(val) {
         if (val === undefined || val === null) return false;
         let str = String(val).trim();
@@ -566,7 +566,6 @@
         const query = document.getElementById("search-input").value.trim();
         
         if (selectedCat === "") {
-            // 在全局搜索模式下，如果清空了搜索框则返回欢迎页，否则直接触发视图更新
             if (query === "" && isGlobalSearchMode) {
                 renderCommandCards();
             } else if (query !== "" && !isGlobalSearchMode) {
@@ -594,8 +593,6 @@
                 
                 const instanceSettings = document.getElementById("instance-settings");
                 instanceSettings.style.display = 'none'; 
-                
-                // 确保欢迎页没有目录
                 tocContainer.style.display = 'none';
                 
                 container.innerHTML = `
@@ -630,8 +627,6 @@
                 return;
             } else {
                 isGlobalSearchMode = true;
-                
-                // 全局搜索：装载所有有效代码
                 currentObjectCommands = commandDatabase.filter(item => hasContent(item.command_template));
                 
                 topControls.style.display = 'flex';
@@ -729,6 +724,11 @@
         let htmlContent = '';
         let tocContent = ''; 
         const selectedTag = document.getElementById("object-tag").value;
+        const safeQuery = escapeHtml(query);
+        
+        let globalInstanceInput = "";
+        let instNameEl = document.getElementById("instance-name");
+        if (instNameEl) globalInstanceInput = instNameEl.value.trim();
 
         currentObjectCommands.forEach((cmd, index) => {
             let title = cmd.command_title || cmd.command_template || `命令 ${index + 1}`;
@@ -737,7 +737,7 @@
             let hasParams = false;
             let paramInputsHtml = '';
             
-            const paramMatch = (cmd.command_template || '').match(/\((.*)\)/);
+            const paramMatch = String(cmd.command_template || '').match(/\((.*)\)/);
             if (paramMatch && hasContent(paramMatch[1])) {
                 const params = paramMatch[1].split(',').map(p => p.trim());
                 if (params.length > 0) {
@@ -772,6 +772,30 @@
                     });
                 }
             }
+            
+            // ============== 核心修复Bug1：硬编码生成初始化的代码展示内容，彻底告别空显示 ==============
+            let initialFinalCode = String(cmd.command_template || '');
+            let needsInstanceForThisCmd = hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE';
+            
+            if (needsInstanceForThisCmd) {
+                let itemInstance = globalInstanceInput;
+                if (itemInstance === "") {
+                    itemInstance = hasContent(cmd.default_instance) ? cmd.default_instance : 'obj';
+                }
+                initialFinalCode = initialFinalCode.replace(/{instance}/g, itemInstance);
+            } else {
+                initialFinalCode = initialFinalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
+            }
+
+            if (paramMatch && hasContent(paramMatch[1])) {
+                const defaultParams = paramMatch[1].split(',').map(p => p.trim());
+                initialFinalCode = initialFinalCode.replace(/\((.*)\)/, `(${defaultParams.join(', ')})`);
+            }
+            
+            let initialEscapedCode = escapeHtml(initialFinalCode);
+            let initialHighlightedCode = initialEscapedCode.replace(/\((.*?)\)/g, '(<span class="param-hl">$1</span>)');
+            initialHighlightedCode = highlightSafe(initialHighlightedCode, safeQuery);
+            // =========================================================================================
 
             const hasParamsDesc = hasContent(cmd.params);
             const hasReturnDesc = hasContent(cmd.return_value);
@@ -791,7 +815,7 @@
                 <div class="cmd-header">
                     <div class="cmd-code-container">
                         <div class="cmd-code-text ${hasParams ? 'clickable' : ''}" ${hasParams ? `onclick="toggleParamsPanel(${index}, ${hasParams})"` : ''}>
-                            <span id="code-text-${index}"></span>
+                            <span id="code-text-${index}">${initialHighlightedCode}</span>
                         </div>
                         ${hasParams ? `
                         <div class="params-wrapper" id="params-wrapper-${index}">
@@ -836,17 +860,16 @@
             </div>`;
         });
 
-        // 强力注入 HTML，随后立即同步执行 updateDisplay，杜绝一切异步白屏 Bug
         container.innerHTML = htmlContent;
         
-        // 核心修复：完全受控的目录显示逻辑
+        // 全局搜索不显示目录，分类搜索才显示目录
         if (isGlobalSearchMode) {
             tocContainer.style.display = 'none';
         } else {
             tocContainer.style.display = 'block';
             tocList.innerHTML = tocContent; 
         }
-
+        
         updateDisplay(); 
 
         if (window.innerWidth <= 768 && currentObjectCommands.length > 0) {
@@ -904,7 +927,9 @@
     function updateDisplay() {
         const query = document.getElementById("search-input").value.trim().toLowerCase();
         const safeQuery = escapeHtml(query);
-        let globalInstanceInput = document.getElementById("instance-name").value.trim();
+        let globalInstanceInput = "";
+        let instNameEl = document.getElementById("instance-name");
+        if(instNameEl) globalInstanceInput = instNameEl.value.trim();
         
         currentObjectCommands.forEach((cmd, index) => {
             const card = document.getElementById(`cmd-card-${index}`);
@@ -914,18 +939,20 @@
             const description = String(cmd.description || '').toLowerCase();
             const title = String(cmd.command_title || '').toLowerCase(); 
 
-            let isMatch = true;
-            if (isGlobalSearchMode && query !== '') {
+            let isMatch = false;
+            if (query === '') {
+                isMatch = true; 
+            } else {
                 isMatch = codeTemplate.includes(query) || description.includes(query) || title.includes(query);
             }
 
-            if (isMatch && (!isGlobalSearchMode || query === '' || codeTemplate.includes(query) || description.includes(query) || title.includes(query))) {
+            if (isMatch) {
                 card.style.display = 'block';
 
                 const descElem = document.getElementById(`cmd-desc-${index}`);
                 descElem.innerHTML = highlightSafe(escapeHtml(cmd.description || '暂无详细说明。'), safeQuery);
 
-                let finalCode = cmd.command_template || '';
+                let finalCode = String(cmd.command_template || '');
                 const needsInstance = hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE';
                 
                 if (needsInstance) {
