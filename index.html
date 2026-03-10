@@ -387,6 +387,7 @@
     let currentObjectCommands = [];
     let isGlobalSearchMode = false; 
 
+    // 严苛的空数据识别
     function hasContent(val) {
         if (val === undefined || val === null) return false;
         let str = String(val).trim();
@@ -401,6 +402,42 @@
              .replace(/</g, "&lt;")
              .replace(/>/g, "&gt;");
     }
+
+    // ============== 核心修复：手写智能分词器，无视括号和引号内的逗号 ==============
+    function smartSplitParams(str) {
+        if (!str) return [];
+        let result = [];
+        let current = "";
+        let depth = 0;
+        let inSingleQuote = false;
+        let inDoubleQuote = false;
+
+        for (let i = 0; i < str.length; i++) {
+            let char = str[i];
+            
+            if (char === "'" && !inDoubleQuote) inSingleQuote = !inSingleQuote;
+            if (char === '"' && !inSingleQuote) inDoubleQuote = !inDoubleQuote;
+            
+            let inQuotes = inSingleQuote || inDoubleQuote;
+
+            if (!inQuotes) {
+                if (char === '(' || char === '[' || char === '{') depth++;
+                else if (char === ')' || char === ']' || char === '}') depth--;
+            }
+            
+            if (char === ',' && depth === 0 && !inQuotes) {
+                result.push(current.trim());
+                current = "";
+            } else {
+                current += char;
+            }
+        }
+        if (current.trim() !== "") {
+            result.push(current.trim());
+        }
+        return result;
+    }
+    // =========================================================================
 
     window.addEventListener('resize', () => {
         adjustCodeFontSizes();
@@ -776,31 +813,30 @@
             let paramInputsHtml = '';
             
             const paramMatch = String(cmd.command_template || '').match(/\((.*)\)/);
-            
-            // =================================================================
-            // 核心交互模式升级：解析并应用基于 "name=default" 的模板默认值
-            // =================================================================
             let parsedDefaultParams = [];
             
+            // ============== 使用全新的智能分词器来切分参数 ==============
             if (paramMatch && hasContent(paramMatch[1])) {
-                const rawParams = paramMatch[1].split(',').map(p => p.trim());
+                const rawParams = smartSplitParams(paramMatch[1]);
                 if (rawParams.length > 0) {
                     hasParams = true;
                     rawParams.forEach((rawP, pIdx) => {
                         let pName = rawP;
-                        let pDefault = rawP; // 默认情况下，无默认值则显示变量名本身
+                        let pDefault = rawP;
+                        let hasEq = false;
 
-                        // 解析 "x=0" 结构
-                        if (rawP.includes('=')) {
-                            let parts = rawP.split('=');
-                            pName = parts[0].trim();
-                            pDefault = parts.slice(1).join('=').trim(); 
+                        let eqIdx = rawP.indexOf('=');
+                        if (eqIdx !== -1) {
+                            hasEq = true;
+                            pName = rawP.substring(0, eqIdx).trim();
+                            pDefault = rawP.substring(eqIdx + 1).trim();
                         }
-                        parsedDefaultParams.push(pDefault);
-
-                        let typePlaceholder = pDefault !== pName ? `默认值: ${pDefault}` : `需要填入: ${pName}`;
                         
-                        // 从 params 列提取额外说明（用于 title 提示，保持 UI 简洁）
+                        // 生成原汁原味的默认参数串用于初次渲染
+                        parsedDefaultParams.push(hasEq ? `${pName}=${pDefault}` : pDefault);
+
+                        let typePlaceholder = hasEq ? `默认值: ${pDefault}` : `需要填入: ${pName}`;
+                        
                         let descText = "";
                         if (hasContent(cmd.params)) {
                             const lines = String(cmd.params).split(/\r?\n/);
@@ -818,7 +854,12 @@
                         paramInputsHtml += `
                             <div class="param-row">
                                 <span class="param-label" title="${escapeHtml(descText)}">${escapeHtml(pName)}:</span>
-                                <input type="text" class="param-input" id="param-input-${index}-${pIdx}" placeholder="${escapeHtml(typePlaceholder)}" data-default="${escapeHtml(pDefault)}" data-name="${escapeHtml(pName)}" oninput="updateDisplay()">
+                                <input type="text" class="param-input" id="param-input-${index}-${pIdx}" 
+                                       placeholder="${escapeHtml(typePlaceholder)}" 
+                                       data-default="${escapeHtml(pDefault)}" 
+                                       data-name="${escapeHtml(pName)}" 
+                                       data-hasiq="${hasEq}"
+                                       oninput="updateDisplay()">
                             </div>
                         `;
                     });
@@ -839,7 +880,6 @@
                 initialFinalCode = initialFinalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
             }
 
-            // 初始代码展示时，直接剥离 "=" 赋权，采用纯净默认值渲染
             if (paramMatch && hasContent(paramMatch[1])) {
                 initialFinalCode = initialFinalCode.replace(/\((.*)\)/, `(${parsedDefaultParams.join(', ')})`);
             }
@@ -1028,24 +1068,29 @@
                 }
 
                 // =================================================================
-                // 实时渲染交互升级：读取 data-default 获取默认值
+                // 核心修复：更新时的参数组装，完美保留 "name=value" 的结构
                 // =================================================================
                 const paramMatch = String(cmd.command_template || '').match(/\((.*)\)/);
                 if (paramMatch && hasContent(paramMatch[1])) {
-                    const rawParams = paramMatch[1].split(',').map(p => p.trim());
+                    const rawParams = smartSplitParams(paramMatch[1]);
                     let currentParams = [];
                     for (let i = 0; i < rawParams.length; i++) {
                         const inputEl = document.getElementById(`param-input-${index}-${i}`);
                         if (inputEl) {
-                            if (inputEl.value.trim() !== '') {
-                                currentParams.push(inputEl.value.trim()); 
+                            let val = inputEl.value.trim();
+                            let pName = inputEl.getAttribute('data-name');
+                            let hasEq = inputEl.getAttribute('data-hasiq') === 'true';
+                            let defVal = inputEl.getAttribute('data-default');
+
+                            let finalVal = val !== '' ? val : defVal;
+                            
+                            if (hasEq) {
+                                currentParams.push(`${pName}=${finalVal}`);
                             } else {
-                                // 如果没填，使用预先存在DOM上的 data-default
-                                currentParams.push(inputEl.getAttribute('data-default'));
+                                currentParams.push(finalVal);
                             }
                         } else {
-                            // 降级处理，不应该发生
-                            currentParams.push(rawParams[i].split('=')[0].trim());
+                            currentParams.push(rawParams[i]); 
                         }
                     }
                     finalCode = finalCode.replace(/\((.*)\)/, `(${currentParams.join(', ')})`);
