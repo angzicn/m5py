@@ -387,7 +387,6 @@
     let currentObjectCommands = [];
     let isGlobalSearchMode = false; 
 
-    // 严苛的空数据识别
     function hasContent(val) {
         if (val === undefined || val === null) return false;
         let str = String(val).trim();
@@ -403,8 +402,10 @@
              .replace(/>/g, "&gt;");
     }
 
-    // ============== 核心修复：手写智能分词器，无视括号和引号内的逗号 ==============
-    function smartSplitParams(str) {
+    // ==============================================================================================
+    // 核心引擎 1：深度智能分词器。自动计算括号与引号深度，绝对不会错误切断包含逗号的元组(如 port=(1,2))
+    // ==============================================================================================
+    function smartSplitComma(str) {
         if (!str) return [];
         let result = [];
         let current = "";
@@ -425,7 +426,8 @@
                 else if (char === ')' || char === ']' || char === '}') depth--;
             }
             
-            if (char === ',' && depth === 0 && !inQuotes) {
+            // 只有在最外层（深度为0）且不在引号内时，遇到中英文逗号才进行切分
+            if ((char === ',' || char === '，') && depth === 0 && !inQuotes) {
                 result.push(current.trim());
                 current = "";
             } else {
@@ -437,7 +439,78 @@
         }
         return result;
     }
-    // =========================================================================
+
+    // ==============================================================================================
+    // 核心引擎 2：智能代码高亮探测器。能精准锁定最外层函数的主括号，彻底修复遇到多括号就高亮崩溃的Bug
+    // ==============================================================================================
+    function highlightParamsInCode(escapedCode) {
+        let firstParen = escapedCode.indexOf('(');
+        if (firstParen === -1) return escapedCode;
+        let depth = 0;
+        let lastParen = -1;
+        for (let i = firstParen; i < escapedCode.length; i++) {
+            if (escapedCode[i] === '(') depth++;
+            else if (escapedCode[i] === ')') {
+                depth--;
+                if (depth === 0) {
+                    lastParen = i;
+                    break;
+                }
+            }
+        }
+        if (lastParen !== -1 && lastParen > firstParen) {
+            let before = escapedCode.substring(0, firstParen + 1);
+            let inside = escapedCode.substring(firstParen + 1, lastParen);
+            let after = escapedCode.substring(lastParen);
+            return before + '<span class="param-hl">' + inside + '</span>' + after;
+        }
+        return escapedCode;
+    }
+
+    // ==============================================================================================
+    // 核心引擎 3：深度参数提取与组装器。取代粗暴的正则替换，保证括号内外结构绝对完整
+    // ==============================================================================================
+    function extractOuterParams(template) {
+        let firstParen = template.indexOf('(');
+        if (firstParen === -1) return null;
+        let depth = 0;
+        let lastParen = -1;
+        for (let i = firstParen; i < template.length; i++) {
+            if (template[i] === '(') depth++;
+            else if (template[i] === ')') {
+                depth--;
+                if (depth === 0) {
+                    lastParen = i;
+                    break;
+                }
+            }
+        }
+        if (lastParen !== -1 && lastParen > firstParen) {
+            return [ template, template.substring(firstParen + 1, lastParen) ];
+        }
+        return null;
+    }
+
+    function replaceOuterParams(template, newInner) {
+        let firstParen = template.indexOf('(');
+        if (firstParen === -1) return template;
+        let depth = 0;
+        let lastParen = -1;
+        for (let i = firstParen; i < template.length; i++) {
+            if (template[i] === '(') depth++;
+            else if (template[i] === ')') {
+                depth--;
+                if (depth === 0) {
+                    lastParen = i;
+                    break;
+                }
+            }
+        }
+        if (lastParen !== -1) {
+            return template.substring(0, firstParen + 1) + newInner + template.substring(lastParen);
+        }
+        return template;
+    }
 
     window.addEventListener('resize', () => {
         adjustCodeFontSizes();
@@ -812,12 +885,12 @@
             let hasParams = false;
             let paramInputsHtml = '';
             
-            const paramMatch = String(cmd.command_template || '').match(/\((.*)\)/);
+            // 使用全新的深度识别引擎提取参数
+            const paramMatch = extractOuterParams(String(cmd.command_template || ''));
             let parsedDefaultParams = [];
             
-            // ============== 使用全新的智能分词器来切分参数 ==============
             if (paramMatch && hasContent(paramMatch[1])) {
-                const rawParams = smartSplitParams(paramMatch[1]);
+                const rawParams = smartSplitComma(paramMatch[1]);
                 if (rawParams.length > 0) {
                     hasParams = true;
                     rawParams.forEach((rawP, pIdx) => {
@@ -825,6 +898,7 @@
                         let pDefault = rawP;
                         let hasEq = false;
 
+                        // 分离 “name=value” 格式
                         let eqIdx = rawP.indexOf('=');
                         if (eqIdx !== -1) {
                             hasEq = true;
@@ -832,11 +906,8 @@
                             pDefault = rawP.substring(eqIdx + 1).trim();
                         }
                         
-                        // 生成原汁原味的默认参数串用于初次渲染
                         parsedDefaultParams.push(hasEq ? `${pName}=${pDefault}` : pDefault);
 
-                        let typePlaceholder = hasEq ? `默认值: ${pDefault}` : `需要填入: ${pName}`;
-                        
                         let descText = "";
                         if (hasContent(cmd.params)) {
                             const lines = String(cmd.params).split(/\r?\n/);
@@ -851,6 +922,30 @@
                             }
                         }
 
+                        // ============== 核心优化 1：精美截取补充说明 ==============
+                        let extraInfo = "";
+                        if (descText !== "") {
+                            let parts = smartSplitComma(descText);
+                            if (parts.length >= 3) {
+                                extraInfo = parts.slice(1, 3).map(s => s.trim()).join(', ');
+                            } else if (parts.length === 2) {
+                                extraInfo = parts[1].trim();
+                            }
+                        }
+
+                        let typePlaceholder = "";
+                        if (hasEq) {
+                            typePlaceholder = `默认值: ${pDefault}`;
+                            if (extraInfo) typePlaceholder += `, ${extraInfo}`;
+                        } else {
+                            if (extraInfo) {
+                                typePlaceholder = `需要填入: ${extraInfo}`;
+                            } else {
+                                typePlaceholder = `需要填入: ${pName}`;
+                            }
+                        }
+                        // ========================================================
+
                         paramInputsHtml += `
                             <div class="param-row">
                                 <span class="param-label" title="${escapeHtml(descText)}">${escapeHtml(pName)}:</span>
@@ -858,7 +953,7 @@
                                        placeholder="${escapeHtml(typePlaceholder)}" 
                                        data-default="${escapeHtml(pDefault)}" 
                                        data-name="${escapeHtml(pName)}" 
-                                       data-hasiq="${hasEq}"
+                                       data-haseq="${hasEq}"
                                        oninput="updateDisplay()">
                             </div>
                         `;
@@ -881,11 +976,12 @@
             }
 
             if (paramMatch && hasContent(paramMatch[1])) {
-                initialFinalCode = initialFinalCode.replace(/\((.*)\)/, `(${parsedDefaultParams.join(', ')})`);
+                initialFinalCode = replaceOuterParams(initialFinalCode, parsedDefaultParams.join(', '));
             }
             
             let initialEscapedCode = escapeHtml(initialFinalCode);
-            let initialHighlightedCode = initialEscapedCode.replace(/\((.*?)\)/g, '(<span class="param-hl">$1</span>)');
+            // 核心优化 2：采用全新型括号解析器进行高亮，告别正则污染
+            let initialHighlightedCode = highlightParamsInCode(initialEscapedCode);
             initialHighlightedCode = highlightSafe(initialHighlightedCode, safeQuery);
 
             const hasParamsDesc = hasContent(cmd.params);
@@ -1067,23 +1163,22 @@
                     finalCode = finalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
                 }
 
-                // =================================================================
-                // 核心修复：更新时的参数组装，完美保留 "name=value" 的结构
-                // =================================================================
-                const paramMatch = String(cmd.command_template || '').match(/\((.*)\)/);
+                const paramMatch = extractOuterParams(String(cmd.command_template || ''));
                 if (paramMatch && hasContent(paramMatch[1])) {
-                    const rawParams = smartSplitParams(paramMatch[1]);
+                    const rawParams = smartSplitComma(paramMatch[1]);
                     let currentParams = [];
                     for (let i = 0; i < rawParams.length; i++) {
                         const inputEl = document.getElementById(`param-input-${index}-${i}`);
                         if (inputEl) {
                             let val = inputEl.value.trim();
                             let pName = inputEl.getAttribute('data-name');
-                            let hasEq = inputEl.getAttribute('data-hasiq') === 'true';
+                            let hasEq = inputEl.getAttribute('data-haseq') === 'true';
                             let defVal = inputEl.getAttribute('data-default');
 
+                            // 优先使用用户的输入，没输入就用 HTML 上绑定的 default
                             let finalVal = val !== '' ? val : defVal;
                             
+                            // 保持原本 “名字=值” 的结构
                             if (hasEq) {
                                 currentParams.push(`${pName}=${finalVal}`);
                             } else {
@@ -1093,11 +1188,12 @@
                             currentParams.push(rawParams[i]); 
                         }
                     }
-                    finalCode = finalCode.replace(/\((.*)\)/, `(${currentParams.join(', ')})`);
+                    finalCode = replaceOuterParams(finalCode, currentParams.join(', '));
                 }
                 
                 let escapedCode = escapeHtml(finalCode);
-                let highlightedCode = escapedCode.replace(/\((.*?)\)/g, '(<span class="param-hl">$1</span>)');
+                // 再次调用安全的高亮渲染
+                let highlightedCode = highlightParamsInCode(escapedCode);
                 highlightedCode = highlightSafe(highlightedCode, safeQuery);
 
                 const codeBlock = document.getElementById(`code-text-${index}`);
