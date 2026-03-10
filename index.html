@@ -38,7 +38,11 @@
         .box1::-webkit-scrollbar { width: 5px; }
         .box1::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
         
-        .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: nowrap; overflow: hidden; flex-shrink: 0; }
+        /* ============== 新增：Logo点击手型与交互效果 ============== */
+        .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: nowrap; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: opacity 0.2s ease; }
+        .header-title:hover { opacity: 0.8; }
+        /* ========================================================== */
+
         .team-logo { height: 14px; width: auto; object-fit: contain; flex-shrink: 0; display: block; } 
         .box1 h2 { margin: 0; color: #334155; font-size: 22px; font-weight: bold; font-family: "Microsoft YaHei", "PingFang SC", sans-serif; letter-spacing: 0.5px; border: none; padding: 0; line-height: 22px; white-space: nowrap; flex-shrink: 1; display: flex; align-items: center;}
         
@@ -55,6 +59,9 @@
             box-sizing: border-box; 
             box-shadow: 0 2px 4px rgba(0,0,0,0.04); 
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         @media (min-width: 769px) {
@@ -133,22 +140,7 @@
 
         .btn-group { display: flex; gap: 8px; flex-shrink: 0; align-items: flex-start;}
 
-        .tag-btn { 
-            height: 48px; 
-            width: 80px; 
-            padding: 0; 
-            font-size: 0.95rem; 
-            font-weight: bold; 
-            border-radius: 8px; 
-            cursor: pointer; 
-            transition: all 0.3s ease; 
-            border: 1px solid transparent; 
-            display: inline-flex; 
-            align-items: center; 
-            justify-content: center; 
-            box-sizing: border-box; 
-            white-space: nowrap; 
-        }
+        .tag-btn { height: 48px; width: 80px; padding: 0; font-size: 0.95rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; white-space: nowrap; }
         .tag-btn:hover { filter: brightness(0.95); transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
         
         .tag-btn .btn-text-hover { display: none; } 
@@ -207,7 +199,7 @@
         
         .tool-panel { flex-shrink: 0; margin-top: auto; padding-top: 20px; border-top: 2px dashed var(--border-color); }
 
-        /* ============== 新增：空状态(欢迎页)专属样式 ============== */
+        /* ============== 欢迎引导页样式 ============== */
         .welcome-box {
             background: var(--box-bg); padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
             text-align: center; border: 1px solid #e2e8f0; animation: cardFadeIn 0.4s ease-out forwards;
@@ -228,7 +220,7 @@
         .feature-text { font-size: 0.95rem; color: #475569; line-height: 1.6; }
         .feature-text strong { color: #334155; font-size: 1.1rem; display: block; margin-bottom: 5px; }
         .welcome-footer { display: inline-block; background: #eff6ff; color: #1d4ed8; padding: 12px 25px; border-radius: 30px; font-weight: bold; font-size: 0.95rem; border: 1px solid #bfdbfe;}
-        /* ======================================================= */
+        /* ========================================= */
 
         @media (max-width: 768px) {
             .box1 { position: sticky; top: 10px; z-index: 999; max-width: 100%; max-height: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); margin-bottom: 20px; overflow-y: visible; }
@@ -266,7 +258,7 @@
 <div class="layout-container">
     <div class="box box1 expanded" id="main-box1">
         
-        <div class="header-title" onclick="toggleMobileBox1()">
+        <div class="header-title" onclick="resetToHome()" title="点击返回首页 / 全局搜索">
             <img src="beijiq.svg" alt="BEIJIQ Logo" class="team-logo">
             <h2>M5代码助手</h2>
             <svg class="mobile-toggle-icon" viewBox="0 0 24 24" width="24" height="24" stroke="currentColor" stroke-width="2.5" fill="none" stroke-linecap="round" stroke-linejoin="round">
@@ -382,7 +374,15 @@
 
     let commandDatabase = [];
     let currentObjectCommands = [];
-    let isGlobalSearchMode = false; // 新增：全局搜索状态标识
+    let isGlobalSearchMode = false; 
+
+    // HTML 核心安全转义函数，彻底解决 Bug 1 (避免 <int> 这种标签吃掉代码)
+    function escapeHtml(unsafe) {
+        return (unsafe || '').toString()
+             .replace(/&/g, "&amp;")
+             .replace(/</g, "&lt;")
+             .replace(/>/g, "&gt;");
+    }
 
     window.addEventListener('resize', () => {
         adjustCodeFontSizes();
@@ -401,11 +401,6 @@
                     document.getElementById("commands-container").innerHTML = '<div class="box" style="color:red;">❌ 表格无数据，请检查。</div>';
                     return;
                 }
-                const firstRowKeys = Object.keys(results.data[0]);
-                if (!firstRowKeys.includes('category') || !firstRowKeys.includes('object_name')) {
-                    document.getElementById("commands-container").innerHTML = '<div class="box" style="color:red;">❌ 表头格式错误，请检查第一行是否为严格的英文表头。</div>';
-                    return;
-                }
                 commandDatabase = results.data;
                 initCategoryDropdown();
             },
@@ -415,6 +410,13 @@
             }
         });
     };
+
+    function resetToHome() {
+        document.getElementById("category").value = "";
+        document.getElementById("search-input").value = "";
+        isGlobalSearchMode = false;
+        updateObjectNames(); 
+    }
 
     function toggleMobileBox1() {
         if (window.innerWidth <= 768) {
@@ -426,10 +428,9 @@
         const catSelect = document.getElementById("category");
         const uniqueCategories = [...new Set(commandDatabase.map(item => item.category).filter(Boolean))];
         
-        // 核心修改：新增默认空选项
         catSelect.innerHTML = `<option value="">-- 请选择硬件类别 --</option>` + 
                               uniqueCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-        catSelect.value = ""; // 默认不选
+        catSelect.value = ""; 
         
         isGlobalSearchMode = false;
         document.getElementById("search-input").value = "";
@@ -441,7 +442,6 @@
         const selectedCat = document.getElementById("category").value;
         const objSelect = document.getElementById("object-name");
         
-        // 核心修改：分类为空时的拦截
         if (selectedCat === "") {
             objSelect.innerHTML = `<option value="">👈 选择类别后可选</option>`;
             updateObjectFunctions();
@@ -546,25 +546,23 @@
             tagSelect.value = tag;
             document.getElementById("search-input").value = ''; 
             renderCommandCards();
-            // 平滑滚动回顶部体验更好
             window.scrollTo({ top: 0, behavior: 'smooth' }); 
         }
     }
 
-    // ============== 新增：智能响应全局搜索与空状态的统一收口 ==============
     function handleSearch() {
         const selectedCat = document.getElementById("category").value;
         const query = document.getElementById("search-input").value.trim();
         
         if (selectedCat === "") {
-            // 在未选分类状态下，文字变更触发 全局搜索 或 返回欢迎页
+            // 空状态与全局搜索模式的切换
             if ((query === "" && isGlobalSearchMode) || (query !== "" && !isGlobalSearchMode)) {
                 renderCommandCards();
             } else {
-                updateDisplay(); // 保持全局搜索时的字词过滤
+                updateDisplay(); 
             }
         } else {
-            updateDisplay(); // 正常局部过滤
+            updateDisplay(); 
         }
     }
 
@@ -575,24 +573,16 @@
         const tocContainer = document.getElementById("toc-container");
         const topControls = document.getElementById("top-controls");
         
-        // 核心一：判定空状态 (显示欢迎页) 还是 全局搜索 还是 正常浏览
         if (selectedCat === "") {
             if (query === "") {
+                // ============== 渲染精美欢迎页 ==============
                 isGlobalSearchMode = false;
-                
-                // 渲染精美欢迎页
                 topControls.style.display = 'flex';
                 tocContainer.style.display = 'none';
                 document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
                 
                 const instanceSettings = document.getElementById("instance-settings");
-                const instanceInput = document.getElementById("instance-name");
-                const instanceLabel = document.getElementById("instance-label");
-                instanceSettings.style.display = 'block';
-                instanceSettings.classList.remove('fixed-mode');
-                instanceInput.readOnly = false;
-                instanceInput.placeholder = "请输入实例名"; // 提示文字
-                instanceLabel.innerText = "实例名称 (全局检索自动替换)：";
+                instanceSettings.style.display = 'none'; // 欢迎页强行隐藏实例框
                 
                 container.innerHTML = `
                 <div class="welcome-box" id="welcome-box">
@@ -600,23 +590,23 @@
                         <span class="welcome-icon">👋</span>
                         <h3>欢迎使用 M5PY 助手</h3>
                     </div>
-                    <p class="welcome-subtitle">由 北极圈机器人 (BEIJIQ) 倾力打造的 UIFlow2 / MicroPython 编程利器</p>
+                    <p class="welcome-subtitle">由 北极圈机器人 (BEIJIQ) 倾力打造的 MicroPython 编程利器</p>
                     <div class="welcome-features">
                         <div class="feature-item">
                             <div class="feature-icon">🔍</div>
-                            <div class="feature-text"><strong>随心检索</strong><br>全局搜索 M5Stack 硬件指令与用法</div>
+                            <div class="feature-text"><strong>全局查询指令</strong><br>快速检索所有 M5 硬件的指令与用法</div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon">🗂️</div>
-                            <div class="feature-text"><strong>分类查阅</strong><br>通过左侧面板按类别精准定位代码</div>
+                            <div class="feature-text"><strong>分类浏览代码</strong><br>按模块类别，精准查阅对应硬件代码</div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon">✍️</div>
-                            <div class="feature-text"><strong>智能修改</strong><br>自定义实例名与参数</div>
+                            <div class="feature-text"><strong>智能修改参数</strong><br>自定义实例名与运行参数，实时更新</div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon">📋</div>
-                            <div class="feature-text"><strong>一键复制</strong><br>提取完美排版代码，附带扩展工具</div>
+                            <div class="feature-text"><strong>一键复制开发</strong><br>搭配取色器等扩展工具，让编程更高效</div>
                         </div>
                     </div>
                     <div class="welcome-footer">
@@ -625,26 +615,42 @@
                 </div>`;
                 return;
             } else {
-                // 全局搜索模式！放开所有数据
+                // ============== 渲染全局搜索结果 ==============
                 isGlobalSearchMode = true;
-                currentObjectCommands = commandDatabase;
+                
+                // 进行全局粗筛
+                currentObjectCommands = commandDatabase.filter(item => {
+                    const c_tmpl = (item.command_template || '').toLowerCase();
+                    const c_desc = (item.description || '').toLowerCase();
+                    const c_title = (item.command_title || '').toLowerCase();
+                    return c_tmpl.includes(query) || c_desc.includes(query) || c_title.includes(query);
+                });
                 
                 topControls.style.display = 'flex';
                 document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
+                
                 const instanceSettings = document.getElementById("instance-settings");
                 const instanceInput = document.getElementById("instance-name");
                 const instanceLabel = document.getElementById("instance-label");
-                instanceSettings.style.display = 'block';
-                instanceSettings.classList.remove('fixed-mode');
-                instanceInput.readOnly = false;
-                // 仅重置 Placeholder
-                if (instanceInput.placeholder !== "请输入实例名") {
-                    instanceInput.placeholder = "请输入实例名";
+                
+                let needsInstance = currentObjectCommands.some(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE');
+                if (needsInstance) {
+                    instanceSettings.style.display = 'flex';
+                    instanceSettings.classList.remove('fixed-mode');
+                    instanceInput.readOnly = false;
                     instanceLabel.innerText = "实例名称 (全局检索自动替换)：";
+                    
+                    if (window.lastSelectedObj !== "GLOBAL_SEARCH") {
+                        instanceInput.value = ""; 
+                        window.lastSelectedObj = "GLOBAL_SEARCH";
+                    }
+                    instanceInput.placeholder = "请输入实例名"; 
+                } else {
+                    instanceSettings.style.display = 'none';
                 }
             }
         } else {
-            // 正常类别浏览过滤
+            // ============== 正常左侧菜单分类渲染 ==============
             isGlobalSearchMode = false;
             const selectedObj = document.getElementById("object-name").value;
             const funcWrapper = document.getElementById("function-group-wrapper");
@@ -665,21 +671,7 @@
                 }
                 return true;
             });
-        }
-        
-        if (currentObjectCommands.length === 0) {
-            container.innerHTML = '<div class="box">未检索到任何符合条件的指令数据。</div>';
-            document.getElementById("top-controls").style.display = 'none';
-            tocContainer.style.display = 'none';
-            return;
-        }
 
-        document.getElementById("top-controls").style.display = 'flex';
-        tocContainer.style.display = 'block'; 
-
-        // 在非全局检索时，配置缩略图和专属实例名
-        if (!isGlobalSearchMode) {
-            const selectedObj = document.getElementById("object-name").value;
             const thumbBox = document.getElementById("object-thumbnail-box");
             const thumbImg = document.getElementById("object-thumbnail-img");
             
@@ -689,16 +681,22 @@
             thumbImg.src = `image/${selectedObj}.jpg`;
 
             let needsInstance = currentObjectCommands.some(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE');
+            const instanceSettings = document.getElementById("instance-settings");
+            const instanceInput = document.getElementById("instance-name");
+            const instanceLabel = document.getElementById("instance-label");
+
             if (needsInstance) {
                 let defaultName = currentObjectCommands.find(cmd => String(cmd.requires_instance).toUpperCase() === 'TRUE' && cmd.default_instance)?.default_instance || 'obj';
                 let isFixed = currentObjectCommands.some(cmd => String(cmd.is_instance_fixed).toUpperCase() === 'TRUE');
 
-                const instanceSettings = document.getElementById("instance-settings");
-                const instanceInput = document.getElementById("instance-name");
-                const instanceLabel = document.getElementById("instance-label");
-
-                instanceSettings.style.display = 'block';
-                instanceInput.value = defaultName;
+                instanceSettings.style.display = 'flex';
+                
+                if (window.lastSelectedObj !== selectedObj) {
+                    instanceInput.value = defaultName;
+                    window.lastSelectedObj = selectedObj;
+                }
+                
+                instanceInput.placeholder = "";
 
                 if (isFixed) {
                     instanceSettings.classList.add('fixed-mode');
@@ -710,20 +708,27 @@
                     instanceLabel.innerText = "实例名称 (自动替换前缀)：";
                 }
             } else {
-                document.getElementById("instance-settings").style.display = 'none';
+                instanceSettings.style.display = 'none';
+                window.lastSelectedObj = selectedObj; // 记录状态
             }
         }
+        
+        if (currentObjectCommands.length === 0) {
+            container.innerHTML = '<div class="box">未检索到任何符合条件的指令数据。</div>';
+            tocContainer.style.display = 'none';
+            return;
+        }
 
+        tocContainer.style.display = 'block'; 
         let htmlContent = '';
         let tocContent = ''; 
 
-        // ================= 获取当前侧边栏选中标签 =================
         const selectedTag = document.getElementById("object-tag").value;
-        // =======================================================
 
         currentObjectCommands.forEach((cmd, index) => {
             let title = cmd.command_title || cmd.command_template || `命令 ${index + 1}`;
-            tocContent += `<li class="toc-item" onclick="scrollToCard(${index})">📌 ${title}</li>`;
+            // 修复 BUG 1：安全转义目录标题中的 HTML 符号
+            tocContent += `<li class="toc-item" onclick="scrollToCard(${index})">📌 ${escapeHtml(title)}</li>`;
 
             let hasParams = false;
             let paramInputsHtml = '';
@@ -813,13 +818,13 @@
                 
                 <div class="cmd-desc" id="cmd-desc-${index}"></div>
 
-                ${hasParamsDesc ? `<div class="cmd-params"><strong>参数说明:</strong>${cmd.params.replace(/\n/g, '<br>')}</div>` : ''}
-                ${hasReturnDesc ? `<div class="cmd-returns"><strong>返回值:</strong>${cmd.return_value.replace(/\n/g, '<br>')}</div>` : ''}
+                ${hasParamsDesc ? `<div class="cmd-params"><strong>参数说明:</strong>${escapeHtml(cmd.params).replace(/\n/g, '<br>')}</div>` : ''}
+                ${hasReturnDesc ? `<div class="cmd-returns"><strong>返回值:</strong>${escapeHtml(cmd.return_value).replace(/\n/g, '<br>')}</div>` : ''}
                 
                 ${hasExample ? `
                 <div class="example-wrapper" id="example-wrapper-${index}">
                     <div class="example-inner">
-                        <div class="cmd-example"><span class="example-label">具体示例代码</span>${cmd.example}</div>
+                        <div class="cmd-example"><span class="example-label">具体示例代码</span>${escapeHtml(cmd.example)}</div>
                     </div>
                 </div>
                 ` : ''}
@@ -859,7 +864,8 @@
         if (!targetCard) return;
 
         if (targetCard.style.display === 'none') {
-            document.getElementById("search-input").value = '';
+            // 如果点目录时该卡片被搜索隐藏，则清空搜索框
+            if(!isGlobalSearchMode) document.getElementById("search-input").value = '';
             updateDisplay();
         }
 
@@ -879,19 +885,15 @@
 
     function highlightSafe(htmlString, query) {
         if (!query) return htmlString;
-        const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+        const escapedQuery = escapeHtml(query).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
         const regex = new RegExp(`(${escapedQuery})(?![^<]*>)`, 'gi');
         return htmlString.replace(regex, '<mark class="search-hl">$1</mark>');
     }
 
     function updateDisplay() {
         const query = document.getElementById("search-input").value.trim().toLowerCase();
-        
-        // 核心修改：如果是未填写的状态，直接利用 Placeholder 作为代码中的替换词
-        let instanceVal = document.getElementById("instance-name").value.trim();
-        if (instanceVal === "") {
-            instanceVal = document.getElementById("instance-name").placeholder;
-        }
+        const safeQuery = escapeHtml(query);
+        let globalInstanceInput = document.getElementById("instance-name").value.trim();
         
         currentObjectCommands.forEach((cmd, index) => {
             const card = document.getElementById(`cmd-card-${index}`);
@@ -901,17 +903,23 @@
             const description = (cmd.description || '').toLowerCase();
             const title = (cmd.command_title || '').toLowerCase(); 
 
-            if (query === '' || codeTemplate.includes(query) || description.includes(query) || title.includes(query)) {
+            // 在全局搜索模式下，已经在 renderCommandCards 做过彻底过滤，这里直接默认显示，只做高亮
+            if (isGlobalSearchMode || query === '' || codeTemplate.includes(query) || description.includes(query) || title.includes(query)) {
                 card.style.display = 'block';
 
                 const descElem = document.getElementById(`cmd-desc-${index}`);
-                descElem.innerHTML = highlightSafe(cmd.description || '暂无详细说明。', query);
+                descElem.innerHTML = highlightSafe(escapeHtml(cmd.description || '暂无详细说明。'), safeQuery);
 
                 let finalCode = cmd.command_template || '';
                 const needsInstance = String(cmd.requires_instance).toUpperCase() === 'TRUE';
                 
                 if (needsInstance) {
-                    finalCode = finalCode.replace(/{instance}/g, instanceVal);
+                    // BUG 2 完美修复：优先使用用户在输入框打的字，否则使用当前条目自己的默认名
+                    let itemInstance = globalInstanceInput;
+                    if (itemInstance === "") {
+                        itemInstance = cmd.default_instance || 'obj';
+                    }
+                    finalCode = finalCode.replace(/{instance}/g, itemInstance);
                 } else {
                     finalCode = finalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
                 }
@@ -931,8 +939,10 @@
                     finalCode = finalCode.replace(/\((.*)\)/, `(${currentParams.join(', ')})`);
                 }
                 
-                let highlightedCode = finalCode.replace(/\((.*?)\)/g, '(<span class="param-hl">$1</span>)');
-                highlightedCode = highlightSafe(highlightedCode, query);
+                // 修复 BUG 1：安全转义带有 < > 的代码符号
+                let escapedCode = escapeHtml(finalCode);
+                let highlightedCode = escapedCode.replace(/\((.*?)\)/g, '(<span class="param-hl">$1</span>)');
+                highlightedCode = highlightSafe(highlightedCode, safeQuery);
 
                 const codeBlock = document.getElementById(`code-text-${index}`);
                 if(codeBlock) codeBlock.innerHTML = highlightedCode;
@@ -1055,4 +1065,3 @@
 
 </body>
 </html>
-
