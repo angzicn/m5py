@@ -372,7 +372,7 @@
     let currentObjectCommands = [];
     let isGlobalSearchMode = false; 
 
-    // ============== 核心修复：极致安全的空数据判定，支持表格里填 NONE / NULL / 留空 ==============
+    // 严苛的空数据识别：支持填入 NONE、NULL、- 或者直接留空
     function hasContent(val) {
         if (val === undefined || val === null) return false;
         let str = String(val).trim();
@@ -380,7 +380,7 @@
         return true;
     }
 
-    // 核心安全转义函数：防止代码里的 <int> 被浏览器当成标签吃掉导致代码隐身
+    // 代码转义器，防止 <> 这种符号被当作 HTML 执行
     function escapeHtml(unsafe) {
         if (!hasContent(unsafe)) return '';
         return String(unsafe)
@@ -461,7 +461,10 @@
         const filteredData = commandDatabase.filter(item => item.category === selectedCat);
         const uniqueObjects = [...new Set(filteredData.map(item => item.object_name).filter(hasContent))];
         
-        objSelect.innerHTML = uniqueObjects.map(obj => `<option value="${obj}">${obj}</option>`).join('');
+        // 核心优化 1：强制手动选择对象名称，不再默认跳到第一个
+        objSelect.innerHTML = `<option value="">-- 请选择硬件名称 --</option>` + 
+                              uniqueObjects.map(obj => `<option value="${obj}">${obj}</option>`).join('');
+        objSelect.value = ""; 
         
         updateObjectFunctions();
     }
@@ -472,7 +475,7 @@
         const funcWrapper = document.getElementById("function-group-wrapper");
         const funcSelect = document.getElementById("object-function");
 
-        if (selectedCat === "") {
+        if (selectedCat === "" || selectedObj === "") {
             funcSelect.innerHTML = `<option value="ALL">无</option>`;
             funcWrapper.classList.remove('show');
             updateObjectTags();
@@ -496,10 +499,11 @@
 
     function updateObjectTags() {
         const selectedCat = document.getElementById("category").value;
+        const selectedObj = document.getElementById("object-name").value;
         const tagSelect = document.getElementById("object-tag");
         const tagWrapper = document.getElementById("tag-group-wrapper");
 
-        if (selectedCat === "") {
+        if (selectedCat === "" || selectedObj === "") {
             tagSelect.innerHTML = `<option value="ALL">显示全部</option>`;
             tagWrapper.classList.remove('show');
             tagSelect.value = "ALL";
@@ -507,7 +511,6 @@
             return;
         }
 
-        const selectedObj = document.getElementById("object-name").value;
         const funcWrapper = document.getElementById("function-group-wrapper");
         const selectedFunc = document.getElementById("object-function").value;
         const isFuncVisible = funcWrapper.classList.contains("show");
@@ -563,9 +566,10 @@
 
     function handleSearch() {
         const selectedCat = document.getElementById("category").value;
+        const selectedObj = document.getElementById("object-name").value;
         const query = document.getElementById("search-input").value.trim();
         
-        if (selectedCat === "") {
+        if (selectedCat === "" || selectedObj === "") {
             if (query === "" && isGlobalSearchMode) {
                 renderCommandCards();
             } else if (query !== "" && !isGlobalSearchMode) {
@@ -580,12 +584,16 @@
 
     function renderCommandCards() {
         const selectedCat = document.getElementById("category").value;
+        const selectedObj = document.getElementById("object-name").value;
         const query = document.getElementById("search-input").value.trim().toLowerCase();
+        
         const container = document.getElementById("commands-container");
         const tocContainer = document.getElementById("toc-container");
+        // 核心修复 Bug 1 缺少的定义：目录的ul列表元素获取
+        const tocList = document.getElementById("toc-list"); 
         const topControls = document.getElementById("top-controls");
         
-        if (selectedCat === "") {
+        if (selectedCat === "" || selectedObj === "") {
             if (query === "") {
                 isGlobalSearchMode = false;
                 topControls.style.display = 'flex';
@@ -595,6 +603,7 @@
                 instanceSettings.style.display = 'none'; 
                 tocContainer.style.display = 'none';
                 
+                // 核心优化 2：精简欢迎框文字防止换行
                 container.innerHTML = `
                 <div class="welcome-box" id="welcome-box">
                     <div class="welcome-header">
@@ -605,23 +614,23 @@
                     <div class="welcome-features">
                         <div class="feature-item">
                             <div class="feature-icon">🔍</div>
-                            <div class="feature-text"><strong>全局查询指令</strong><br>快速检索所有 M5 硬件的指令与用法</div>
+                            <div class="feature-text"><strong>全局检索</strong><br>快速查找所有硬件指令</div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon">🗂️</div>
-                            <div class="feature-text"><strong>分类浏览代码</strong><br>按模块类别，精准查阅对应硬件代码</div>
+                            <div class="feature-text"><strong>分类浏览</strong><br>按类别精准定位代码</div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon">✍️</div>
-                            <div class="feature-text"><strong>智能修改参数</strong><br>自定义实例名与运行参数，实时更新</div>
+                            <div class="feature-text"><strong>智能修改</strong><br>自定义参数，实时更新</div>
                         </div>
                         <div class="feature-item">
                             <div class="feature-icon">📋</div>
-                            <div class="feature-text"><strong>一键复制开发</strong><br>搭配取色器等扩展工具，让编程更高效</div>
+                            <div class="feature-text"><strong>一键复制</strong><br>结合工具，高效编程</div>
                         </div>
                     </div>
                     <div class="welcome-footer">
-                        👈 请在左侧选择硬件类别，或直接在上方搜索框输入指令
+                        👈 请在左侧选择硬件类别和名称，或直接在上方全局搜索
                     </div>
                 </div>`;
                 return;
@@ -654,7 +663,6 @@
             }
         } else {
             isGlobalSearchMode = false;
-            const selectedObj = document.getElementById("object-name").value;
             const funcWrapper = document.getElementById("function-group-wrapper");
             const selectedFunc = document.getElementById("object-function").value;
             const isFuncVisible = funcWrapper.classList.contains("show");
@@ -773,7 +781,7 @@
                 }
             }
             
-            // ============== 核心修复Bug1：硬编码生成初始化的代码展示内容，彻底告别空显示 ==============
+            // 核心修复 Bug 1：同步直接写入代码，取消所有异步等待，彻底告别空显示
             let initialFinalCode = String(cmd.command_template || '');
             let needsInstanceForThisCmd = hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE';
             
@@ -795,7 +803,6 @@
             let initialEscapedCode = escapeHtml(initialFinalCode);
             let initialHighlightedCode = initialEscapedCode.replace(/\((.*?)\)/g, '(<span class="param-hl">$1</span>)');
             initialHighlightedCode = highlightSafe(initialHighlightedCode, safeQuery);
-            // =========================================================================================
 
             const hasParamsDesc = hasContent(cmd.params);
             const hasReturnDesc = hasContent(cmd.return_value);
@@ -862,12 +869,12 @@
 
         container.innerHTML = htmlContent;
         
-        // 全局搜索不显示目录，分类搜索才显示目录
+        // 全局搜索不显示目录，仅分类搜索显示目录
         if (isGlobalSearchMode) {
             tocContainer.style.display = 'none';
         } else {
             tocContainer.style.display = 'block';
-            tocList.innerHTML = tocContent; 
+            tocList.innerHTML = tocContent; // 关键修复：写入目录数据
         }
         
         updateDisplay(); 
