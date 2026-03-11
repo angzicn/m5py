@@ -101,9 +101,10 @@
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; background-color: #fff; }
 
-        .function-group-wrapper, .tag-group-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
-        .function-group-wrapper.show, .tag-group-wrapper.show { grid-template-rows: 1fr; }
-        .function-group-inner, .tag-group-inner { overflow: hidden; }
+        /* ============== 核心更新：加入名称框的折叠动画支持 ============== */
+        .name-group-wrapper, .function-group-wrapper, .tag-group-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
+        .name-group-wrapper.show, .function-group-wrapper.show, .tag-group-wrapper.show { grid-template-rows: 1fr; }
+        .name-group-inner, .function-group-inner, .tag-group-inner { overflow: hidden; }
 
         .toc-container { margin-bottom: 20px; padding: 10px 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; flex-grow: 1; overflow-y: auto; }
         .toc-title { font-size: 0.9rem; font-weight: bold; color: #64748b; margin-bottom: 8px; padding: 0 4px 5px 4px; border-bottom: 1px dashed #cbd5e1; }
@@ -281,13 +282,18 @@
             <div class="box1-content-inner">
                 <div class="box1-scroll-area">
                     
-                    <div class="form-group">
+                    <div class="form-group" style="margin-bottom: 20px;">
                         <label for="category">对象类别：</label>
                         <select id="category" onchange="updateObjectNames()"><option>等待连接...</option></select>
                     </div>
-                    <div class="form-group">
-                        <label for="object-name">对象名称：</label>
-                        <select id="object-name" onchange="updateObjectFunctions()"><option>等待连接...</option></select>
+
+                    <div class="name-group-wrapper show" id="name-group-wrapper">
+                        <div class="name-group-inner">
+                            <div class="form-group" style="margin-bottom: 20px;">
+                                <label for="object-name">对象名称：</label>
+                                <select id="object-name" onchange="updateObjectFunctions()"><option>等待连接...</option></select>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="function-group-wrapper" id="function-group-wrapper">
@@ -402,9 +408,6 @@
              .replace(/>/g, "&gt;");
     }
 
-    // ==============================================================================================
-    // 核心引擎 1：深度智能分词器。自动计算括号与引号深度，绝对不会错误切断包含逗号的元组(如 port=(1,2))
-    // ==============================================================================================
     function smartSplitComma(str) {
         if (!str) return [];
         let result = [];
@@ -415,10 +418,8 @@
 
         for (let i = 0; i < str.length; i++) {
             let char = str[i];
-            
             if (char === "'" && !inDoubleQuote) inSingleQuote = !inSingleQuote;
             if (char === '"' && !inSingleQuote) inDoubleQuote = !inDoubleQuote;
-            
             let inQuotes = inSingleQuote || inDoubleQuote;
 
             if (!inQuotes) {
@@ -426,7 +427,6 @@
                 else if (char === ')' || char === ']' || char === '}') depth--;
             }
             
-            // 只有在最外层（深度为0）且不在引号内时，遇到中英文逗号才进行切分
             if ((char === ',' || char === '，') && depth === 0 && !inQuotes) {
                 result.push(current.trim());
                 current = "";
@@ -434,15 +434,10 @@
                 current += char;
             }
         }
-        if (current.trim() !== "") {
-            result.push(current.trim());
-        }
+        if (current.trim() !== "") result.push(current.trim());
         return result;
     }
 
-    // ==============================================================================================
-    // 核心引擎 2：智能代码高亮探测器。能精准锁定最外层函数的主括号，彻底修复遇到多括号就高亮崩溃的Bug
-    // ==============================================================================================
     function highlightParamsInCode(escapedCode) {
         let firstParen = escapedCode.indexOf('(');
         if (firstParen === -1) return escapedCode;
@@ -467,9 +462,6 @@
         return escapedCode;
     }
 
-    // ==============================================================================================
-    // 核心引擎 3：深度参数提取与组装器。取代粗暴的正则替换，保证括号内外结构绝对完整
-    // ==============================================================================================
     function extractOuterParams(template) {
         let firstParen = template.indexOf('(');
         if (firstParen === -1) return null;
@@ -574,9 +566,11 @@
     function updateObjectNames() {
         const selectedCat = document.getElementById("category").value;
         const objSelect = document.getElementById("object-name");
+        const nameWrapper = document.getElementById("name-group-wrapper");
         
         if (selectedCat === "") {
             objSelect.innerHTML = `<option value="">👈 选择类别后可选</option>`;
+            nameWrapper.classList.add('show');
             updateObjectFunctions();
             return;
         }
@@ -584,9 +578,17 @@
         const filteredData = commandDatabase.filter(item => item.category === selectedCat);
         const uniqueObjects = [...new Set(filteredData.map(item => item.object_name).filter(hasContent))];
         
-        objSelect.innerHTML = `<option value="">-- 请选择硬件名称 --</option>` + 
-                              uniqueObjects.map(obj => `<option value="${obj}">${obj}</option>`).join('');
-        objSelect.value = ""; 
+        // ============== 核心逻辑：智能识别是否有名称属性，控制折叠 ==============
+        if (uniqueObjects.length > 0) {
+            objSelect.innerHTML = `<option value="">-- 请选择硬件名称 --</option>` + 
+                                  uniqueObjects.map(obj => `<option value="${obj}">${obj}</option>`).join('');
+            objSelect.value = ""; 
+            nameWrapper.classList.add('show'); // 有名称时，展开框，并提示手动选择
+        } else {
+            objSelect.innerHTML = `<option value="ALL">无</option>`;
+            objSelect.value = "ALL";
+            nameWrapper.classList.remove('show'); // 全都没有名称，平滑折叠！
+        }
         
         updateObjectFunctions();
     }
@@ -594,17 +596,26 @@
     function updateObjectFunctions() {
         const selectedCat = document.getElementById("category").value;
         const selectedObj = document.getElementById("object-name").value;
+        const nameWrapper = document.getElementById("name-group-wrapper");
+        const isNameVisible = nameWrapper.classList.contains("show");
+        
         const funcWrapper = document.getElementById("function-group-wrapper");
         const funcSelect = document.getElementById("object-function");
 
-        if (selectedCat === "" || selectedObj === "") {
+        if (selectedCat === "" || (isNameVisible && selectedObj === "")) {
             funcSelect.innerHTML = `<option value="ALL">无</option>`;
             funcWrapper.classList.remove('show');
             updateObjectTags();
             return;
         }
 
-        const filteredData = commandDatabase.filter(item => item.category === selectedCat && item.object_name === selectedObj);
+        const filteredData = commandDatabase.filter(item => {
+            if (item.category !== selectedCat) return false;
+            // 如果名称框显示，才去匹配它
+            if (isNameVisible && item.object_name !== selectedObj) return false;
+            return true;
+        });
+        
         const uniqueFunctions = [...new Set(filteredData.map(item => item.object_function).filter(hasContent))];
 
         if (uniqueFunctions.length > 0) {
@@ -622,10 +633,12 @@
     function updateObjectTags() {
         const selectedCat = document.getElementById("category").value;
         const selectedObj = document.getElementById("object-name").value;
+        const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
+        
         const tagSelect = document.getElementById("object-tag");
         const tagWrapper = document.getElementById("tag-group-wrapper");
 
-        if (selectedCat === "" || selectedObj === "") {
+        if (selectedCat === "" || (isNameVisible && selectedObj === "")) {
             tagSelect.innerHTML = `<option value="ALL">显示全部</option>`;
             tagWrapper.classList.remove('show');
             tagSelect.value = "ALL";
@@ -639,7 +652,8 @@
 
         const filteredData = commandDatabase.filter(item => {
             if (!hasContent(item.command_template)) return false;
-            if (item.category !== selectedCat || item.object_name !== selectedObj) return false;
+            if (item.category !== selectedCat) return false;
+            if (isNameVisible && item.object_name !== selectedObj) return false;
             if (isFuncVisible && selectedFunc !== "ALL") {
                 if (String(item.object_function || '').trim() !== selectedFunc) return false;
             }
@@ -701,9 +715,10 @@
     function handleSearch() {
         const selectedCat = document.getElementById("category").value;
         const selectedObj = document.getElementById("object-name").value;
+        const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
         const query = document.getElementById("search-input").value.trim();
         
-        if (selectedCat === "" || selectedObj === "") {
+        if (selectedCat === "") {
             if (query === "" && isGlobalSearchMode) {
                 renderCommandCards();
             } else if (query !== "" && !isGlobalSearchMode) {
@@ -711,6 +726,8 @@
             } else {
                 updateDisplay(); 
             }
+        } else if (isNameVisible && selectedObj === "") {
+            // 当还停留在“请选择名称”状态时打字，直接静默即可，因为此时搜不出内容
         } else {
             updateDisplay(); 
         }
@@ -719,6 +736,7 @@
     function renderCommandCards() {
         const selectedCat = document.getElementById("category").value;
         const selectedObj = document.getElementById("object-name").value;
+        const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
         const query = document.getElementById("search-input").value.trim().toLowerCase();
         
         const container = document.getElementById("commands-container");
@@ -726,7 +744,7 @@
         const tocList = document.getElementById("toc-list"); 
         const topControls = document.getElementById("top-controls");
         
-        if (selectedCat === "" || selectedObj === "") {
+        if (selectedCat === "") {
             if (query === "") {
                 isGlobalSearchMode = false;
                 topControls.style.display = 'flex';
@@ -801,6 +819,18 @@
                     instanceSettings.style.display = 'none';
                 }
             }
+        } else if (isNameVisible && selectedObj === "") {
+            // ============== 核心优化 2：中间态引导 ==============
+            isGlobalSearchMode = false;
+            topControls.style.display = 'none';
+            tocContainer.style.display = 'none';
+            container.innerHTML = `
+            <div class="box" style="text-align: center; padding: 50px 20px; color: #64748b; border: 1px dashed #cbd5e1; background: transparent; box-shadow: none;">
+                <div style="font-size: 2.2rem; margin-bottom: 12px; animation: bounce 2s infinite;">👈</div>
+                <div style="font-size: 1.05rem; font-weight: bold;">请在左侧选择具体的【硬件名称】以查看指令</div>
+            </div>
+            <style>@keyframes bounce { 0%, 100% {transform: translateX(0);} 50% {transform: translateX(-10px);} }</style>`;
+            return;
         } else {
             isGlobalSearchMode = false;
             const funcWrapper = document.getElementById("function-group-wrapper");
@@ -813,7 +843,10 @@
 
             currentObjectCommands = commandDatabase.filter(item => {
                 if (!hasContent(item.command_template)) return false;
-                if (item.category !== selectedCat || item.object_name !== selectedObj) return false;
+                if (item.category !== selectedCat) return false;
+                // 注意这里：如果是自动隐藏名称的分类，就忽略对 object_name 的校验！
+                if (isNameVisible && item.object_name !== selectedObj) return false;
+                
                 if (isFuncVisible && selectedFunc !== "ALL") {
                     if (String(item.object_function || '').trim() !== selectedFunc) return false;
                 }
@@ -829,7 +862,10 @@
             thumbBox.classList.add('hidden-by-error');
             thumbImg.onload = function() { thumbBox.classList.remove('hidden-by-error'); };
             thumbImg.onerror = function() { thumbBox.classList.add('hidden-by-error'); };
-            thumbImg.src = `image/${selectedObj}.jpg`;
+            
+            // 核心优化 3：如果隐藏了名称框，就使用 Category 作为图片名寻找对应大图！
+            const imageName = isNameVisible ? selectedObj : selectedCat;
+            thumbImg.src = `image/${imageName}.jpg`;
 
             let needsInstance = currentObjectCommands.some(cmd => hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE');
             const instanceSettings = document.getElementById("instance-settings");
@@ -842,9 +878,10 @@
 
                 instanceSettings.style.display = 'flex';
                 
-                if (window.lastSelectedObj !== selectedObj) {
+                // 标识符改为使用图片名（能兼容没选对象的场景）
+                if (window.lastSelectedObj !== imageName) {
                     instanceInput.value = defaultName;
-                    window.lastSelectedObj = selectedObj;
+                    window.lastSelectedObj = imageName;
                 }
                 instanceInput.placeholder = "";
 
@@ -859,7 +896,7 @@
                 }
             } else {
                 instanceSettings.style.display = 'none';
-                window.lastSelectedObj = selectedObj; 
+                window.lastSelectedObj = imageName; 
             }
         }
         
@@ -885,7 +922,6 @@
             let hasParams = false;
             let paramInputsHtml = '';
             
-            // 使用全新的深度识别引擎提取参数
             const paramMatch = extractOuterParams(String(cmd.command_template || ''));
             let parsedDefaultParams = [];
             
@@ -898,7 +934,6 @@
                         let pDefault = rawP;
                         let hasEq = false;
 
-                        // 分离 “name=value” 格式
                         let eqIdx = rawP.indexOf('=');
                         if (eqIdx !== -1) {
                             hasEq = true;
@@ -922,7 +957,6 @@
                             }
                         }
 
-                        // ============== 核心优化 1：精美截取补充说明 ==============
                         let extraInfo = "";
                         if (descText !== "") {
                             let parts = smartSplitComma(descText);
@@ -944,7 +978,6 @@
                                 typePlaceholder = `需要填入: ${pName}`;
                             }
                         }
-                        // ========================================================
 
                         paramInputsHtml += `
                             <div class="param-row">
@@ -980,7 +1013,6 @@
             }
             
             let initialEscapedCode = escapeHtml(initialFinalCode);
-            // 核心优化 2：采用全新型括号解析器进行高亮，告别正则污染
             let initialHighlightedCode = highlightParamsInCode(initialEscapedCode);
             initialHighlightedCode = highlightSafe(initialHighlightedCode, safeQuery);
 
@@ -1175,10 +1207,8 @@
                             let hasEq = inputEl.getAttribute('data-haseq') === 'true';
                             let defVal = inputEl.getAttribute('data-default');
 
-                            // 优先使用用户的输入，没输入就用 HTML 上绑定的 default
                             let finalVal = val !== '' ? val : defVal;
                             
-                            // 保持原本 “名字=值” 的结构
                             if (hasEq) {
                                 currentParams.push(`${pName}=${finalVal}`);
                             } else {
@@ -1192,7 +1222,6 @@
                 }
                 
                 let escapedCode = escapeHtml(finalCode);
-                // 再次调用安全的高亮渲染
                 let highlightedCode = highlightParamsInCode(escapedCode);
                 highlightedCode = highlightSafe(highlightedCode, safeQuery);
 
