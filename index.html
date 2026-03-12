@@ -715,12 +715,15 @@
         const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
         const query = document.getElementById("search-input").value.trim();
         
-        const isScopeSelected = (selectedCat !== "" && !(isNameVisible && selectedObj === ""));
+        // 核心优化：在中间态时，搜索框直接作用于当前已冻结的右侧画面！不触发重渲染！
+        const isIntermediateState = (selectedCat !== "" && isNameVisible && selectedObj === "");
+        if (isIntermediateState) {
+            updateDisplay();
+            return; 
+        }
 
-        if (!isScopeSelected) {
-            if (query === "" && isGlobalSearchMode) {
-                renderCommandCards();
-            } else if (query !== "" && !isGlobalSearchMode) {
+        if (selectedCat === "") {
+            if ((query === "" && isGlobalSearchMode) || (query !== "" && !isGlobalSearchMode)) {
                 renderCommandCards();
             } else {
                 updateDisplay(); 
@@ -736,14 +739,19 @@
         const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
         const query = document.getElementById("search-input").value.trim().toLowerCase();
         
+        // ============== 核心交互升级：冻结视图快照（Snapshot） ==============
+        // 如果处于“选了分类但没选名称”的中间态，直接阻止重新渲染，完美保留右侧上一个状态的内容！
+        if (selectedCat !== "" && isNameVisible && selectedObj === "") {
+            return;
+        }
+        // ====================================================================
+
         const container = document.getElementById("commands-container");
         const tocContainer = document.getElementById("toc-container");
         const tocList = document.getElementById("toc-list"); 
         const topControls = document.getElementById("top-controls");
-
-        const isScopeSelected = (selectedCat !== "" && !(isNameVisible && selectedObj === ""));
         
-        if (!isScopeSelected) {
+        if (selectedCat === "") {
             if (query === "") {
                 isGlobalSearchMode = false;
                 topControls.style.display = 'flex';
@@ -795,7 +803,6 @@
                     return true;
                 });
                 
-                // ============== 彻底修复 BUG 2：强行恢复 topControls 显示 ==============
                 topControls.style.display = 'flex';
                 document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
                 
@@ -821,7 +828,6 @@
             }
         } else {
             isGlobalSearchMode = false;
-            // ============== 彻底修复 BUG 2：正常分类下也必须强行显示 topControls ==============
             topControls.style.display = 'flex'; 
 
             const funcWrapper = document.getElementById("function-group-wrapper");
