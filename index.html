@@ -101,7 +101,6 @@
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; background-color: #fff; }
 
-        /* ============== 核心更新：加入名称框的折叠动画支持 ============== */
         .name-group-wrapper, .function-group-wrapper, .tag-group-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
         .name-group-wrapper.show, .function-group-wrapper.show, .tag-group-wrapper.show { grid-template-rows: 1fr; }
         .name-group-inner, .function-group-inner, .tag-group-inner { overflow: hidden; }
@@ -578,16 +577,15 @@
         const filteredData = commandDatabase.filter(item => item.category === selectedCat);
         const uniqueObjects = [...new Set(filteredData.map(item => item.object_name).filter(hasContent))];
         
-        // ============== 核心逻辑：智能识别是否有名称属性，控制折叠 ==============
         if (uniqueObjects.length > 0) {
             objSelect.innerHTML = `<option value="">-- 请选择硬件名称 --</option>` + 
                                   uniqueObjects.map(obj => `<option value="${obj}">${obj}</option>`).join('');
             objSelect.value = ""; 
-            nameWrapper.classList.add('show'); // 有名称时，展开框，并提示手动选择
+            nameWrapper.classList.add('show'); 
         } else {
             objSelect.innerHTML = `<option value="ALL">无</option>`;
             objSelect.value = "ALL";
-            nameWrapper.classList.remove('show'); // 全都没有名称，平滑折叠！
+            nameWrapper.classList.remove('show'); 
         }
         
         updateObjectFunctions();
@@ -611,7 +609,6 @@
 
         const filteredData = commandDatabase.filter(item => {
             if (item.category !== selectedCat) return false;
-            // 如果名称框显示，才去匹配它
             if (isNameVisible && item.object_name !== selectedObj) return false;
             return true;
         });
@@ -718,7 +715,9 @@
         const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
         const query = document.getElementById("search-input").value.trim();
         
-        if (selectedCat === "") {
+        const isScopeSelected = (selectedCat !== "" && !(isNameVisible && selectedObj === ""));
+
+        if (!isScopeSelected) {
             if (query === "" && isGlobalSearchMode) {
                 renderCommandCards();
             } else if (query !== "" && !isGlobalSearchMode) {
@@ -726,8 +725,6 @@
             } else {
                 updateDisplay(); 
             }
-        } else if (isNameVisible && selectedObj === "") {
-            // 当还停留在“请选择名称”状态时打字，直接静默即可，因为此时搜不出内容
         } else {
             updateDisplay(); 
         }
@@ -743,8 +740,10 @@
         const tocContainer = document.getElementById("toc-container");
         const tocList = document.getElementById("toc-list"); 
         const topControls = document.getElementById("top-controls");
+
+        const isScopeSelected = (selectedCat !== "" && !(isNameVisible && selectedObj === ""));
         
-        if (selectedCat === "") {
+        if (!isScopeSelected) {
             if (query === "") {
                 isGlobalSearchMode = false;
                 topControls.style.display = 'flex';
@@ -796,6 +795,7 @@
                     return true;
                 });
                 
+                // ============== 彻底修复 BUG 2：强行恢复 topControls 显示 ==============
                 topControls.style.display = 'flex';
                 document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
                 
@@ -819,20 +819,11 @@
                     instanceSettings.style.display = 'none';
                 }
             }
-        } else if (isNameVisible && selectedObj === "") {
-            // ============== 核心优化 2：中间态引导 ==============
-            isGlobalSearchMode = false;
-            topControls.style.display = 'none';
-            tocContainer.style.display = 'none';
-            container.innerHTML = `
-            <div class="box" style="text-align: center; padding: 50px 20px; color: #64748b; border: 1px dashed #cbd5e1; background: transparent; box-shadow: none;">
-                <div style="font-size: 2.2rem; margin-bottom: 12px; animation: bounce 2s infinite;">👈</div>
-                <div style="font-size: 1.05rem; font-weight: bold;">请在左侧选择具体的【硬件名称】以查看指令</div>
-            </div>
-            <style>@keyframes bounce { 0%, 100% {transform: translateX(0);} 50% {transform: translateX(-10px);} }</style>`;
-            return;
         } else {
             isGlobalSearchMode = false;
+            // ============== 彻底修复 BUG 2：正常分类下也必须强行显示 topControls ==============
+            topControls.style.display = 'flex'; 
+
             const funcWrapper = document.getElementById("function-group-wrapper");
             const selectedFunc = document.getElementById("object-function").value;
             const isFuncVisible = funcWrapper.classList.contains("show");
@@ -844,7 +835,6 @@
             currentObjectCommands = commandDatabase.filter(item => {
                 if (!hasContent(item.command_template)) return false;
                 if (item.category !== selectedCat) return false;
-                // 注意这里：如果是自动隐藏名称的分类，就忽略对 object_name 的校验！
                 if (isNameVisible && item.object_name !== selectedObj) return false;
                 
                 if (isFuncVisible && selectedFunc !== "ALL") {
@@ -863,7 +853,6 @@
             thumbImg.onload = function() { thumbBox.classList.remove('hidden-by-error'); };
             thumbImg.onerror = function() { thumbBox.classList.add('hidden-by-error'); };
             
-            // 核心优化 3：如果隐藏了名称框，就使用 Category 作为图片名寻找对应大图！
             const imageName = isNameVisible ? selectedObj : selectedCat;
             thumbImg.src = `image/${imageName}.jpg`;
 
@@ -878,7 +867,6 @@
 
                 instanceSettings.style.display = 'flex';
                 
-                // 标识符改为使用图片名（能兼容没选对象的场景）
                 if (window.lastSelectedObj !== imageName) {
                     instanceInput.value = defaultName;
                     window.lastSelectedObj = imageName;
