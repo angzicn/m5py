@@ -88,9 +88,38 @@
         .instance-box.fixed-mode input { border-color: #fecaca; background-color: #fee2e2; color: #991b1b; cursor: not-allowed; outline: none; }
         .instance-box.fixed-mode input:focus { box-shadow: none; }
 
-        .search-box { background-color: #ffffff; border: 1px solid #e2e8f0; }
-        .search-box label { color: #475569; }
-        .search-box input { border-color: #cbd5e1; }
+        /* ============== 优化①：动态搜索框 UI ============== */
+        .search-box { background-color: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid transparent; transition: all 0.3s ease; }
+        .search-box label { color: #475569; transition: color 0.3s ease; }
+        .search-box input { border-color: #cbd5e1; transition: all 0.3s ease; }
+        
+        .search-box.global-search { background-color: #ecfdf5; border-color: #a7f3d0; border-left: 5px solid #10b981; }
+        .search-box.global-search label { color: #047857; font-weight: bold; }
+        .search-box.global-search input { border-color: #6ee7b7; background-color: #ffffff; color: #064e3b; }
+        .search-box.global-search input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
+        /* ================================================= */
+
+        /* ============== 优化③：精美的淡紫色备注框 ============== */
+        .note-box { 
+            background-color: #faf5ff; 
+            border: 1px solid #e9d5ff; 
+            border-left: 5px solid #a855f7; 
+            color: #5b21b6; 
+            padding: 16px 22px; 
+            border-radius: 12px; 
+            font-size: 0.95rem; 
+            display: flex; 
+            align-items: flex-start; 
+            gap: 12px; 
+            animation: cardFadeIn 0.3s ease-out forwards; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04); 
+            box-sizing: border-box;
+            margin: 0;
+            line-height: 1.6;
+        }
+        .note-box strong { color: #4c1d95; font-size: 1rem; display: block; margin-bottom: 4px; }
+        .note-icon { font-size: 1.4rem; line-height: 1; margin-top: 2px;}
+        /* ======================================================= */
 
         #commands-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
 
@@ -364,18 +393,20 @@
 
             <div class="control-box instance-box" id="instance-settings" style="display: none;">
                 <div class="form-group">
-                    <label id="instance-label" for="instance-name">实例名称 (自动替换前缀)：</label>
+                    <label id="instance-label" for="instance-name">实例名称：</label>
                     <input type="text" id="instance-name" oninput="updateDisplay()">
                 </div>
             </div>
 
             <div class="control-box search-box" id="search-settings">
                 <div class="form-group">
-                    <label for="search-input">快速搜索指令：</label>
+                    <label id="search-label" for="search-input">搜索当前指令：</label>
                     <input type="text" id="search-input" placeholder="输入代码或中文解释..." oninput="handleSearch()">
                 </div>
             </div>
         </div>
+
+        <div id="note-container" class="note-box" style="display: none;"></div>
 
         <div id="commands-container">
             <div class="box" style="color:#3b82f6; font-weight:bold;">⏳ 正在连接 Google Sheets 获取数据...</div>
@@ -501,6 +532,19 @@
             return template.substring(0, firstParen + 1) + newInner + template.substring(lastParen);
         }
         return template;
+    }
+
+    // ============== 优化①：动态控制搜索框的外观与文案 ==============
+    function updateSearchBoxUI(isGlobal) {
+        const searchLabel = document.getElementById("search-label");
+        const searchSettings = document.getElementById("search-settings");
+        if (isGlobal) {
+            searchLabel.innerText = "搜索全部指令：";
+            searchSettings.classList.add("global-search");
+        } else {
+            searchLabel.innerText = "搜索当前指令：";
+            searchSettings.classList.remove("global-search");
+        }
     }
 
     window.addEventListener('resize', () => {
@@ -715,7 +759,6 @@
         const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
         const query = document.getElementById("search-input").value.trim();
         
-        // 核心优化：在中间态时，搜索框直接作用于当前已冻结的右侧画面！不触发重渲染！
         const isIntermediateState = (selectedCat !== "" && isNameVisible && selectedObj === "");
         if (isIntermediateState) {
             updateDisplay();
@@ -739,12 +782,12 @@
         const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
         const query = document.getElementById("search-input").value.trim().toLowerCase();
         
-        // ============== 核心交互升级：冻结视图快照（Snapshot） ==============
-        // 如果处于“选了分类但没选名称”的中间态，直接阻止重新渲染，完美保留右侧上一个状态的内容！
+        const noteContainer = document.getElementById("note-container");
+        noteContainer.style.display = 'none'; // 每次渲染先默认隐藏备注框
+
         if (selectedCat !== "" && isNameVisible && selectedObj === "") {
             return;
         }
-        // ====================================================================
 
         const container = document.getElementById("commands-container");
         const tocContainer = document.getElementById("toc-container");
@@ -754,6 +797,7 @@
         if (selectedCat === "") {
             if (query === "") {
                 isGlobalSearchMode = false;
+                updateSearchBoxUI(true); // 欢迎页默认准备全局搜索
                 topControls.style.display = 'flex';
                 document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
                 
@@ -795,6 +839,7 @@
                 return;
             } else {
                 isGlobalSearchMode = true;
+                updateSearchBoxUI(true);
                 const selectedTag = document.getElementById("object-tag").value;
                 
                 currentObjectCommands = commandDatabase.filter(item => {
@@ -815,7 +860,7 @@
                     instanceSettings.style.display = 'flex';
                     instanceSettings.classList.remove('fixed-mode');
                     instanceInput.readOnly = false;
-                    instanceLabel.innerText = "实例名称 (全局检索自动替换)：";
+                    instanceLabel.innerText = "实例名称："; // 优化②：精简实例名称
                     
                     if (window.lastSelectedObj !== "GLOBAL_SEARCH") {
                         instanceInput.value = ""; 
@@ -828,6 +873,7 @@
             }
         } else {
             isGlobalSearchMode = false;
+            updateSearchBoxUI(false);
             topControls.style.display = 'flex'; 
 
             const funcWrapper = document.getElementById("function-group-wrapper");
@@ -882,11 +928,11 @@
                 if (isFixed) {
                     instanceSettings.classList.add('fixed-mode');
                     instanceInput.readOnly = true;
-                    instanceLabel.innerText = "实例名称 (硬件固定，不可修改)：";
+                    instanceLabel.innerText = "实例名称：";
                 } else {
                     instanceSettings.classList.remove('fixed-mode');
                     instanceInput.readOnly = false;
-                    instanceLabel.innerText = "实例名称 (自动替换前缀)：";
+                    instanceLabel.innerText = "实例名称：";
                 }
             } else {
                 instanceSettings.style.display = 'none';
@@ -894,6 +940,17 @@
             }
         }
         
+        // ============== 优化③：解析并展示淡紫色备注框 ==============
+        if (!isGlobalSearchMode && currentObjectCommands.length > 0) {
+            let validNoteItem = currentObjectCommands.find(item => hasContent(item.note) || hasContent(item['备注']));
+            if (validNoteItem) {
+                let noteText = hasContent(validNoteItem.note) ? validNoteItem.note : validNoteItem['备注'];
+                noteContainer.innerHTML = `<div class="note-icon">💡</div><div><strong>分类备注说明</strong>${escapeHtml(noteText).replace(/\n/g, '<br>')}</div>`;
+                noteContainer.style.display = 'flex';
+            }
+        }
+        // ==========================================================
+
         if (currentObjectCommands.length === 0) {
             container.innerHTML = '<div class="box">未检索到任何符合条件的指令数据。</div>';
             tocContainer.style.display = 'none';
