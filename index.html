@@ -88,18 +88,18 @@
         .instance-box.fixed-mode input { border-color: #fecaca; background-color: #fee2e2; color: #991b1b; cursor: not-allowed; outline: none; }
         .instance-box.fixed-mode input:focus { box-shadow: none; }
 
-        /* ============== 优化①：动态搜索框 UI ============== */
+        /* ============== 完美更新的深蓝色全局搜索框 ============== */
         .search-box { background-color: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid transparent; transition: all 0.3s ease; }
         .search-box label { color: #475569; transition: color 0.3s ease; }
         .search-box input { border-color: #cbd5e1; transition: all 0.3s ease; }
         
-        .search-box.global-search { background-color: #ecfdf5; border-color: #a7f3d0; border-left: 5px solid #10b981; }
-        .search-box.global-search label { color: #047857; font-weight: bold; }
-        .search-box.global-search input { border-color: #6ee7b7; background-color: #ffffff; color: #064e3b; }
-        .search-box.global-search input:focus { border-color: #10b981; box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.2); }
-        /* ================================================= */
+        /* 沉稳蓝配色：比实例框更深、更实，区分度极佳 */
+        .search-box.global-search { background-color: #dbeafe; border-color: #bfdbfe; border-left: 5px solid #2563eb; }
+        .search-box.global-search label { color: #1e40af; font-weight: bold; }
+        .search-box.global-search input { border-color: #93c5fd; background-color: #ffffff; color: #1e3a8a; }
+        .search-box.global-search input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+        /* ====================================================== */
 
-        /* ============== 优化③：精美的淡紫色备注框 ============== */
         .note-box { 
             background-color: #faf5ff; 
             border: 1px solid #e9d5ff; 
@@ -119,7 +119,6 @@
         }
         .note-box strong { color: #4c1d95; font-size: 1rem; display: block; margin-bottom: 4px; }
         .note-icon { font-size: 1.4rem; line-height: 1; margin-top: 2px;}
-        /* ======================================================= */
 
         #commands-container { display: flex; flex-direction: column; gap: 20px; width: 100%; }
 
@@ -534,7 +533,6 @@
         return template;
     }
 
-    // ============== 优化①：动态控制搜索框的外观与文案 ==============
     function updateSearchBoxUI(isGlobal) {
         const searchLabel = document.getElementById("search-label");
         const searchSettings = document.getElementById("search-settings");
@@ -783,7 +781,7 @@
         const query = document.getElementById("search-input").value.trim().toLowerCase();
         
         const noteContainer = document.getElementById("note-container");
-        noteContainer.style.display = 'none'; // 每次渲染先默认隐藏备注框
+        noteContainer.style.display = 'none'; 
 
         if (selectedCat !== "" && isNameVisible && selectedObj === "") {
             return;
@@ -797,7 +795,7 @@
         if (selectedCat === "") {
             if (query === "") {
                 isGlobalSearchMode = false;
-                updateSearchBoxUI(true); // 欢迎页默认准备全局搜索
+                updateSearchBoxUI(true); 
                 topControls.style.display = 'flex';
                 document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
                 
@@ -860,7 +858,7 @@
                     instanceSettings.style.display = 'flex';
                     instanceSettings.classList.remove('fixed-mode');
                     instanceInput.readOnly = false;
-                    instanceLabel.innerText = "实例名称："; // 优化②：精简实例名称
+                    instanceLabel.innerText = "实例名称："; 
                     
                     if (window.lastSelectedObj !== "GLOBAL_SEARCH") {
                         instanceInput.value = ""; 
@@ -940,7 +938,6 @@
             }
         }
         
-        // ============== 优化③：解析并展示淡紫色备注框 ==============
         if (!isGlobalSearchMode && currentObjectCommands.length > 0) {
             let validNoteItem = currentObjectCommands.find(item => hasContent(item.note) || hasContent(item['备注']));
             if (validNoteItem) {
@@ -949,7 +946,6 @@
                 noteContainer.style.display = 'flex';
             }
         }
-        // ==========================================================
 
         if (currentObjectCommands.length === 0) {
             container.innerHTML = '<div class="box">未检索到任何符合条件的指令数据。</div>';
