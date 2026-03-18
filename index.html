@@ -126,7 +126,6 @@
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; background-color: #fff; }
 
-        /* 为参数下拉框特别优化的样式 */
         select.param-input { cursor: pointer; appearance: auto; background-image: none; }
         select.param-input:hover { border-color: #93c5fd; }
 
@@ -973,6 +972,13 @@
             const paramMatch = extractOuterParams(String(cmd.command_template || ''));
             let parsedDefaultParams = [];
             
+            // ============== 核心优化②：只过滤纯文本的描述中的中括号，用于底层UI渲染 =============
+            let rawCmdParams = hasContent(cmd.params) ? String(cmd.params) : "";
+            // 清理掉所有 [...] 或 【...】 供 UI 显示
+            let cleanCmdParams = rawCmdParams.replace(/\[.*?\]|【.*?】/g, '').trim();
+            const hasParamsDesc = cleanCmdParams !== "";
+            // =========================================================================
+
             if (paramMatch && hasContent(paramMatch[1])) {
                 const rawParams = smartSplitComma(paramMatch[1]);
                 if (rawParams.length > 0) {
@@ -989,11 +995,9 @@
                             pDefault = rawP.substring(eqIdx + 1).trim();
                         }
                         
-                        parsedDefaultParams.push(hasEq ? `${pName}=${pDefault}` : pDefault);
-
                         let descText = "";
-                        if (hasContent(cmd.params)) {
-                            const lines = String(cmd.params).split(/\r?\n/);
+                        if (rawCmdParams !== "") {
+                            const lines = rawCmdParams.split(/\r?\n/);
                             for (let line of lines) {
                                 let cleanLine = line.trim();
                                 if (cleanLine.startsWith(pName + ':') || cleanLine.startsWith(pName + '：')) {
@@ -1004,8 +1008,7 @@
                                 }
                             }
                         }
-                        
-                        // ============== 核心优化：动态解析参数的下拉选项 =================
+
                         let options = [];
                         let optionRegex = /\[(.*?)\]|【(.*?)】/;
                         let optMatch = descText.match(optionRegex);
@@ -1014,7 +1017,14 @@
                             options = optStr.split('|').map(s => s.trim()).filter(s => s !== '');
                             descText = descText.replace(optMatch[0], '').trim();
                         }
-                        // ==============================================================
+                        
+                        // ============== 核心优化②：如果是下拉框选项，代码初始直接展示参数名！ ==============
+                        if (options.length > 0) {
+                            pDefault = pName; 
+                            hasEq = false;    
+                        }
+                        parsedDefaultParams.push(hasEq ? `${pName}=${pDefault}` : pDefault);
+                        // ==================================================================================
 
                         let extraInfo = "";
                         if (descText !== "") {
@@ -1038,18 +1048,12 @@
                             }
                         }
 
-                        // ============== 核心优化：自动生成带有下拉框的 HTML ================
                         if (options.length > 0) {
-                            let optionsHtml = options.map(opt => {
-                                let isSelected = (opt === pDefault) ? 'selected' : '';
-                                return `<option value="${escapeHtml(opt)}" ${isSelected}>${escapeHtml(opt)}</option>`;
+                            let optionsHtml = `<option value="" selected>-- 点击选择可选参数 --</option>`;
+                            optionsHtml += options.map(opt => {
+                                return `<option value="${escapeHtml(opt)}">${escapeHtml(opt)}</option>`;
                             }).join('');
                             
-                            // 防止默认值本身不在选项列表中导致显示错误
-                            if (!options.includes(pDefault) && pDefault !== pName && hasEq) {
-                                optionsHtml = `<option value="${escapeHtml(pDefault)}" selected>${escapeHtml(pDefault)}</option>` + optionsHtml;
-                            }
-
                             paramInputsHtml += `
                                 <div class="param-row">
                                     <span class="param-label" title="${escapeHtml(descText)}">${escapeHtml(pName)}:</span>
@@ -1075,7 +1079,6 @@
                                 </div>
                             `;
                         }
-                        // ==============================================================
                     });
                 }
             }
@@ -1102,7 +1105,6 @@
             let initialHighlightedCode = highlightParamsInCode(initialEscapedCode);
             initialHighlightedCode = highlightSafe(initialHighlightedCode, safeQuery);
 
-            const hasParamsDesc = hasContent(cmd.params);
             const hasReturnDesc = hasContent(cmd.return_value);
             const hasExample = hasContent(cmd.example);
             
@@ -1160,7 +1162,8 @@
                 
                 <div class="cmd-desc" id="cmd-desc-${index}"></div>
 
-                ${hasParamsDesc ? `<div class="cmd-params"><strong>参数说明:</strong>${escapeHtml(cmd.params).replace(/\n/g, '<br>')}</div>` : ''}
+                ${hasParamsDesc ? `<div class="cmd-params"><strong>参数说明:</strong>${escapeHtml(cleanCmdParams).replace(/\n/g, '<br>')}</div>` : ''}
+                
                 ${hasReturnDesc ? `<div class="cmd-returns"><strong>返回值:</strong>${escapeHtml(cmd.return_value).replace(/\n/g, '<br>')}</div>` : ''}
                 
                 ${hasExample ? `
@@ -1288,17 +1291,24 @@
                     for (let i = 0; i < rawParams.length; i++) {
                         const inputEl = document.getElementById(`param-input-${index}-${i}`);
                         if (inputEl) {
-                            let val = inputEl.value.trim();
+                            let val = inputEl.value;
                             let pName = inputEl.getAttribute('data-name');
                             let hasEq = inputEl.getAttribute('data-haseq') === 'true';
                             let defVal = inputEl.getAttribute('data-default');
+                            let isSelect = inputEl.tagName.toLowerCase() === 'select';
 
-                            let finalVal = val !== '' ? val : defVal;
-                            
-                            if (hasEq) {
-                                currentParams.push(`${pName}=${finalVal}`);
+                            // ============== 核心优化②：处理下拉框未选择和已选择的拼接状态 ==============
+                            if (isSelect && val === '') {
+                                // 下拉框没选的时候，只展示参数名
+                                currentParams.push(pName);
                             } else {
-                                currentParams.push(finalVal);
+                                // 文本框或者下拉框选了具体值
+                                let finalVal = val !== '' ? val.trim() : defVal;
+                                if (hasEq) {
+                                    currentParams.push(`${pName}=${finalVal}`);
+                                } else {
+                                    currentParams.push(finalVal);
+                                }
                             }
                         } else {
                             currentParams.push(rawParams[i]); 
