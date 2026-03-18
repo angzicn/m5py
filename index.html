@@ -240,6 +240,15 @@
         
         .tool-panel { flex-shrink: 0; margin-top: auto; padding-top: 20px; border-top: 2px dashed var(--border-color); }
 
+        /* ============== 预设颜色调色板样式 ============== */
+        .color-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        .color-swatch { 
+            width: 24px; height: 24px; border-radius: 4px; cursor: pointer; 
+            border: 1px solid rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s; 
+        }
+        .color-swatch:hover { transform: scale(1.15); box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2; }
+        /* ============================================= */
+
         .welcome-box {
             background: var(--box-bg); padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
             text-align: center; border: 1px solid #e2e8f0; animation: cardFadeIn 0.4s ease-out forwards;
@@ -357,7 +366,23 @@
                         </div>
                         
                         <div id="tool-color-picker" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; animation: fadein 0.3s;">
-                            <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">点击下方色块打开画板：</label>
+                            
+                            <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">快速预设颜色：</label>
+                            <div class="color-presets">
+                                <div class="color-swatch" style="background-color: #000000;" data-hex="#000000" onclick="applyPresetColor(this)" title="黑色"></div>
+                                <div class="color-swatch" style="background-color: #FFFFFF;" data-hex="#FFFFFF" onclick="applyPresetColor(this)" title="白色"></div>
+                                <div class="color-swatch" style="background-color: #FF0000;" data-hex="#FF0000" onclick="applyPresetColor(this)" title="红色"></div>
+                                <div class="color-swatch" style="background-color: #00FF00;" data-hex="#00FF00" onclick="applyPresetColor(this)" title="绿色"></div>
+                                <div class="color-swatch" style="background-color: #0000FF;" data-hex="#0000FF" onclick="applyPresetColor(this)" title="蓝色"></div>
+                                <div class="color-swatch" style="background-color: #FFFF00;" data-hex="#FFFF00" onclick="applyPresetColor(this)" title="黄色"></div>
+                                <div class="color-swatch" style="background-color: #00FFFF;" data-hex="#00FFFF" onclick="applyPresetColor(this)" title="青色"></div>
+                                <div class="color-swatch" style="background-color: #FF00FF;" data-hex="#FF00FF" onclick="applyPresetColor(this)" title="洋红"></div>
+                                <div class="color-swatch" style="background-color: #FFA500;" data-hex="#FFA500" onclick="applyPresetColor(this)" title="橙色"></div>
+                                <div class="color-swatch" style="background-color: #800080;" data-hex="#800080" onclick="applyPresetColor(this)" title="紫色"></div>
+                                <div class="color-swatch" style="background-color: #808080;" data-hex="#808080" onclick="applyPresetColor(this)" title="灰色"></div>
+                                <div class="color-swatch" style="background-color: #00BFFF;" data-hex="#00BFFF" onclick="applyPresetColor(this)" title="深空蓝"></div>
+                            </div>
+                            <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">或点击下方色块自由选择：</label>
                             <input type="color" id="native-color" value="#00FF00" style="width: 100%; height: 50px; border: none; border-radius: 8px; cursor: pointer; padding: 0; margin-bottom: 15px; background: none;">
 
                             <div class="form-group" style="margin-bottom: 12px;">
@@ -972,12 +997,9 @@
             const paramMatch = extractOuterParams(String(cmd.command_template || ''));
             let parsedDefaultParams = [];
             
-            // ============== 核心优化②：只过滤纯文本的描述中的中括号，用于底层UI渲染 =============
             let rawCmdParams = hasContent(cmd.params) ? String(cmd.params) : "";
-            // 清理掉所有 [...] 或 【...】 供 UI 显示
             let cleanCmdParams = rawCmdParams.replace(/\[.*?\]|【.*?】/g, '').trim();
             const hasParamsDesc = cleanCmdParams !== "";
-            // =========================================================================
 
             if (paramMatch && hasContent(paramMatch[1])) {
                 const rawParams = smartSplitComma(paramMatch[1]);
@@ -1018,13 +1040,11 @@
                             descText = descText.replace(optMatch[0], '').trim();
                         }
                         
-                        // ============== 核心优化②：如果是下拉框选项，代码初始直接展示参数名！ ==============
                         if (options.length > 0) {
                             pDefault = pName; 
                             hasEq = false;    
                         }
                         parsedDefaultParams.push(hasEq ? `${pName}=${pDefault}` : pDefault);
-                        // ==================================================================================
 
                         let extraInfo = "";
                         if (descText !== "") {
@@ -1163,7 +1183,6 @@
                 <div class="cmd-desc" id="cmd-desc-${index}"></div>
 
                 ${hasParamsDesc ? `<div class="cmd-params"><strong>参数说明:</strong>${escapeHtml(cleanCmdParams).replace(/\n/g, '<br>')}</div>` : ''}
-                
                 ${hasReturnDesc ? `<div class="cmd-returns"><strong>返回值:</strong>${escapeHtml(cmd.return_value).replace(/\n/g, '<br>')}</div>` : ''}
                 
                 ${hasExample ? `
@@ -1297,12 +1316,9 @@
                             let defVal = inputEl.getAttribute('data-default');
                             let isSelect = inputEl.tagName.toLowerCase() === 'select';
 
-                            // ============== 核心优化②：处理下拉框未选择和已选择的拼接状态 ==============
                             if (isSelect && val === '') {
-                                // 下拉框没选的时候，只展示参数名
                                 currentParams.push(pName);
                             } else {
-                                // 文本框或者下拉框选了具体值
                                 let finalVal = val !== '' ? val.trim() : defVal;
                                 if (hasEq) {
                                     currentParams.push(`${pName}=${finalVal}`);
@@ -1360,6 +1376,9 @@
         });
     }
 
+    // =======================================================
+    // 扩展工具：取色器与预设调色板交互逻辑
+    // =======================================================
     function toggleTool() {
         const tool = document.getElementById('tool-select').value;
         const cp = document.getElementById('tool-color-picker');
@@ -1368,6 +1387,14 @@
         } else {
             cp.style.display = 'none';
         }
+    }
+
+    function applyPresetColor(element) {
+        const hex = element.getAttribute('data-hex');
+        const nativeColor = document.getElementById('native-color');
+        nativeColor.value = hex;
+        // 触发原生颜色选择器的 input 事件，让下方的转换框联动更新
+        nativeColor.dispatchEvent(new Event('input'));
     }
 
     const nativeColor = document.getElementById('native-color');
