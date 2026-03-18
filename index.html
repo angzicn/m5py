@@ -88,17 +88,14 @@
         .instance-box.fixed-mode input { border-color: #fecaca; background-color: #fee2e2; color: #991b1b; cursor: not-allowed; outline: none; }
         .instance-box.fixed-mode input:focus { box-shadow: none; }
 
-        /* ============== 完美更新的深蓝色全局搜索框 ============== */
         .search-box { background-color: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid transparent; transition: all 0.3s ease; }
         .search-box label { color: #475569; transition: color 0.3s ease; }
         .search-box input { border-color: #cbd5e1; transition: all 0.3s ease; }
         
-        /* 沉稳蓝配色：比实例框更深、更实，区分度极佳 */
         .search-box.global-search { background-color: #dbeafe; border-color: #bfdbfe; border-left: 5px solid #2563eb; }
         .search-box.global-search label { color: #1e40af; font-weight: bold; }
         .search-box.global-search input { border-color: #93c5fd; background-color: #ffffff; color: #1e3a8a; }
         .search-box.global-search input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
-        /* ====================================================== */
 
         .note-box { 
             background-color: #faf5ff; 
@@ -128,6 +125,10 @@
         label { display: block; margin-bottom: 8px; font-weight: 600; color: #475569; font-size: 0.95rem;}
         select, input[type="text"] { width: 100%; padding: 12px; border: 1px solid var(--border-color); border-radius: 8px; box-sizing: border-box; font-size: 15px; background-color: #f8fafc; font-family: Consolas, monospace; transition: all 0.2s; }
         select:focus, input[type="text"]:focus { border-color: #3b82f6; box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2); outline: none; background-color: #fff; }
+
+        /* 为参数下拉框特别优化的样式 */
+        select.param-input { cursor: pointer; appearance: auto; background-image: none; }
+        select.param-input:hover { border-color: #93c5fd; }
 
         .name-group-wrapper, .function-group-wrapper, .tag-group-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
         .name-group-wrapper.show, .function-group-wrapper.show, .tag-group-wrapper.show { grid-template-rows: 1fr; }
@@ -1003,6 +1004,17 @@
                                 }
                             }
                         }
+                        
+                        // ============== 核心优化：动态解析参数的下拉选项 =================
+                        let options = [];
+                        let optionRegex = /\[(.*?)\]|【(.*?)】/;
+                        let optMatch = descText.match(optionRegex);
+                        if (optMatch) {
+                            let optStr = optMatch[1] || optMatch[2]; 
+                            options = optStr.split('|').map(s => s.trim()).filter(s => s !== '');
+                            descText = descText.replace(optMatch[0], '').trim();
+                        }
+                        // ==============================================================
 
                         let extraInfo = "";
                         if (descText !== "") {
@@ -1026,17 +1038,44 @@
                             }
                         }
 
-                        paramInputsHtml += `
-                            <div class="param-row">
-                                <span class="param-label" title="${escapeHtml(descText)}">${escapeHtml(pName)}:</span>
-                                <input type="text" class="param-input" id="param-input-${index}-${pIdx}" 
-                                       placeholder="${escapeHtml(typePlaceholder)}" 
-                                       data-default="${escapeHtml(pDefault)}" 
-                                       data-name="${escapeHtml(pName)}" 
-                                       data-haseq="${hasEq}"
-                                       oninput="updateDisplay()">
-                            </div>
-                        `;
+                        // ============== 核心优化：自动生成带有下拉框的 HTML ================
+                        if (options.length > 0) {
+                            let optionsHtml = options.map(opt => {
+                                let isSelected = (opt === pDefault) ? 'selected' : '';
+                                return `<option value="${escapeHtml(opt)}" ${isSelected}>${escapeHtml(opt)}</option>`;
+                            }).join('');
+                            
+                            // 防止默认值本身不在选项列表中导致显示错误
+                            if (!options.includes(pDefault) && pDefault !== pName && hasEq) {
+                                optionsHtml = `<option value="${escapeHtml(pDefault)}" selected>${escapeHtml(pDefault)}</option>` + optionsHtml;
+                            }
+
+                            paramInputsHtml += `
+                                <div class="param-row">
+                                    <span class="param-label" title="${escapeHtml(descText)}">${escapeHtml(pName)}:</span>
+                                    <select class="param-input" id="param-input-${index}-${pIdx}" 
+                                           data-default="${escapeHtml(pDefault)}" 
+                                           data-name="${escapeHtml(pName)}" 
+                                           data-haseq="${hasEq}"
+                                           onchange="updateDisplay()">
+                                        ${optionsHtml}
+                                    </select>
+                                </div>
+                            `;
+                        } else {
+                            paramInputsHtml += `
+                                <div class="param-row">
+                                    <span class="param-label" title="${escapeHtml(descText)}">${escapeHtml(pName)}:</span>
+                                    <input type="text" class="param-input" id="param-input-${index}-${pIdx}" 
+                                           placeholder="${escapeHtml(typePlaceholder)}" 
+                                           data-default="${escapeHtml(pDefault)}" 
+                                           data-name="${escapeHtml(pName)}" 
+                                           data-haseq="${hasEq}"
+                                           oninput="updateDisplay()">
+                                </div>
+                            `;
+                        }
+                        // ==============================================================
                     });
                 }
             }
