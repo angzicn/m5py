@@ -88,31 +88,29 @@
         .instance-box.fixed-mode input { border-color: #fecaca; background-color: #fee2e2; color: #991b1b; cursor: not-allowed; outline: none; }
         .instance-box.fixed-mode input:focus { box-shadow: none; }
 
+        /* ============== 强大的三态搜索框 UI ============== */
         .search-box { background-color: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid transparent; transition: all 0.3s ease; }
         .search-box label { color: #475569; transition: color 0.3s ease; }
         .search-box input { border-color: #cbd5e1; transition: all 0.3s ease; }
         
+        /* 全局模式：沉稳蓝 */
         .search-box.global-search { background-color: #dbeafe; border-color: #bfdbfe; border-left: 5px solid #2563eb; }
         .search-box.global-search label { color: #1e40af; font-weight: bold; }
         .search-box.global-search input { border-color: #93c5fd; background-color: #ffffff; color: #1e3a8a; }
         .search-box.global-search input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
+        
+        /* 收藏模式：暖阳金 */
+        .search-box.fav-search { background-color: #fffbeb; border-color: #fde68a; border-left: 5px solid #f59e0b; }
+        .search-box.fav-search label { color: #b45309; font-weight: bold; }
+        .search-box.fav-search input { border-color: #fcd34d; background-color: #ffffff; color: #92400e; }
+        .search-box.fav-search input:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); }
+        /* ============================================== */
 
         .note-box { 
-            background-color: #faf5ff; 
-            border: 1px solid #e9d5ff; 
-            border-left: 5px solid #a855f7; 
-            color: #5b21b6; 
-            padding: 16px 22px; 
-            border-radius: 12px; 
-            font-size: 0.95rem; 
-            display: flex; 
-            align-items: flex-start; 
-            gap: 12px; 
-            animation: cardFadeIn 0.3s ease-out forwards; 
-            box-shadow: 0 2px 4px rgba(0,0,0,0.04); 
-            box-sizing: border-box;
-            margin: 0;
-            line-height: 1.6;
+            background-color: #faf5ff; border: 1px solid #e9d5ff; border-left: 5px solid #a855f7; 
+            color: #5b21b6; padding: 16px 22px; border-radius: 12px; font-size: 0.95rem; 
+            display: flex; align-items: flex-start; gap: 12px; animation: cardFadeIn 0.3s ease-out forwards; 
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04); box-sizing: border-box; margin: 0; line-height: 1.6;
         }
         .note-box strong { color: #4c1d95; font-size: 1rem; display: block; margin-bottom: 4px; }
         .note-icon { font-size: 1.4rem; line-height: 1; margin-top: 2px;}
@@ -132,6 +130,16 @@
         .name-group-wrapper, .function-group-wrapper, .tag-group-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
         .name-group-wrapper.show, .function-group-wrapper.show, .tag-group-wrapper.show { grid-template-rows: 1fr; }
         .name-group-inner, .function-group-inner, .tag-group-inner { overflow: hidden; }
+
+        /* ============== 左侧导航：收藏按钮 UI ============== */
+        .nav-fav-btn {
+            width: 100%; padding: 12px; background: #fffbeb; border: 1px dashed #f59e0b; color: #d97706; 
+            border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; 
+            display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px;
+        }
+        .nav-fav-btn:hover { background: #fef3c7; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1); }
+        .nav-fav-btn.active { background: #f59e0b; color: #ffffff; border-style: solid; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); }
+        /* =============================================== */
 
         .toc-container { margin-bottom: 20px; padding: 10px 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; flex-grow: 1; overflow-y: auto; }
         .toc-title { font-size: 0.9rem; font-weight: bold; color: #64748b; margin-bottom: 8px; padding: 0 4px 5px 4px; border-bottom: 1px dashed #cbd5e1; }
@@ -165,6 +173,17 @@
         .cmd-code-text.clickable:hover { background-color: #e0f2fe; }
 
         .btn-group { display: flex; gap: 8px; flex-shrink: 0; align-items: flex-start;}
+
+        /* ============== 收藏星星按钮 UI ============== */
+        .fav-btn { 
+            height: 48px; width: 48px; padding: 0; font-size: 1.6rem; border-radius: 8px; cursor: pointer; 
+            transition: all 0.2s ease; border: 1px solid #cbd5e1; background-color: #f1f5f9; color: #94a3b8; 
+            display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; line-height: 1;
+        }
+        .fav-btn:hover { background-color: #e2e8f0; color: #f59e0b; border-color: #cbd5e1; transform: scale(1.05);}
+        .fav-btn.active { background-color: #fffbeb; color: #f59e0b; border-color: #fcd34d; }
+        .fav-btn.active:hover { background-color: #fef3c7; }
+        /* =========================================== */
 
         .tag-btn { height: 48px; width: 80px; padding: 0; font-size: 0.95rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; white-space: nowrap; }
         .tag-btn:hover { filter: brightness(0.95); transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
@@ -240,17 +259,14 @@
         
         .tool-panel { flex-shrink: 0; margin-top: auto; padding-top: 20px; border-top: 2px dashed var(--border-color); }
 
-        /* ============== 精美调色板 UI 升级 (限制两行，带展开按钮) ============== */
         .color-presets-wrapper { margin-bottom: 12px; }
         .color-presets { 
             display: flex; flex-wrap: wrap; gap: 8px; 
-            max-height: 56px; /* 24px色块 + 8px间距 + 24px色块 = 56px，精准锁死两行高度 */
+            max-height: 56px; 
             overflow: hidden; 
             transition: max-height 0.35s ease-in-out; 
         }
-        .color-presets.expanded {
-            max-height: 300px; /* 展开后的足够高度 */
-        }
+        .color-presets.expanded { max-height: 300px; }
         .color-swatch { 
             width: 24px; height: 24px; border-radius: 4px; cursor: pointer; 
             border: 1px solid rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s; 
@@ -259,23 +275,10 @@
         .color-swatch:hover { transform: scale(1.15); box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2; }
         
         .color-toggle-btn {
-            width: 100%;
-            background: #f8fafc;
-            border: 1px dashed #cbd5e1;
-            color: #64748b;
-            font-size: 0.8rem;
-            padding: 4px 0;
-            border-radius: 6px;
-            cursor: pointer;
-            margin-top: 8px;
-            transition: all 0.2s ease;
+            width: 100%; background: #f8fafc; border: 1px dashed #cbd5e1; color: #64748b; font-size: 0.8rem;
+            padding: 4px 0; border-radius: 6px; cursor: pointer; margin-top: 8px; transition: all 0.2s ease;
         }
-        .color-toggle-btn:hover {
-            background: #f1f5f9;
-            color: #3b82f6;
-            border-color: #94a3b8;
-        }
-        /* ====================================================================== */
+        .color-toggle-btn:hover { background: #f1f5f9; color: #3b82f6; border-color: #94a3b8; }
 
         .welcome-box {
             background: var(--box-bg); padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
@@ -319,6 +322,7 @@
             .cmd-header { flex-direction: column; align-items: stretch; }
             
             .btn-group { width: 100%; display: flex; gap: 10px; }
+            .fav-btn { width: 48px; flex-shrink: 0; }
             .tag-btn { width: 72px; flex-shrink: 0; padding: 0;}
             .example-btn { width: 60px; flex-shrink: 0;} 
             .copy-btn { flex-grow: 1; }  
@@ -378,6 +382,7 @@
                         </div>
                     </div>
 
+                    <button id="nav-fav-btn" class="nav-fav-btn" onclick="showFavorites()">⭐ 我的本地收藏</button>
                     <div class="toc-container" id="toc-container" style="display: none;">
                         <div class="toc-title">📑 本页目录</div>
                         <ul class="toc-list" id="toc-list">
@@ -395,7 +400,7 @@
                         
                         <div id="tool-color-picker" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; animation: fadein 0.3s;">
                             
-                            <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">快速预设颜色 (49色)：</label>
+                            <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">快速预设颜色：</label>
                             <div class="color-presets-wrapper">
                                 <div class="color-presets" id="color-presets">
                                     <div class="color-swatch" style="background-color: #000000;" data-hex="#000000" onclick="applyPresetColor(this)" title="黑"></div>
@@ -405,7 +410,6 @@
                                     <div class="color-swatch" style="background-color: #AAAAAA;" data-hex="#AAAAAA" onclick="applyPresetColor(this)" title="浅灰"></div>
                                     <div class="color-swatch" style="background-color: #DDDDDD;" data-hex="#DDDDDD" onclick="applyPresetColor(this)" title="银灰"></div>
                                     <div class="color-swatch" style="background-color: #FFFFFF;" data-hex="#FFFFFF" onclick="applyPresetColor(this)" title="白"></div>
-                                    
                                     <div class="color-swatch" style="background-color: #FF0000;" data-hex="#FF0000" onclick="applyPresetColor(this)" title="正红"></div>
                                     <div class="color-swatch" style="background-color: #CC0000;" data-hex="#CC0000" onclick="applyPresetColor(this)" title="深红"></div>
                                     <div class="color-swatch" style="background-color: #8B0000;" data-hex="#8B0000" onclick="applyPresetColor(this)" title="暗红"></div>
@@ -413,7 +417,6 @@
                                     <div class="color-swatch" style="background-color: #FF6347;" data-hex="#FF6347" onclick="applyPresetColor(this)" title="番茄红"></div>
                                     <div class="color-swatch" style="background-color: #FF7F50;" data-hex="#FF7F50" onclick="applyPresetColor(this)" title="珊瑚色"></div>
                                     <div class="color-swatch" style="background-color: #DC143C;" data-hex="#DC143C" onclick="applyPresetColor(this)" title="猩红"></div>
-
                                     <div class="color-swatch" style="background-color: #FF00FF;" data-hex="#FF00FF" onclick="applyPresetColor(this)" title="洋红"></div>
                                     <div class="color-swatch" style="background-color: #FF1493;" data-hex="#FF1493" onclick="applyPresetColor(this)" title="深粉"></div>
                                     <div class="color-swatch" style="background-color: #C71585;" data-hex="#C71585" onclick="applyPresetColor(this)" title="中紫紫罗兰红"></div>
@@ -421,7 +424,6 @@
                                     <div class="color-swatch" style="background-color: #FF69B4;" data-hex="#FF69B4" onclick="applyPresetColor(this)" title="热粉"></div>
                                     <div class="color-swatch" style="background-color: #FFB6C1;" data-hex="#FFB6C1" onclick="applyPresetColor(this)" title="浅粉"></div>
                                     <div class="color-swatch" style="background-color: #FFC0CB;" data-hex="#FFC0CB" onclick="applyPresetColor(this)" title="粉红"></div>
-
                                     <div class="color-swatch" style="background-color: #FFFF00;" data-hex="#FFFF00" onclick="applyPresetColor(this)" title="黄"></div>
                                     <div class="color-swatch" style="background-color: #FFD700;" data-hex="#FFD700" onclick="applyPresetColor(this)" title="金黄"></div>
                                     <div class="color-swatch" style="background-color: #FFA500;" data-hex="#FFA500" onclick="applyPresetColor(this)" title="橙色"></div>
@@ -429,7 +431,6 @@
                                     <div class="color-swatch" style="background-color: #B8860B;" data-hex="#B8860B" onclick="applyPresetColor(this)" title="暗金麒麟"></div>
                                     <div class="color-swatch" style="background-color: #F0E68C;" data-hex="#F0E68C" onclick="applyPresetColor(this)" title="卡其"></div>
                                     <div class="color-swatch" style="background-color: #EEE8AA;" data-hex="#EEE8AA" onclick="applyPresetColor(this)" title="苍麒麟"></div>
-
                                     <div class="color-swatch" style="background-color: #00FF00;" data-hex="#00FF00" onclick="applyPresetColor(this)" title="正绿"></div>
                                     <div class="color-swatch" style="background-color: #32CD32;" data-hex="#32CD32" onclick="applyPresetColor(this)" title="青柠绿"></div>
                                     <div class="color-swatch" style="background-color: #008000;" data-hex="#008000" onclick="applyPresetColor(this)" title="纯绿"></div>
@@ -437,7 +438,6 @@
                                     <div class="color-swatch" style="background-color: #228B22;" data-hex="#228B22" onclick="applyPresetColor(this)" title="森林绿"></div>
                                     <div class="color-swatch" style="background-color: #9ACD32;" data-hex="#9ACD32" onclick="applyPresetColor(this)" title="黄绿"></div>
                                     <div class="color-swatch" style="background-color: #7CFC00;" data-hex="#7CFC00" onclick="applyPresetColor(this)" title="草绿"></div>
-
                                     <div class="color-swatch" style="background-color: #00FFFF;" data-hex="#00FFFF" onclick="applyPresetColor(this)" title="青色"></div>
                                     <div class="color-swatch" style="background-color: #00CED1;" data-hex="#00CED1" onclick="applyPresetColor(this)" title="暗宝石绿"></div>
                                     <div class="color-swatch" style="background-color: #20B2AA;" data-hex="#20B2AA" onclick="applyPresetColor(this)" title="浅海洋绿"></div>
@@ -445,7 +445,6 @@
                                     <div class="color-swatch" style="background-color: #008080;" data-hex="#008080" onclick="applyPresetColor(this)" title="水鸭色"></div>
                                     <div class="color-swatch" style="background-color: #4682B4;" data-hex="#4682B4" onclick="applyPresetColor(this)" title="钢蓝"></div>
                                     <div class="color-swatch" style="background-color: #5F9EA0;" data-hex="#5F9EA0" onclick="applyPresetColor(this)" title="军灰蓝"></div>
-
                                     <div class="color-swatch" style="background-color: #0000FF;" data-hex="#0000FF" onclick="applyPresetColor(this)" title="纯蓝"></div>
                                     <div class="color-swatch" style="background-color: #0000CD;" data-hex="#0000CD" onclick="applyPresetColor(this)" title="中蓝"></div>
                                     <div class="color-swatch" style="background-color: #00008B;" data-hex="#00008B" onclick="applyPresetColor(this)" title="深蓝"></div>
@@ -454,8 +453,9 @@
                                     <div class="color-swatch" style="background-color: #8A2BE2;" data-hex="#8A2BE2" onclick="applyPresetColor(this)" title="蓝紫"></div>
                                     <div class="color-swatch" style="background-color: #800080;" data-hex="#800080" onclick="applyPresetColor(this)" title="紫色"></div>
                                 </div>
-                                <button class="color-toggle-btn" id="color-toggle-btn" onclick="toggleColorPresets()">展开全部 49 色 ⬇</button>
+                                <button class="color-toggle-btn" id="color-toggle-btn" onclick="toggleColorPresets()">展开 ⬇</button>
                             </div>
+
                             <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">或点击下方色块自由选择：</label>
                             <input type="color" id="native-color" value="#00FF00" style="width: 100%; height: 50px; border: none; border-radius: 8px; cursor: pointer; padding: 0; margin-bottom: 15px; background: none;">
 
@@ -519,7 +519,10 @@
 
     let commandDatabase = [];
     let currentObjectCommands = [];
+    
+    // ============== 新增：UI 三态管理 ==============
     let isGlobalSearchMode = false; 
+    let isFavoritesMode = false;
 
     function hasContent(val) {
         if (val === undefined || val === null) return false;
@@ -534,6 +537,11 @@
              .replace(/&/g, "&amp;")
              .replace(/</g, "&lt;")
              .replace(/>/g, "&gt;");
+    }
+
+    // 核心安全转义：生成绝对唯一的每行卡片 ID，用于收藏功能！
+    function getCmdId(cmd) {
+        return escapeHtml(`${cmd.category}_${cmd.object_name}_${cmd.object_function}_${cmd.command_template}`).replace(/\s+/g, '');
     }
 
     function smartSplitComma(str) {
@@ -632,15 +640,20 @@
         return template;
     }
 
-    function updateSearchBoxUI(isGlobal) {
+    function updateSearchBoxUI(state) {
         const searchLabel = document.getElementById("search-label");
         const searchSettings = document.getElementById("search-settings");
-        if (isGlobal) {
+        
+        searchSettings.classList.remove("global-search", "fav-search");
+        
+        if (state === 'global') {
             searchLabel.innerText = "搜索全部指令：";
             searchSettings.classList.add("global-search");
+        } else if (state === 'fav') {
+            searchLabel.innerText = "搜索收藏指令：";
+            searchSettings.classList.add("fav-search");
         } else {
             searchLabel.innerText = "搜索当前指令：";
-            searchSettings.classList.remove("global-search");
         }
     }
 
@@ -680,8 +693,27 @@
         document.getElementById("category").value = "";
         document.getElementById("search-input").value = "";
         isGlobalSearchMode = false;
+        isFavoritesMode = false;
         updateObjectNames(); 
     }
+
+    // ============== 新增：展示本地收藏 ==============
+    function showFavorites() {
+        isFavoritesMode = true;
+        isGlobalSearchMode = false;
+        
+        // 视觉上清空左侧菜单选择，让用户明白现在进入了特殊模式
+        document.getElementById("category").value = "";
+        document.getElementById("object-name").innerHTML = '<option value="">👈 选择类别后可选</option>';
+        document.getElementById("name-group-wrapper").classList.remove('show');
+        document.getElementById("function-group-wrapper").classList.remove('show');
+        document.getElementById("tag-group-wrapper").classList.remove('show');
+        
+        document.getElementById("search-input").value = "";
+        
+        renderCommandCards();
+    }
+    // ==============================================
 
     function toggleMobileBox1() {
         if (window.innerWidth <= 768) {
@@ -698,12 +730,14 @@
         catSelect.value = ""; 
         
         isGlobalSearchMode = false;
+        isFavoritesMode = false;
         document.getElementById("search-input").value = "";
         
         updateObjectNames(); 
     }
 
     function updateObjectNames() {
+        isFavoritesMode = false; // 用户只要操作了左侧菜单，就自动退出收藏模式
         const selectedCat = document.getElementById("category").value;
         const objSelect = document.getElementById("object-name");
         const nameWrapper = document.getElementById("name-group-wrapper");
@@ -733,6 +767,7 @@
     }
 
     function updateObjectFunctions() {
+        isFavoritesMode = false;
         const selectedCat = document.getElementById("category").value;
         const selectedObj = document.getElementById("object-name").value;
         const nameWrapper = document.getElementById("name-group-wrapper");
@@ -769,6 +804,7 @@
     }
 
     function updateObjectTags() {
+        isFavoritesMode = false;
         const selectedCat = document.getElementById("category").value;
         const selectedObj = document.getElementById("object-name").value;
         const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
@@ -841,7 +877,7 @@
             
             tagSelect.value = tag;
             
-            if (!isGlobalSearchMode) {
+            if (!isGlobalSearchMode && !isFavoritesMode) {
                 document.getElementById("search-input").value = ''; 
             }
             
@@ -851,6 +887,11 @@
     }
 
     function handleSearch() {
+        if (isFavoritesMode) {
+            renderCommandCards();
+            return;
+        }
+
         const selectedCat = document.getElementById("category").value;
         const selectedObj = document.getElementById("object-name").value;
         const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
@@ -873,184 +914,254 @@
         }
     }
 
-    function renderCommandCards() {
-        const selectedCat = document.getElementById("category").value;
-        const selectedObj = document.getElementById("object-name").value;
-        const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
-        const query = document.getElementById("search-input").value.trim().toLowerCase();
+    // ============== 新增：收藏逻辑 ==============
+    function toggleFav(index) {
+        let cmd = currentObjectCommands[index];
+        if (!cmd) return;
+        let cmdId = getCmdId(cmd);
+        let favs = JSON.parse(localStorage.getItem('m5py_favorites')) || [];
         
-        const noteContainer = document.getElementById("note-container");
-        noteContainer.style.display = 'none'; 
-
-        if (selectedCat !== "" && isNameVisible && selectedObj === "") {
-            return;
+        let favIndex = favs.indexOf(cmdId);
+        let btn = document.getElementById(`fav-btn-${index}`);
+        
+        if (favIndex > -1) {
+            favs.splice(favIndex, 1);
+            if (btn) {
+                btn.classList.remove('active');
+                btn.innerHTML = '☆';
+                btn.title = '加入收藏';
+            }
+            showToast("已取消收藏");
+        } else {
+            favs.push(cmdId);
+            if (btn) {
+                btn.classList.add('active');
+                btn.innerHTML = '★';
+                btn.title = '取消收藏';
+            }
+            showToast("收藏成功！");
         }
+        localStorage.setItem('m5py_favorites', JSON.stringify(favs));
+    }
+    // ==========================================
 
+    function renderCommandCards() {
+        let favs = JSON.parse(localStorage.getItem('m5py_favorites')) || [];
         const container = document.getElementById("commands-container");
         const tocContainer = document.getElementById("toc-container");
         const tocList = document.getElementById("toc-list"); 
         const topControls = document.getElementById("top-controls");
+        const noteContainer = document.getElementById("note-container");
+        const query = document.getElementById("search-input").value.trim().toLowerCase();
         
-        if (selectedCat === "") {
-            if (query === "") {
-                isGlobalSearchMode = false;
-                updateSearchBoxUI(true); 
-                topControls.style.display = 'flex';
-                document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
-                
-                const instanceSettings = document.getElementById("instance-settings");
-                instanceSettings.style.display = 'none'; 
-                tocContainer.style.display = 'none';
-                
-                if (!document.getElementById("welcome-box")) {
+        noteContainer.style.display = 'none'; 
+
+        // ============== 收藏夹渲染模式 ==============
+        if (isFavoritesMode) {
+            document.getElementById('nav-fav-btn').classList.add('active');
+            updateSearchBoxUI('fav'); 
+            
+            topControls.style.display = 'flex';
+            document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
+            document.getElementById("instance-settings").style.display = 'none';
+            tocContainer.style.display = 'none';
+
+            currentObjectCommands = commandDatabase.filter(item => hasContent(item.command_template) && favs.includes(getCmdId(item)));
+
+            if (query !== "") {
+                currentObjectCommands = currentObjectCommands.filter(item => {
+                    const c_tmpl = String(item.command_template || '').toLowerCase();
+                    const c_desc = String(item.description || '').toLowerCase();
+                    const c_title = String(item.command_title || '').toLowerCase();
+                    return c_tmpl.includes(query) || c_desc.includes(query) || c_title.includes(query);
+                });
+            }
+
+            if (currentObjectCommands.length === 0) {
+                if (favs.length === 0) {
                     container.innerHTML = `
-                    <div class="welcome-box" id="welcome-box">
-                        <div class="welcome-header">
-                            <span class="welcome-icon">👋</span>
-                            <h3>欢迎使用 M5PY 助手</h3>
-                        </div>
-                        <p class="welcome-subtitle">由 北极圈机器人 (BEIJIQ) 倾力打造的 MicroPython 编程利器</p>
-                        <div class="welcome-features">
-                            <div class="feature-item">
-                                <div class="feature-icon">🔍</div>
-                                <div class="feature-text"><strong>全局检索</strong><br>快速查找所有硬件指令</div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon">🗂️</div>
-                                <div class="feature-text"><strong>分类浏览</strong><br>按类别精准定位代码</div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon">✍️</div>
-                                <div class="feature-text"><strong>智能修改</strong><br>自定义参数，实时更新</div>
-                            </div>
-                            <div class="feature-item">
-                                <div class="feature-icon">📋</div>
-                                <div class="feature-text"><strong>一键复制</strong><br>结合工具，高效编程</div>
-                            </div>
-                        </div>
-                        <div class="welcome-footer">
-                            👈 请在左侧选择硬件类别和名称，或直接在上方全局搜索
-                        </div>
+                    <div class="box" style="text-align: center; padding: 60px 20px; color: #64748b; border: 1px dashed #cbd5e1; background: transparent; box-shadow: none;">
+                        <div style="font-size: 3.5rem; margin-bottom: 15px; opacity: 0.8; animation: cardFadeIn 0.5s ease;">⭐</div>
+                        <div style="font-size: 1.15rem; font-weight: bold; margin-bottom: 8px; color:#334155;">你目前还没有收藏任何指令</div>
+                        <div style="font-size: 0.95rem;">在查阅指令时，点击卡片右上角的 ⭐ 即可收藏，方便日后随时取用</div>
                     </div>`;
+                } else {
+                    container.innerHTML = '<div class="box">未在你的收藏中检索到相关指令。</div>';
                 }
                 return;
+            }
+        } else {
+            // ============== 常规模式/全局模式 ==============
+            document.getElementById('nav-fav-btn').classList.remove('active');
+            const selectedCat = document.getElementById("category").value;
+            const selectedObj = document.getElementById("object-name").value;
+            const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
+            
+            if (selectedCat !== "" && isNameVisible && selectedObj === "") {
+                return;
+            }
+            
+            if (selectedCat === "") {
+                if (query === "") {
+                    isGlobalSearchMode = false;
+                    updateSearchBoxUI('global'); 
+                    topControls.style.display = 'flex';
+                    document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
+                    
+                    const instanceSettings = document.getElementById("instance-settings");
+                    instanceSettings.style.display = 'none'; 
+                    tocContainer.style.display = 'none';
+                    
+                    if (!document.getElementById("welcome-box")) {
+                        container.innerHTML = `
+                        <div class="welcome-box" id="welcome-box">
+                            <div class="welcome-header">
+                                <span class="welcome-icon">👋</span>
+                                <h3>欢迎使用 M5PY 助手</h3>
+                            </div>
+                            <p class="welcome-subtitle">由 北极圈机器人 (BEIJIQ) 倾力打造的 MicroPython 编程利器</p>
+                            <div class="welcome-features">
+                                <div class="feature-item">
+                                    <div class="feature-icon">🔍</div>
+                                    <div class="feature-text"><strong>全局检索</strong><br>快速查找所有硬件指令</div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">🗂️</div>
+                                    <div class="feature-text"><strong>分类浏览</strong><br>按类别精准定位代码</div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">✍️</div>
+                                    <div class="feature-text"><strong>智能修改</strong><br>自定义参数，实时更新</div>
+                                </div>
+                                <div class="feature-item">
+                                    <div class="feature-icon">📋</div>
+                                    <div class="feature-text"><strong>一键复制</strong><br>结合工具，高效编程</div>
+                                </div>
+                            </div>
+                            <div class="welcome-footer">
+                                👈 请在左侧选择硬件类别和名称，或直接在上方全局搜索
+                            </div>
+                        </div>`;
+                    }
+                    return;
+                } else {
+                    isGlobalSearchMode = true;
+                    updateSearchBoxUI('global');
+                    const selectedTag = document.getElementById("object-tag").value;
+                    
+                    currentObjectCommands = commandDatabase.filter(item => {
+                        if (!hasContent(item.command_template)) return false;
+                        if (selectedTag !== "ALL" && String(item.tag || '').trim() !== selectedTag) return false;
+                        return true;
+                    });
+                    
+                    topControls.style.display = 'flex';
+                    document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
+                    
+                    const instanceSettings = document.getElementById("instance-settings");
+                    const instanceInput = document.getElementById("instance-name");
+                    const instanceLabel = document.getElementById("instance-label");
+                    
+                    let needsInstance = currentObjectCommands.some(cmd => hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE');
+                    if (needsInstance) {
+                        instanceSettings.style.display = 'flex';
+                        instanceSettings.classList.remove('fixed-mode');
+                        instanceInput.readOnly = false;
+                        instanceLabel.innerText = "实例名称："; 
+                        
+                        if (window.lastSelectedObj !== "GLOBAL_SEARCH") {
+                            instanceInput.value = ""; 
+                            window.lastSelectedObj = "GLOBAL_SEARCH";
+                        }
+                        instanceInput.placeholder = "请输入实例名"; 
+                    } else {
+                        instanceSettings.style.display = 'none';
+                    }
+                }
             } else {
-                isGlobalSearchMode = true;
-                updateSearchBoxUI(true);
-                const selectedTag = document.getElementById("object-tag").value;
+                isGlobalSearchMode = false;
+                updateSearchBoxUI('local');
+                topControls.style.display = 'flex'; 
+
+                const funcWrapper = document.getElementById("function-group-wrapper");
+                const selectedFunc = document.getElementById("object-function").value;
+                const isFuncVisible = funcWrapper.classList.contains("show");
                 
+                const tagWrapper = document.getElementById("tag-group-wrapper");
+                const selectedTag = document.getElementById("object-tag").value;
+                const isTagVisible = tagWrapper.classList.contains("show");
+
                 currentObjectCommands = commandDatabase.filter(item => {
                     if (!hasContent(item.command_template)) return false;
-                    if (selectedTag !== "ALL" && String(item.tag || '').trim() !== selectedTag) return false;
+                    if (item.category !== selectedCat) return false;
+                    if (isNameVisible && item.object_name !== selectedObj) return false;
+                    
+                    if (isFuncVisible && selectedFunc !== "ALL") {
+                        if (String(item.object_function || '').trim() !== selectedFunc) return false;
+                    }
+                    if (isTagVisible && selectedTag !== "ALL") {
+                        if (String(item.tag || '').trim() !== selectedTag) return false;
+                    }
                     return true;
                 });
+
+                const thumbBox = document.getElementById("object-thumbnail-box");
+                const thumbImg = document.getElementById("object-thumbnail-img");
                 
-                topControls.style.display = 'flex';
-                document.getElementById("object-thumbnail-box").classList.add('hidden-by-error');
+                thumbBox.classList.add('hidden-by-error');
+                thumbImg.onload = function() { thumbBox.classList.remove('hidden-by-error'); };
+                thumbImg.onerror = function() { thumbBox.classList.add('hidden-by-error'); };
                 
+                const imageName = isNameVisible ? selectedObj : selectedCat;
+                thumbImg.src = `image/${imageName}.jpg`;
+
+                let needsInstance = currentObjectCommands.some(cmd => hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE');
                 const instanceSettings = document.getElementById("instance-settings");
                 const instanceInput = document.getElementById("instance-name");
                 const instanceLabel = document.getElementById("instance-label");
-                
-                let needsInstance = currentObjectCommands.some(cmd => hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE');
+
                 if (needsInstance) {
+                    let defaultName = currentObjectCommands.find(cmd => hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE' && hasContent(cmd.default_instance))?.default_instance || 'obj';
+                    let isFixed = currentObjectCommands.some(cmd => hasContent(cmd.is_instance_fixed) && String(cmd.is_instance_fixed).toUpperCase() === 'TRUE');
+
                     instanceSettings.style.display = 'flex';
-                    instanceSettings.classList.remove('fixed-mode');
-                    instanceInput.readOnly = false;
-                    instanceLabel.innerText = "实例名称："; 
                     
-                    if (window.lastSelectedObj !== "GLOBAL_SEARCH") {
-                        instanceInput.value = ""; 
-                        window.lastSelectedObj = "GLOBAL_SEARCH";
+                    if (window.lastSelectedObj !== imageName) {
+                        instanceInput.value = defaultName;
+                        window.lastSelectedObj = imageName;
                     }
-                    instanceInput.placeholder = "请输入实例名"; 
+                    instanceInput.placeholder = "";
+
+                    if (isFixed) {
+                        instanceSettings.classList.add('fixed-mode');
+                        instanceInput.readOnly = true;
+                        instanceLabel.innerText = "实例名称：";
+                    } else {
+                        instanceSettings.classList.remove('fixed-mode');
+                        instanceInput.readOnly = false;
+                        instanceLabel.innerText = "实例名称：";
+                    }
                 } else {
                     instanceSettings.style.display = 'none';
+                    window.lastSelectedObj = imageName; 
                 }
             }
-        } else {
-            isGlobalSearchMode = false;
-            updateSearchBoxUI(false);
-            topControls.style.display = 'flex'; 
-
-            const funcWrapper = document.getElementById("function-group-wrapper");
-            const selectedFunc = document.getElementById("object-function").value;
-            const isFuncVisible = funcWrapper.classList.contains("show");
             
-            const tagWrapper = document.getElementById("tag-group-wrapper");
-            const selectedTag = document.getElementById("object-tag").value;
-            const isTagVisible = tagWrapper.classList.contains("show");
-
-            currentObjectCommands = commandDatabase.filter(item => {
-                if (!hasContent(item.command_template)) return false;
-                if (item.category !== selectedCat) return false;
-                if (isNameVisible && item.object_name !== selectedObj) return false;
-                
-                if (isFuncVisible && selectedFunc !== "ALL") {
-                    if (String(item.object_function || '').trim() !== selectedFunc) return false;
+            if (!isGlobalSearchMode && currentObjectCommands.length > 0) {
+                let validNoteItem = currentObjectCommands.find(item => hasContent(item.note) || hasContent(item['备注']));
+                if (validNoteItem) {
+                    let noteText = hasContent(validNoteItem.note) ? validNoteItem.note : validNoteItem['备注'];
+                    noteContainer.innerHTML = `<div class="note-icon">💡</div><div><strong>分类备注说明</strong>${escapeHtml(noteText).replace(/\n/g, '<br>')}</div>`;
+                    noteContainer.style.display = 'flex';
                 }
-                if (isTagVisible && selectedTag !== "ALL") {
-                    if (String(item.tag || '').trim() !== selectedTag) return false;
-                }
-                return true;
-            });
-
-            const thumbBox = document.getElementById("object-thumbnail-box");
-            const thumbImg = document.getElementById("object-thumbnail-img");
-            
-            thumbBox.classList.add('hidden-by-error');
-            thumbImg.onload = function() { thumbBox.classList.remove('hidden-by-error'); };
-            thumbImg.onerror = function() { thumbBox.classList.add('hidden-by-error'); };
-            
-            const imageName = isNameVisible ? selectedObj : selectedCat;
-            thumbImg.src = `image/${imageName}.jpg`;
-
-            let needsInstance = currentObjectCommands.some(cmd => hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE');
-            const instanceSettings = document.getElementById("instance-settings");
-            const instanceInput = document.getElementById("instance-name");
-            const instanceLabel = document.getElementById("instance-label");
-
-            if (needsInstance) {
-                let defaultName = currentObjectCommands.find(cmd => hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE' && hasContent(cmd.default_instance))?.default_instance || 'obj';
-                let isFixed = currentObjectCommands.some(cmd => hasContent(cmd.is_instance_fixed) && String(cmd.is_instance_fixed).toUpperCase() === 'TRUE');
-
-                instanceSettings.style.display = 'flex';
-                
-                if (window.lastSelectedObj !== imageName) {
-                    instanceInput.value = defaultName;
-                    window.lastSelectedObj = imageName;
-                }
-                instanceInput.placeholder = "";
-
-                if (isFixed) {
-                    instanceSettings.classList.add('fixed-mode');
-                    instanceInput.readOnly = true;
-                    instanceLabel.innerText = "实例名称：";
-                } else {
-                    instanceSettings.classList.remove('fixed-mode');
-                    instanceInput.readOnly = false;
-                    instanceLabel.innerText = "实例名称：";
-                }
-            } else {
-                instanceSettings.style.display = 'none';
-                window.lastSelectedObj = imageName; 
             }
-        }
-        
-        if (!isGlobalSearchMode && currentObjectCommands.length > 0) {
-            let validNoteItem = currentObjectCommands.find(item => hasContent(item.note) || hasContent(item['备注']));
-            if (validNoteItem) {
-                let noteText = hasContent(validNoteItem.note) ? validNoteItem.note : validNoteItem['备注'];
-                noteContainer.innerHTML = `<div class="note-icon">💡</div><div><strong>分类备注说明</strong>${escapeHtml(noteText).replace(/\n/g, '<br>')}</div>`;
-                noteContainer.style.display = 'flex';
-            }
-        }
 
-        if (currentObjectCommands.length === 0) {
-            container.innerHTML = '<div class="box">未检索到任何符合条件的指令数据。</div>';
-            tocContainer.style.display = 'none';
-            return;
-        }
+            if (currentObjectCommands.length === 0) {
+                container.innerHTML = '<div class="box">未检索到任何符合条件的指令数据。</div>';
+                tocContainer.style.display = 'none';
+                return;
+            }
+        } // end of else (not favorites mode)
 
         let htmlContent = '';
         let tocContent = ''; 
@@ -1206,19 +1317,25 @@
             const tagText = hasTag ? String(cmd.tag).trim() : '';
             const tagClass = hasTag ? getTagClass(tagText) : '';
 
+            // 在收藏夹模式下，也支持点击标签在当前范围内进行过滤
             let isCurrentFilter = (!isGlobalSearchMode && hasTag && selectedTag === tagText);
             let tagOnClick = isCurrentFilter ? `selectTag('ALL')` : `selectTag('${tagText}')`;
             let tagTitle = isCurrentFilter ? "点击显示全部条目" : `点击只看[${tagText}]标签`;
             let activeClass = isCurrentFilter ? "active-filter" : "";
 
             let breadcrumbHtml = '';
-            if (isGlobalSearchMode) {
+            if (isGlobalSearchMode || isFavoritesMode) {
                 let pathText = `${escapeHtml(cmd.category)} - ${escapeHtml(cmd.object_name)}`;
                 if (hasContent(cmd.object_function)) {
                     pathText += ` - ${escapeHtml(cmd.object_function)}`;
                 }
                 breadcrumbHtml = `<div class="cmd-breadcrumb">🗂️ 所属模块：<span>${pathText}</span></div>`;
             }
+
+            // ============== 获取当前指令的收藏状态 ==============
+            let cmdId = getCmdId(cmd);
+            let isFav = favs.includes(cmdId);
+            // ==================================================
 
             htmlContent += `
             <div class="cmd-card" id="cmd-card-${index}">
@@ -1243,6 +1360,10 @@
                     </div>
                     
                     <div class="btn-group">
+                        <button id="fav-btn-${index}" class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFav(${index})" title="${isFav ? '取消收藏' : '加入收藏'}">
+                            ${isFav ? '★' : '☆'}
+                        </button>
+
                         ${hasTag ? `
                         <button class="tag-btn ${tagClass} ${activeClass}" onclick="${tagOnClick}" title="${tagTitle}">
                             <span class="btn-text-normal">${tagText}</span>
@@ -1274,7 +1395,7 @@
 
         container.innerHTML = htmlContent;
         
-        if (isGlobalSearchMode) {
+        if (isGlobalSearchMode || isFavoritesMode) {
             tocContainer.style.display = 'none';
         } else {
             tocContainer.style.display = 'block';
@@ -1283,7 +1404,7 @@
         
         updateDisplay(); 
 
-        if (window.innerWidth <= 768 && currentObjectCommands.length > 0) {
+        if (window.innerWidth <= 768 && currentObjectCommands.length > 0 && !isFavoritesMode) {
             document.getElementById('main-box1').classList.remove('expanded');
         }
     }
@@ -1310,7 +1431,7 @@
         if (!targetCard) return;
 
         if (targetCard.style.display === 'none') {
-            if(!isGlobalSearchMode) document.getElementById("search-input").value = '';
+            if(!isGlobalSearchMode && !isFavoritesMode) document.getElementById("search-input").value = '';
             updateDisplay();
         }
 
@@ -1450,9 +1571,6 @@
         });
     }
 
-    // =======================================================
-    // 扩展工具：取色器与预设调色板交互逻辑
-    // =======================================================
     function toggleTool() {
         const tool = document.getElementById('tool-select').value;
         const cp = document.getElementById('tool-color-picker');
@@ -1463,18 +1581,16 @@
         }
     }
     
-    // ============== 核心逻辑：展开/收起 49色调色板 ==============
     function toggleColorPresets() {
         const presets = document.getElementById('color-presets');
         const btn = document.getElementById('color-toggle-btn');
         presets.classList.toggle('expanded');
         if (presets.classList.contains('expanded')) {
-            btn.innerHTML = '收起更多颜色 ⬆';
+            btn.innerHTML = '收起 ⬆';
         } else {
-            btn.innerHTML = '展开全部 49 色 ⬇';
+            btn.innerHTML = '展开 ⬇';
         }
     }
-    // ============================================================
 
     function applyPresetColor(element) {
         const hex = element.getAttribute('data-hex');
