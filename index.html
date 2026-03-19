@@ -240,14 +240,42 @@
         
         .tool-panel { flex-shrink: 0; margin-top: auto; padding-top: 20px; border-top: 2px dashed var(--border-color); }
 
-        /* ============== 预设颜色调色板样式 ============== */
-        .color-presets { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+        /* ============== 精美调色板 UI 升级 (限制两行，带展开按钮) ============== */
+        .color-presets-wrapper { margin-bottom: 12px; }
+        .color-presets { 
+            display: flex; flex-wrap: wrap; gap: 8px; 
+            max-height: 56px; /* 24px色块 + 8px间距 + 24px色块 = 56px，精准锁死两行高度 */
+            overflow: hidden; 
+            transition: max-height 0.35s ease-in-out; 
+        }
+        .color-presets.expanded {
+            max-height: 300px; /* 展开后的足够高度 */
+        }
         .color-swatch { 
             width: 24px; height: 24px; border-radius: 4px; cursor: pointer; 
             border: 1px solid rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s; 
+            box-sizing: border-box;
         }
         .color-swatch:hover { transform: scale(1.15); box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2; }
-        /* ============================================= */
+        
+        .color-toggle-btn {
+            width: 100%;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            color: #64748b;
+            font-size: 0.8rem;
+            padding: 4px 0;
+            border-radius: 6px;
+            cursor: pointer;
+            margin-top: 8px;
+            transition: all 0.2s ease;
+        }
+        .color-toggle-btn:hover {
+            background: #f1f5f9;
+            color: #3b82f6;
+            border-color: #94a3b8;
+        }
+        /* ====================================================================== */
 
         .welcome-box {
             background: var(--box-bg); padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
@@ -367,20 +395,66 @@
                         
                         <div id="tool-color-picker" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; animation: fadein 0.3s;">
                             
-                            <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">快速预设颜色：</label>
-                            <div class="color-presets">
-                                <div class="color-swatch" style="background-color: #000000;" data-hex="#000000" onclick="applyPresetColor(this)" title="黑色"></div>
-                                <div class="color-swatch" style="background-color: #FFFFFF;" data-hex="#FFFFFF" onclick="applyPresetColor(this)" title="白色"></div>
-                                <div class="color-swatch" style="background-color: #FF0000;" data-hex="#FF0000" onclick="applyPresetColor(this)" title="红色"></div>
-                                <div class="color-swatch" style="background-color: #00FF00;" data-hex="#00FF00" onclick="applyPresetColor(this)" title="绿色"></div>
-                                <div class="color-swatch" style="background-color: #0000FF;" data-hex="#0000FF" onclick="applyPresetColor(this)" title="蓝色"></div>
-                                <div class="color-swatch" style="background-color: #FFFF00;" data-hex="#FFFF00" onclick="applyPresetColor(this)" title="黄色"></div>
-                                <div class="color-swatch" style="background-color: #00FFFF;" data-hex="#00FFFF" onclick="applyPresetColor(this)" title="青色"></div>
-                                <div class="color-swatch" style="background-color: #FF00FF;" data-hex="#FF00FF" onclick="applyPresetColor(this)" title="洋红"></div>
-                                <div class="color-swatch" style="background-color: #FFA500;" data-hex="#FFA500" onclick="applyPresetColor(this)" title="橙色"></div>
-                                <div class="color-swatch" style="background-color: #800080;" data-hex="#800080" onclick="applyPresetColor(this)" title="紫色"></div>
-                                <div class="color-swatch" style="background-color: #808080;" data-hex="#808080" onclick="applyPresetColor(this)" title="灰色"></div>
-                                <div class="color-swatch" style="background-color: #00BFFF;" data-hex="#00BFFF" onclick="applyPresetColor(this)" title="深空蓝"></div>
+                            <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">快速预设颜色 (49色)：</label>
+                            <div class="color-presets-wrapper">
+                                <div class="color-presets" id="color-presets">
+                                    <div class="color-swatch" style="background-color: #000000;" data-hex="#000000" onclick="applyPresetColor(this)" title="黑"></div>
+                                    <div class="color-swatch" style="background-color: #333333;" data-hex="#333333" onclick="applyPresetColor(this)" title="深灰"></div>
+                                    <div class="color-swatch" style="background-color: #555555;" data-hex="#555555" onclick="applyPresetColor(this)" title="暗灰"></div>
+                                    <div class="color-swatch" style="background-color: #777777;" data-hex="#777777" onclick="applyPresetColor(this)" title="中灰"></div>
+                                    <div class="color-swatch" style="background-color: #AAAAAA;" data-hex="#AAAAAA" onclick="applyPresetColor(this)" title="浅灰"></div>
+                                    <div class="color-swatch" style="background-color: #DDDDDD;" data-hex="#DDDDDD" onclick="applyPresetColor(this)" title="银灰"></div>
+                                    <div class="color-swatch" style="background-color: #FFFFFF;" data-hex="#FFFFFF" onclick="applyPresetColor(this)" title="白"></div>
+                                    
+                                    <div class="color-swatch" style="background-color: #FF0000;" data-hex="#FF0000" onclick="applyPresetColor(this)" title="正红"></div>
+                                    <div class="color-swatch" style="background-color: #CC0000;" data-hex="#CC0000" onclick="applyPresetColor(this)" title="深红"></div>
+                                    <div class="color-swatch" style="background-color: #8B0000;" data-hex="#8B0000" onclick="applyPresetColor(this)" title="暗红"></div>
+                                    <div class="color-swatch" style="background-color: #FF4500;" data-hex="#FF4500" onclick="applyPresetColor(this)" title="橘红"></div>
+                                    <div class="color-swatch" style="background-color: #FF6347;" data-hex="#FF6347" onclick="applyPresetColor(this)" title="番茄红"></div>
+                                    <div class="color-swatch" style="background-color: #FF7F50;" data-hex="#FF7F50" onclick="applyPresetColor(this)" title="珊瑚色"></div>
+                                    <div class="color-swatch" style="background-color: #DC143C;" data-hex="#DC143C" onclick="applyPresetColor(this)" title="猩红"></div>
+
+                                    <div class="color-swatch" style="background-color: #FF00FF;" data-hex="#FF00FF" onclick="applyPresetColor(this)" title="洋红"></div>
+                                    <div class="color-swatch" style="background-color: #FF1493;" data-hex="#FF1493" onclick="applyPresetColor(this)" title="深粉"></div>
+                                    <div class="color-swatch" style="background-color: #C71585;" data-hex="#C71585" onclick="applyPresetColor(this)" title="中紫紫罗兰红"></div>
+                                    <div class="color-swatch" style="background-color: #DB7093;" data-hex="#DB7093" onclick="applyPresetColor(this)" title="苍白紫罗兰红"></div>
+                                    <div class="color-swatch" style="background-color: #FF69B4;" data-hex="#FF69B4" onclick="applyPresetColor(this)" title="热粉"></div>
+                                    <div class="color-swatch" style="background-color: #FFB6C1;" data-hex="#FFB6C1" onclick="applyPresetColor(this)" title="浅粉"></div>
+                                    <div class="color-swatch" style="background-color: #FFC0CB;" data-hex="#FFC0CB" onclick="applyPresetColor(this)" title="粉红"></div>
+
+                                    <div class="color-swatch" style="background-color: #FFFF00;" data-hex="#FFFF00" onclick="applyPresetColor(this)" title="黄"></div>
+                                    <div class="color-swatch" style="background-color: #FFD700;" data-hex="#FFD700" onclick="applyPresetColor(this)" title="金黄"></div>
+                                    <div class="color-swatch" style="background-color: #FFA500;" data-hex="#FFA500" onclick="applyPresetColor(this)" title="橙色"></div>
+                                    <div class="color-swatch" style="background-color: #DAA520;" data-hex="#DAA520" onclick="applyPresetColor(this)" title="金麒麟色"></div>
+                                    <div class="color-swatch" style="background-color: #B8860B;" data-hex="#B8860B" onclick="applyPresetColor(this)" title="暗金麒麟"></div>
+                                    <div class="color-swatch" style="background-color: #F0E68C;" data-hex="#F0E68C" onclick="applyPresetColor(this)" title="卡其"></div>
+                                    <div class="color-swatch" style="background-color: #EEE8AA;" data-hex="#EEE8AA" onclick="applyPresetColor(this)" title="苍麒麟"></div>
+
+                                    <div class="color-swatch" style="background-color: #00FF00;" data-hex="#00FF00" onclick="applyPresetColor(this)" title="正绿"></div>
+                                    <div class="color-swatch" style="background-color: #32CD32;" data-hex="#32CD32" onclick="applyPresetColor(this)" title="青柠绿"></div>
+                                    <div class="color-swatch" style="background-color: #008000;" data-hex="#008000" onclick="applyPresetColor(this)" title="纯绿"></div>
+                                    <div class="color-swatch" style="background-color: #006400;" data-hex="#006400" onclick="applyPresetColor(this)" title="深绿"></div>
+                                    <div class="color-swatch" style="background-color: #228B22;" data-hex="#228B22" onclick="applyPresetColor(this)" title="森林绿"></div>
+                                    <div class="color-swatch" style="background-color: #9ACD32;" data-hex="#9ACD32" onclick="applyPresetColor(this)" title="黄绿"></div>
+                                    <div class="color-swatch" style="background-color: #7CFC00;" data-hex="#7CFC00" onclick="applyPresetColor(this)" title="草绿"></div>
+
+                                    <div class="color-swatch" style="background-color: #00FFFF;" data-hex="#00FFFF" onclick="applyPresetColor(this)" title="青色"></div>
+                                    <div class="color-swatch" style="background-color: #00CED1;" data-hex="#00CED1" onclick="applyPresetColor(this)" title="暗宝石绿"></div>
+                                    <div class="color-swatch" style="background-color: #20B2AA;" data-hex="#20B2AA" onclick="applyPresetColor(this)" title="浅海洋绿"></div>
+                                    <div class="color-swatch" style="background-color: #008B8B;" data-hex="#008B8B" onclick="applyPresetColor(this)" title="暗青"></div>
+                                    <div class="color-swatch" style="background-color: #008080;" data-hex="#008080" onclick="applyPresetColor(this)" title="水鸭色"></div>
+                                    <div class="color-swatch" style="background-color: #4682B4;" data-hex="#4682B4" onclick="applyPresetColor(this)" title="钢蓝"></div>
+                                    <div class="color-swatch" style="background-color: #5F9EA0;" data-hex="#5F9EA0" onclick="applyPresetColor(this)" title="军灰蓝"></div>
+
+                                    <div class="color-swatch" style="background-color: #0000FF;" data-hex="#0000FF" onclick="applyPresetColor(this)" title="纯蓝"></div>
+                                    <div class="color-swatch" style="background-color: #0000CD;" data-hex="#0000CD" onclick="applyPresetColor(this)" title="中蓝"></div>
+                                    <div class="color-swatch" style="background-color: #00008B;" data-hex="#00008B" onclick="applyPresetColor(this)" title="深蓝"></div>
+                                    <div class="color-swatch" style="background-color: #000080;" data-hex="#000080" onclick="applyPresetColor(this)" title="海军蓝"></div>
+                                    <div class="color-swatch" style="background-color: #4169E1;" data-hex="#4169E1" onclick="applyPresetColor(this)" title="皇家蓝"></div>
+                                    <div class="color-swatch" style="background-color: #8A2BE2;" data-hex="#8A2BE2" onclick="applyPresetColor(this)" title="蓝紫"></div>
+                                    <div class="color-swatch" style="background-color: #800080;" data-hex="#800080" onclick="applyPresetColor(this)" title="紫色"></div>
+                                </div>
+                                <button class="color-toggle-btn" id="color-toggle-btn" onclick="toggleColorPresets()">展开全部 49 色 ⬇</button>
                             </div>
                             <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">或点击下方色块自由选择：</label>
                             <input type="color" id="native-color" value="#00FF00" style="width: 100%; height: 50px; border: none; border-radius: 8px; cursor: pointer; padding: 0; margin-bottom: 15px; background: none;">
@@ -1388,12 +1462,24 @@
             cp.style.display = 'none';
         }
     }
+    
+    // ============== 核心逻辑：展开/收起 49色调色板 ==============
+    function toggleColorPresets() {
+        const presets = document.getElementById('color-presets');
+        const btn = document.getElementById('color-toggle-btn');
+        presets.classList.toggle('expanded');
+        if (presets.classList.contains('expanded')) {
+            btn.innerHTML = '收起更多颜色 ⬆';
+        } else {
+            btn.innerHTML = '展开全部 49 色 ⬇';
+        }
+    }
+    // ============================================================
 
     function applyPresetColor(element) {
         const hex = element.getAttribute('data-hex');
         const nativeColor = document.getElementById('native-color');
         nativeColor.value = hex;
-        // 触发原生颜色选择器的 input 事件，让下方的转换框联动更新
         nativeColor.dispatchEvent(new Event('input'));
     }
 
