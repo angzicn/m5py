@@ -156,13 +156,13 @@
         }
         .highlight-active { animation: flashFocus 0.8s ease 2 alternate; border-color: #3b82f6 !important; }
 
-        /* ============== 全新排版：顶部信息层 (序号+标签+释义框+收藏) ============== */
+        /* ============== 第一行：信息栏 (序号 + 释义 + 标签 + 收藏) ============== */
         .cmd-top-bar { 
             display: flex; justify-content: space-between; align-items: stretch; 
-            margin-bottom: 12px; gap: 10px;
+            margin-bottom: 15px; gap: 12px;
         }
         .cmd-top-left { 
-            display: flex; align-items: stretch; gap: 10px; flex-grow: 1; min-width: 0;
+            display: flex; align-items: stretch; gap: 12px; flex-grow: 1; min-width: 0;
         }
         .cmd-index-badge {
             background-color: #eff6ff; color: #3b82f6; 
@@ -170,32 +170,37 @@
             border-radius: 8px; display: flex; justify-content: center; align-items: center; 
             border: 1px solid #bfdbfe; flex-shrink: 0; padding: 0 12px;
         }
-        
-        /* 全新的中文释义气泡框 */
         .cmd-desc-box {
-            flex-grow: 1; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; 
-            padding: 6px 15px; font-size: 0.95rem; color: #1e293b; font-weight: bold; 
+            flex-grow: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; 
+            padding: 8px 15px; font-size: 0.95rem; color: #334155; font-weight: bold; 
             display: flex; align-items: center; line-height: 1.5; min-width: 0;
-            overflow-wrap: break-word;
+        }
+        
+        .cmd-top-right {
+            display: flex; align-items: center; gap: 12px; flex-shrink: 0;
         }
 
-        /* 纯正 SVG 高级收藏星星 */
         .fav-svg-btn {
-            width: 40px; flex-shrink: 0; display: flex; justify-content: center; align-items: center;
+            width: 42px; flex-shrink: 0; display: flex; justify-content: center; align-items: center;
             cursor: pointer; color: #cbd5e1; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;
         }
-        .fav-svg-btn svg {
-            width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; transition: all 0.3s;
-        }
-        .fav-svg-btn:hover { border-color: #cbd5e1; background: #f8fafc; }
-        .fav-svg-btn:hover svg { color: #fbbf24; transform: scale(1.15); }
+        .fav-svg-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; transition: all 0.3s; }
+        .fav-svg-btn:hover { border-color: #94a3b8; background: #f8fafc; }
+        .fav-svg-btn:hover svg { color: #f59e0b; transform: scale(1.15); }
         
         .fav-svg-btn.active { color: #f59e0b; border-color: #fde68a; background: #fffbeb; }
         .fav-svg-btn.active svg { fill: #f59e0b; stroke: #f59e0b; filter: drop-shadow(0 2px 4px rgba(245,158,11,0.4)); }
-        /* =================================================================== */
+        
+        .tag-btn { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; white-space: nowrap; padding: 0 14px; font-size: 0.9rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; border: 1px solid transparent; flex-shrink: 0; height: 100%; min-height: 38px;}
+        .tag-btn:hover { filter: brightness(0.95); transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
+        .tag-btn .btn-text-hover { display: none; } 
+        .tag-btn.active-filter:hover .btn-text-normal { display: none; } 
+        .tag-btn.active-filter:hover .btn-text-hover { display: inline; } 
+        /* ========================================================================= */
 
-        .cmd-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 15px; flex-wrap: nowrap; }
+        /* ============== 第二行：操作栏 (代码 + 示例 + 复制) ============== */
+        .cmd-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 15px; flex-wrap: nowrap; }
         
         .cmd-code-container { flex-grow: 1; min-width: 0; background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 8px; overflow: hidden; }
         
@@ -205,27 +210,15 @@
         .cmd-code-text.clickable { cursor: pointer; }
         .cmd-code-text.clickable:hover { background-color: #e0f2fe; }
 
-        .btn-group { display: flex; gap: 8px; flex-shrink: 0; align-items: flex-start;}
+        .btn-group { display: flex; gap: 10px; flex-shrink: 0; align-items: flex-start;}
 
-        /* 标签现在放在第一行，适配高度 */
-        .tag-btn { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; white-space: nowrap; padding: 0 12px; font-size: 0.9rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; border: 1px solid transparent; flex-shrink: 0;}
-        .tag-btn:hover { filter: brightness(0.95); transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
-        
-        .tag-btn .btn-text-hover { display: none; } 
-        .tag-btn.active-filter:hover .btn-text-normal { display: none; } 
-        .tag-btn.active-filter:hover .btn-text-hover { display: inline; } 
-
-        .tag-init { background-color: #e0e7ff; color: #4338ca; border-color: #c7d2fe; }
-        .tag-write { background-color: #d1fae5; color: #047857; border-color: #a7f3d0; }
-        .tag-read { background-color: #fef3c7; color: #b45309; border-color: #fde68a; }
-        .tag-default { background-color: #f1f5f9; color: #475569; border-color: #e2e8f0; }
-
-        .example-btn { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; height: 48px; padding: 0 15px; font-size: 1.1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
+        .example-btn { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; height: 48px; padding: 0 16px; font-size: 1.1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
         .example-btn:hover { background-color: #e2e8f0; border-color: #94a3b8; }
         .example-btn.open { background-color: #e0f2fe; border-color: #7dd3fc; }
 
-        .copy-btn { background-color: #3b82f6; color: white; border: none; height: 48px; padding: 0 20px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; box-sizing: border-box; }
+        .copy-btn { background-color: #3b82f6; color: white; border: none; height: 48px; padding: 0 24px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; box-sizing: border-box; }
         .copy-btn:hover { background-color: #2563eb; }
+        /* ========================================================================= */
         
         .tool-copy-btn { padding: 10px 15px; font-size: 13px; margin-left: 8px; height: auto;}
 
@@ -341,10 +334,10 @@
             .top-controls { flex-direction: column; gap: 15px; }
             .object-thumbnail-box { display: none !important; }
             
-            /* 手机端头部适配 */
             .cmd-top-bar { flex-direction: column; align-items: stretch; }
-            .cmd-top-left { flex-direction: row; flex-wrap: wrap; }
-            .fav-svg-btn { align-self: flex-end; margin-top: -42px; }
+            .cmd-top-left { flex-direction: row; flex-wrap: wrap; align-items: center; }
+            .cmd-top-right { justify-content: flex-end; width: 100%; margin-top: 5px;}
+            .cmd-desc-box { width: 100%; }
 
             .cmd-header { flex-direction: column; align-items: stretch; }
             
@@ -548,6 +541,43 @@
     let isGlobalSearchMode = false; 
     let isFavoritesMode = false;
 
+    // ============== 核心引擎：动态标签预分配系统 ==============
+    let globalTagMap = {};
+    const TAG_PALETTE = [
+        { bg: '#e0e7ff', text: '#4338ca', border: '#c7d2fe' }, // Indigo (如:初始化)
+        { bg: '#d1fae5', text: '#047857', border: '#a7f3d0' }, // Emerald (如:写入)
+        { bg: '#fef3c7', text: '#b45309', border: '#fde68a' }, // Amber (如:读取)
+        { bg: '#e0f2fe', text: '#0369a1', border: '#bae6fd' }, // Light Blue
+        { bg: '#fae8ff', text: '#7e22ce', border: '#f3e8ff' }, // Purple
+        { bg: '#ffe4e6', text: '#be185d', border: '#fecdd3' }, // Rose
+        { bg: '#ffedd5', text: '#b45309', border: '#fed7aa' }, // Orange
+        { bg: '#ccfbf1', text: '#0f766e', border: '#99f6e4' }, // Teal
+        { bg: '#f3e8ff', text: '#6b21a8', border: '#e9d5ff' }, // Fuchsia
+        { bg: '#fce7f3', text: '#be185d', border: '#fbcfe8' }, // Pink
+        { bg: '#ecfccb', text: '#4d7c0f', border: '#d9f99d' }, // Lime
+        { bg: '#cffafe', text: '#0f766e', border: '#a5f3fc' }, // Cyan
+        { bg: '#fee2e2', text: '#e11d48', border: '#fecaca' }, // Red
+        { bg: '#f3f4f6', text: '#334155', border: '#e2e8f0' }  // Slate (Fallback)
+    ];
+
+    function buildTagColorMap() {
+        // 全局提取所有出现过的不为空的标签
+        let uniqueTags = [...new Set(commandDatabase.map(item => String(item.tag || '').trim()).filter(t => t !== ''))];
+        // 字母排序，保证每次加载映射顺序绝对一致
+        uniqueTags.sort();
+        // 依次分发预设颜色
+        uniqueTags.forEach((tag, index) => {
+            globalTagMap[tag] = TAG_PALETTE[index % TAG_PALETTE.length];
+        });
+    }
+
+    function getTagStyle(tag) {
+        let style = globalTagMap[tag];
+        if (!style) return 'background-color: #f1f5f9; color: #475569; border-color: #e2e8f0;'; // 安全兜底
+        return `background-color: ${style.bg}; color: ${style.text}; border-color: ${style.border};`;
+    }
+    // ========================================================
+
     function hasContent(val) {
         if (val === undefined || val === null) return false;
         let str = String(val).trim();
@@ -703,6 +733,7 @@
                     return;
                 }
                 commandDatabase = results.data;
+                buildTagColorMap(); // <-- 核心：拉取数据后立即构建动态标签字典
                 initCategoryDropdown();
             },
             error: function(err) {
@@ -877,13 +908,6 @@
         renderCommandCards();
     }
 
-    function getTagClass(tag) {
-        if (tag === '初始化') return 'tag-init';
-        if (tag === '写入') return 'tag-write';
-        if (tag === '读取') return 'tag-read';
-        return 'tag-default';
-    }
-
     function selectTag(tag) {
         const tagSelect = document.getElementById("object-tag");
         if (tagSelect) {
@@ -943,7 +967,6 @@
         let favIndex = favs.indexOf(cmdId);
         let btn = document.getElementById(`fav-btn-${index}`);
         
-        // 核心修改：基于 class 切换实现 SVG 样式的改变
         if (favIndex > -1) {
             favs.splice(favIndex, 1);
             if (btn) {
@@ -1331,7 +1354,6 @@
             
             const hasTag = hasContent(cmd.tag);
             const tagText = hasTag ? String(cmd.tag).trim() : '';
-            const tagClass = hasTag ? getTagClass(tagText) : '';
 
             let isCurrentFilter = (!isGlobalSearchMode && !isFavoritesMode && hasTag && selectedTag === tagText);
             let tagOnClick = isCurrentFilter ? `selectTag('ALL')` : `selectTag('${tagText}')`;
@@ -1350,28 +1372,29 @@
             let cmdId = getCmdId(cmd);
             let isFav = favs.includes(cmdId);
 
-            // ============== 核心修改：生成双层结构的 HTML 卡片 ==============
             htmlContent += `
             <div class="cmd-card" id="cmd-card-${index}">
                 
                 <div class="cmd-top-bar">
                     <div class="cmd-top-left">
                         <div class="cmd-index-badge">${listIndexStr}</div>
-                        ${hasTag ? `
-                        <button class="tag-btn ${tagClass} ${activeClass}" onclick="${tagOnClick}" title="${tagTitle}">
-                            <span class="btn-text-normal">${tagText}</span>
-                            <span class="btn-text-hover">全部</span>
-                        </button>` : ''}
-                        
                         <div class="cmd-desc-box" id="cmd-desc-${index}">
                             ${highlightSafe(escapeHtml(cmd.description || '暂无详细说明。'), safeQuery)}
                         </div>
                     </div>
                     
-                    <div class="fav-svg-btn ${isFav ? 'active' : ''}" id="fav-btn-${index}" onclick="toggleFav(${index})" title="${isFav ? '取消收藏' : '加入收藏'}">
-                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                        </svg>
+                    <div class="cmd-top-right">
+                        ${hasTag ? `
+                        <button class="tag-btn tag-dynamic ${activeClass}" style="${getTagStyle(tagText)}" onclick="${tagOnClick}" title="${tagTitle}">
+                            <span class="btn-text-normal">${tagText}</span>
+                            <span class="btn-text-hover">全部</span>
+                        </button>` : ''}
+                        
+                        <div class="fav-svg-btn ${isFav ? 'active' : ''}" id="fav-btn-${index}" onclick="toggleFav(${index})" title="${isFav ? '取消收藏' : '加入收藏'}">
+                            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                            </svg>
+                        </div>
                     </div>
                 </div>
                 
@@ -1506,7 +1529,6 @@
                 card.style.display = 'block';
 
                 const descElem = document.getElementById(`cmd-desc-${index}`);
-                // 确保中文描述框内的搜索高亮依然生效
                 if(descElem) descElem.innerHTML = highlightSafe(escapeHtml(cmd.description || '暂无详细说明。'), safeQuery);
 
                 let finalCode = String(cmd.command_template || '');
