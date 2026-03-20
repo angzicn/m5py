@@ -156,25 +156,43 @@
         }
         .highlight-active { animation: flashFocus 0.8s ease 2 alternate; border-color: #3b82f6 !important; }
 
-        /* ============== 全新排版：顶部信息层 (序号+标签+收藏) ============== */
+        /* ============== 全新排版：顶部信息层 (序号+标签+释义框+收藏) ============== */
         .cmd-top-bar { 
-            display: flex; justify-content: space-between; align-items: center; 
-            margin-bottom: 12px; 
+            display: flex; justify-content: space-between; align-items: stretch; 
+            margin-bottom: 12px; gap: 10px;
         }
         .cmd-top-left { 
-            display: flex; align-items: center; gap: 12px; 
+            display: flex; align-items: stretch; gap: 10px; flex-grow: 1; min-width: 0;
         }
         .cmd-index-badge {
-            width: 32px; height: 32px; background-color: #eff6ff; color: #3b82f6; 
+            background-color: #eff6ff; color: #3b82f6; 
             font-family: Consolas, monospace; font-size: 1.05rem; font-weight: bold; 
             border-radius: 8px; display: flex; justify-content: center; align-items: center; 
-            border: 1px solid #bfdbfe; flex-shrink: 0;
+            border: 1px solid #bfdbfe; flex-shrink: 0; padding: 0 12px;
         }
-        .fav-emoji-btn {
-            font-size: 1.8rem; cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
-            user-select: none; display: flex; align-items: center; justify-content: center;
+        
+        /* 全新的中文释义气泡框 */
+        .cmd-desc-box {
+            flex-grow: 1; background: #f1f5f9; border: 1px solid #e2e8f0; border-radius: 8px; 
+            padding: 6px 15px; font-size: 0.95rem; color: #1e293b; font-weight: bold; 
+            display: flex; align-items: center; line-height: 1.5; min-width: 0;
+            overflow-wrap: break-word;
         }
-        .fav-emoji-btn:hover { transform: scale(1.2); }
+
+        /* 纯正 SVG 高级收藏星星 */
+        .fav-svg-btn {
+            width: 40px; flex-shrink: 0; display: flex; justify-content: center; align-items: center;
+            cursor: pointer; color: #cbd5e1; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;
+        }
+        .fav-svg-btn svg {
+            width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; transition: all 0.3s;
+        }
+        .fav-svg-btn:hover { border-color: #cbd5e1; background: #f8fafc; }
+        .fav-svg-btn:hover svg { color: #fbbf24; transform: scale(1.15); }
+        
+        .fav-svg-btn.active { color: #f59e0b; border-color: #fde68a; background: #fffbeb; }
+        .fav-svg-btn.active svg { fill: #f59e0b; stroke: #f59e0b; filter: drop-shadow(0 2px 4px rgba(245,158,11,0.4)); }
         /* =================================================================== */
 
         .cmd-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 15px; flex-wrap: nowrap; }
@@ -189,8 +207,8 @@
 
         .btn-group { display: flex; gap: 8px; flex-shrink: 0; align-items: flex-start;}
 
-        /* 修改了标签的高度适配顶栏 */
-        .tag-btn { height: 32px; width: 80px; padding: 0; font-size: 0.9rem; font-weight: bold; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; white-space: nowrap; }
+        /* 标签现在放在第一行，适配高度 */
+        .tag-btn { display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; white-space: nowrap; padding: 0 12px; font-size: 0.9rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; border: 1px solid transparent; flex-shrink: 0;}
         .tag-btn:hover { filter: brightness(0.95); transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
         
         .tag-btn .btn-text-hover { display: none; } 
@@ -227,8 +245,6 @@
         .param-hl { color: var(--code-param); }
         .search-hl { background-color: var(--search-hl-bg); color: var(--search-hl-text); border-radius: 3px; padding: 0 2px; font-weight: bold; }
 
-        .cmd-desc { margin-bottom: 15px; font-size: 1rem; color: #334155; font-weight: bold; }
-        
         .cmd-params { background: var(--param-bg); border-left: 4px solid var(--param-border); color: var(--param-text); padding: 12px 15px; border-radius: 4px 8px 8px 4px; margin-bottom: 15px; font-size: 0.95rem; }
         .cmd-params strong { display: block; margin-bottom: 5px; color: #b45309; }
         
@@ -324,6 +340,12 @@
 
             .top-controls { flex-direction: column; gap: 15px; }
             .object-thumbnail-box { display: none !important; }
+            
+            /* 手机端头部适配 */
+            .cmd-top-bar { flex-direction: column; align-items: stretch; }
+            .cmd-top-left { flex-direction: row; flex-wrap: wrap; }
+            .fav-svg-btn { align-self: flex-end; margin-top: -42px; }
+
             .cmd-header { flex-direction: column; align-items: stretch; }
             
             .btn-group { width: 100%; display: flex; gap: 10px; }
@@ -921,17 +943,18 @@
         let favIndex = favs.indexOf(cmdId);
         let btn = document.getElementById(`fav-btn-${index}`);
         
+        // 核心修改：基于 class 切换实现 SVG 样式的改变
         if (favIndex > -1) {
             favs.splice(favIndex, 1);
             if (btn) {
-                btn.innerHTML = '<span style="color: #cbd5e1;">☆</span>';
+                btn.classList.remove('active');
                 btn.title = '加入收藏';
             }
             showToast("已取消收藏");
         } else {
             favs.push(cmdId);
             if (btn) {
-                btn.innerHTML = '<span style="color: #f59e0b; text-shadow: 0 2px 4px rgba(245,158,11,0.3);">★</span>';
+                btn.classList.add('active');
                 btn.title = '取消收藏';
             }
             showToast("收藏成功！");
@@ -1166,7 +1189,6 @@
 
         currentObjectCommands.forEach((cmd, index) => {
             let title = cmd.command_title || cmd.command_template || `命令 ${index + 1}`;
-            // 目录加上两位数序号
             let listIndexStr = String(index + 1).padStart(2, '0');
             tocContent += `<li class="toc-item" onclick="scrollToCard(${index})">📌 ${listIndexStr}. ${escapeHtml(title)}</li>`;
 
@@ -1327,11 +1349,8 @@
 
             let cmdId = getCmdId(cmd);
             let isFav = favs.includes(cmdId);
-            let favHtml = isFav 
-                ? '<span style="color: #f59e0b; text-shadow: 0 2px 4px rgba(245,158,11,0.3);">★</span>' 
-                : '<span style="color: #cbd5e1;">☆</span>';
 
-            // ============== 核心重构：双层卡片布局 ==============
+            // ============== 核心修改：生成双层结构的 HTML 卡片 ==============
             htmlContent += `
             <div class="cmd-card" id="cmd-card-${index}">
                 
@@ -1343,9 +1362,16 @@
                             <span class="btn-text-normal">${tagText}</span>
                             <span class="btn-text-hover">全部</span>
                         </button>` : ''}
+                        
+                        <div class="cmd-desc-box" id="cmd-desc-${index}">
+                            ${highlightSafe(escapeHtml(cmd.description || '暂无详细说明。'), safeQuery)}
+                        </div>
                     </div>
-                    <div class="fav-emoji-btn" id="fav-btn-${index}" onclick="toggleFav(${index})" title="${isFav ? '取消收藏' : '加入收藏'}">
-                        ${favHtml}
+                    
+                    <div class="fav-svg-btn ${isFav ? 'active' : ''}" id="fav-btn-${index}" onclick="toggleFav(${index})" title="${isFav ? '取消收藏' : '加入收藏'}">
+                        <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
+                            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
+                        </svg>
                     </div>
                 </div>
                 
@@ -1374,8 +1400,6 @@
                         <button class="copy-btn" onclick="copyCommand(${index})">复制</button>
                     </div>
                 </div>
-                
-                <div class="cmd-desc" id="cmd-desc-${index}"></div>
 
                 ${hasParamsDesc ? `<div class="cmd-params"><strong>参数说明:</strong>${escapeHtml(cleanCmdParams).replace(/\n/g, '<br>')}</div>` : ''}
                 ${hasReturnDesc ? `<div class="cmd-returns"><strong>返回值:</strong>${escapeHtml(cmd.return_value).replace(/\n/g, '<br>')}</div>` : ''}
@@ -1482,7 +1506,8 @@
                 card.style.display = 'block';
 
                 const descElem = document.getElementById(`cmd-desc-${index}`);
-                descElem.innerHTML = highlightSafe(escapeHtml(cmd.description || '暂无详细说明。'), safeQuery);
+                // 确保中文描述框内的搜索高亮依然生效
+                if(descElem) descElem.innerHTML = highlightSafe(escapeHtml(cmd.description || '暂无详细说明。'), safeQuery);
 
                 let finalCode = String(cmd.command_template || '');
                 const needsInstance = hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE';
