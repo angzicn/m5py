@@ -175,7 +175,6 @@
             display: flex; align-items: center; line-height: 1.5; min-width: 0; min-height: 38px;
         }
         
-        /* ============== 修复：右侧容器强制拉伸 ============== */
         .cmd-top-right {
             display: flex; align-items: stretch; gap: 12px; flex-shrink: 0;
         }
@@ -184,7 +183,7 @@
             width: 42px; flex-shrink: 0; display: flex; justify-content: center; align-items: center;
             cursor: pointer; color: #cbd5e1; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;
-            min-height: 38px; box-sizing: border-box; /* 强制限定最小高度且撑满 */
+            min-height: 38px; box-sizing: border-box; 
         }
         .fav-svg-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; transition: all 0.3s; }
         .fav-svg-btn:hover { border-color: #94a3b8; background: #f8fafc; }
@@ -198,7 +197,6 @@
         .tag-btn .btn-text-hover { display: none; } 
         .tag-btn.active-filter:hover .btn-text-normal { display: none; } 
         .tag-btn.active-filter:hover .btn-text-hover { display: inline; } 
-        /* ======================================================= */
 
         .cmd-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 15px; flex-wrap: nowrap; }
         
@@ -293,26 +291,36 @@
         }
         .color-toggle-btn:hover { background: #f1f5f9; color: #3b82f6; border-color: #94a3b8; }
 
+        /* ============== 全新：动态树状仪表盘 UI ============== */
         .welcome-box {
-            background: var(--box-bg); padding: 40px 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
-            text-align: center; border: 1px solid #e2e8f0; animation: cardFadeIn 0.4s ease-out forwards;
+            background: var(--box-bg); padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
+            border: 1px solid #e2e8f0; animation: cardFadeIn 0.4s ease-out forwards;
         }
-        .welcome-header { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 10px; }
-        .welcome-icon { font-size: 2.8rem; animation: wave 2s infinite; transform-origin: 70% 70%; }
-        @keyframes wave { 
-            0% { transform: rotate(0deg); } 10% { transform: rotate(14deg); } 20% { transform: rotate(-8deg); } 
-            30% { transform: rotate(14deg); } 40% { transform: rotate(-4deg); } 50% { transform: rotate(10deg); } 
-            60%, 100% { transform: rotate(0deg); }
-        }
-        .welcome-box h3 { margin: 0; font-size: 1.8rem; color: #1e293b; letter-spacing: 1px;}
-        .welcome-subtitle { color: #64748b; font-size: 1.05rem; margin-bottom: 40px; }
-        .welcome-features { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; margin-bottom: 40px; }
-        .feature-item { background: #f8fafc; padding: 25px 20px; border-radius: 12px; border: 1px solid #e2e8f0; display: flex; flex-direction: column; align-items: center; gap: 15px; transition: transform 0.3s, box-shadow 0.3s; }
-        .feature-item:hover { transform: translateY(-5px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.08); border-color: #cbd5e1; }
-        .feature-icon { font-size: 2.2rem; }
-        .feature-text { font-size: 0.95rem; color: #475569; line-height: 1.6; }
-        .feature-text strong { color: #334155; font-size: 1.1rem; display: block; margin-bottom: 5px; }
-        .welcome-footer { display: inline-block; background: #eff6ff; color: #1d4ed8; padding: 12px 25px; border-radius: 30px; font-weight: bold; font-size: 0.95rem; border: 1px solid #bfdbfe;}
+        .welcome-header { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 5px; }
+        .welcome-icon { font-size: 2.2rem; animation: wave 2s infinite; transform-origin: 70% 70%; }
+        .welcome-box h3 { margin: 0; font-size: 1.6rem; color: #1e293b; letter-spacing: 1px;}
+        .welcome-subtitle { color: #64748b; font-size: 0.95rem; margin-bottom: 25px; text-align: center;}
+        
+        .tree-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; text-align: left; margin-bottom: 30px; }
+        .tree-cat-card { background: #f8fafc; border: 1px solid #e2e8f0; border-top: 4px solid #3b82f6; border-radius: 10px; padding: 18px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s; }
+        .tree-cat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
+        .tree-cat-title { font-size: 1.15rem; font-weight: 800; color: #1e293b; margin-bottom: 15px; border-bottom: 2px dashed #cbd5e1; padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+        
+        .tree-name-block { margin-bottom: 15px; }
+        .tree-name-block:last-child { margin-bottom: 0; }
+        .tree-name-title { font-size: 0.95rem; color: #475569; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: color 0.2s;}
+        .tree-name-title:hover { color: #2563eb; }
+        
+        .tree-func-list { display: flex; flex-wrap: wrap; gap: 6px; padding-left: 20px; border-left: 2px solid #e2e8f0; margin-left: 6px; }
+        .tree-func-pill { background: #ffffff; color: #3b82f6; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; transition: all 0.2s; border: 1px solid #bfdbfe; }
+        .tree-func-pill:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
+        .tree-func-pill.all-pill { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; border-radius: 12px; }
+        .tree-func-pill.all-pill:hover { background: #0284c7; color: white; border-color: #0284c7; }
+
+        /* 极致压缩的页脚说明 */
+        .welcome-features-mini { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; border-top: 1px dashed #cbd5e1; padding-top: 20px;}
+        .feature-mini { font-size: 0.85rem; color: #64748b; display: flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; border: 1px solid #e2e8f0;}
+        /* ============================================================== */
 
         @media (max-width: 768px) {
             .box1 { position: sticky; top: 10px; z-index: 999; max-width: 100%; max-height: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); margin-bottom: 20px; overflow-y: visible; }
@@ -338,7 +346,6 @@
             .cmd-top-right { justify-content: flex-end; width: 100%; margin-top: 5px;}
             .cmd-desc-box { width: 100%; }
             
-            /* 手机端按钮高度也锁定以防塌陷 */
             .fav-svg-btn { align-self: flex-end; margin-top: -42px; height: 38px; }
 
             .cmd-header { flex-direction: column; align-items: stretch; }
@@ -740,6 +747,93 @@
         });
     };
 
+    // ============== 核心：生成动态仪表盘 HTML ==============
+    function getWelcomeTreeHtml() {
+        let tree = {};
+        
+        commandDatabase.forEach(item => {
+            if (!hasContent(item.command_template)) return;
+            let cat = hasContent(item.category) ? String(item.category).trim() : "";
+            let name = hasContent(item.object_name) ? String(item.object_name).trim() : "";
+            let func = hasContent(item.object_function) ? String(item.object_function).trim() : "";
+
+            if (cat === "") return;
+
+            if (!tree[cat]) tree[cat] = {};
+            
+            if (name !== "") {
+                if (!tree[cat][name]) tree[cat][name] = new Set();
+                if (func !== "" && func.toUpperCase() !== "ALL") {
+                    tree[cat][name].add(func);
+                }
+            } else {
+                if (!tree[cat]["__NO_NAME__"]) tree[cat]["__NO_NAME__"] = new Set();
+            }
+        });
+
+        let html = '<div class="tree-grid">';
+        for (let cat in tree) {
+            html += `<div class="tree-cat-card">`;
+            html += `<div class="tree-cat-title">🗂️ ${escapeHtml(cat)}</div>`;
+            
+            let names = Object.keys(tree[cat]);
+            
+            if (names.length === 1 && names[0] === "__NO_NAME__") {
+                html += `<div class="tree-func-pill" style="display:inline-block; font-size:1rem; padding:8px 16px;" onclick="navTo('${escapeHtml(cat)}', '', '')">🚀 进入 [${escapeHtml(cat)}]</div>`;
+            } else {
+                for (let name of names) {
+                    if (name === "__NO_NAME__") continue;
+                    
+                    let funcs = Array.from(tree[cat][name]);
+                    html += `<div class="tree-name-block">`;
+                    
+                    if (funcs.length === 0) {
+                        html += `<div class="tree-name-title" onclick="navTo('${escapeHtml(cat)}', '${escapeHtml(name)}', 'ALL')" title="点击查看此对象所有指令">📦 ${escapeHtml(name)} <span style="font-size:0.8rem; color:#94a3b8;">(点击进入)</span></div>`;
+                    } else {
+                        html += `<div class="tree-name-title" onclick="navTo('${escapeHtml(cat)}', '${escapeHtml(name)}', 'ALL')" title="点击查看此对象所有指令">📦 ${escapeHtml(name)}</div>`;
+                        html += `<div class="tree-func-list">`;
+                        for (let func of funcs) {
+                            html += `<div class="tree-func-pill" onclick="navTo('${escapeHtml(cat)}', '${escapeHtml(name)}', '${escapeHtml(func)}')">${escapeHtml(func)}</div>`;
+                        }
+                        html += `</div>`; 
+                    }
+                    html += `</div>`; 
+                }
+            }
+            html += `</div>`; 
+        }
+        html += '</div>';
+        return html;
+    }
+    // ========================================================
+
+    // ============== 核心：一键导航引擎 ==============
+    window.navTo = function(cat, name, func) {
+        isGlobalSearchMode = false;
+        isFavoritesMode = false;
+        document.getElementById("search-input").value = "";
+        document.getElementById('nav-fav-btn').classList.remove('active');
+
+        document.getElementById("category").value = cat;
+        updateObjectNames(); 
+
+        if (name && name !== "") {
+            document.getElementById("object-name").value = name;
+            updateObjectFunctions(); 
+            
+            if (func && func !== "") {
+                document.getElementById("object-function").value = func;
+                updateObjectTags(); 
+            }
+        }
+
+        if (window.innerWidth <= 768) {
+            document.getElementById('main-box1').classList.remove('expanded');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    // ================================================
+
     function resetToHome() {
         document.getElementById("category").value = "";
         document.getElementById("search-input").value = "";
@@ -1054,27 +1148,15 @@
                                 <span class="welcome-icon">👋</span>
                                 <h3>欢迎使用 M5PY 助手</h3>
                             </div>
-                            <p class="welcome-subtitle">由 北极圈机器人 (BEIJIQ) 倾力打造的 MicroPython 编程利器</p>
-                            <div class="welcome-features">
-                                <div class="feature-item">
-                                    <div class="feature-icon">🔍</div>
-                                    <div class="feature-text"><strong>全局检索</strong><br>快速查找所有硬件指令</div>
-                                </div>
-                                <div class="feature-item">
-                                    <div class="feature-icon">🗂️</div>
-                                    <div class="feature-text"><strong>分类浏览</strong><br>按类别精准定位代码</div>
-                                </div>
-                                <div class="feature-item">
-                                    <div class="feature-icon">✍️</div>
-                                    <div class="feature-text"><strong>智能修改</strong><br>自定义参数，实时更新</div>
-                                </div>
-                                <div class="feature-item">
-                                    <div class="feature-icon">📋</div>
-                                    <div class="feature-text"><strong>一键复制</strong><br>结合工具，高效编程</div>
-                                </div>
-                            </div>
-                            <div class="welcome-footer">
-                                👈 请在左侧选择硬件类别和名称，或直接在上方全局搜索
+                            <p class="welcome-subtitle">请在下方快速选择您要查看的指令字典，或在上方全局检索</p>
+                            
+                            ${getWelcomeTreeHtml()}
+
+                            <div class="welcome-features-mini">
+                                <div class="feature-mini"><span class="icon">🔍</span>全局检索</div>
+                                <div class="feature-mini"><span class="icon">🗂️</span>分类浏览</div>
+                                <div class="feature-mini"><span class="icon">✍️</span>智能修改</div>
+                                <div class="feature-mini"><span class="icon">📋</span>一键复制</div>
                             </div>
                         </div>`;
                     }
@@ -1375,6 +1457,7 @@
                 <div class="cmd-top-bar">
                     <div class="cmd-top-left">
                         <div class="cmd-index-badge">${listIndexStr}</div>
+                        
                         <div class="cmd-desc-box" id="cmd-desc-${index}">
                             ${highlightSafe(escapeHtml(cmd.description || '暂无详细说明。'), safeQuery)}
                         </div>
