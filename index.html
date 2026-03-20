@@ -88,23 +88,19 @@
         .instance-box.fixed-mode input { border-color: #fecaca; background-color: #fee2e2; color: #991b1b; cursor: not-allowed; outline: none; }
         .instance-box.fixed-mode input:focus { box-shadow: none; }
 
-        /* ============== 强大的三态搜索框 UI ============== */
         .search-box { background-color: #ffffff; border: 1px solid #e2e8f0; border-left: 5px solid transparent; transition: all 0.3s ease; }
         .search-box label { color: #475569; transition: color 0.3s ease; }
         .search-box input { border-color: #cbd5e1; transition: all 0.3s ease; }
         
-        /* 全局模式：沉稳蓝 */
         .search-box.global-search { background-color: #dbeafe; border-color: #bfdbfe; border-left: 5px solid #2563eb; }
         .search-box.global-search label { color: #1e40af; font-weight: bold; }
         .search-box.global-search input { border-color: #93c5fd; background-color: #ffffff; color: #1e3a8a; }
         .search-box.global-search input:focus { border-color: #2563eb; box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2); }
         
-        /* 收藏模式：暖阳金 */
         .search-box.fav-search { background-color: #fffbeb; border-color: #fde68a; border-left: 5px solid #f59e0b; }
         .search-box.fav-search label { color: #b45309; font-weight: bold; }
         .search-box.fav-search input { border-color: #fcd34d; background-color: #ffffff; color: #92400e; }
         .search-box.fav-search input:focus { border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2); }
-        /* ============================================== */
 
         .note-box { 
             background-color: #faf5ff; border: 1px solid #e9d5ff; border-left: 5px solid #a855f7; 
@@ -131,7 +127,6 @@
         .name-group-wrapper.show, .function-group-wrapper.show, .tag-group-wrapper.show { grid-template-rows: 1fr; }
         .name-group-inner, .function-group-inner, .tag-group-inner { overflow: hidden; }
 
-        /* ============== 左侧导航：收藏按钮 UI ============== */
         .nav-fav-btn {
             width: 100%; padding: 12px; background: #fffbeb; border: 1px dashed #f59e0b; color: #d97706; 
             border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; 
@@ -139,7 +134,6 @@
         }
         .nav-fav-btn:hover { background: #fef3c7; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1); }
         .nav-fav-btn.active { background: #f59e0b; color: #ffffff; border-style: solid; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); }
-        /* =============================================== */
 
         .toc-container { margin-bottom: 20px; padding: 10px 10px; background: #f8fafc; border-radius: 8px; border: 1px solid #e2e8f0; flex-grow: 1; overflow-y: auto; }
         .toc-title { font-size: 0.9rem; font-weight: bold; color: #64748b; margin-bottom: 8px; padding: 0 4px 5px 4px; border-bottom: 1px dashed #cbd5e1; }
@@ -162,6 +156,27 @@
         }
         .highlight-active { animation: flashFocus 0.8s ease 2 alternate; border-color: #3b82f6 !important; }
 
+        /* ============== 全新排版：顶部信息层 (序号+标签+收藏) ============== */
+        .cmd-top-bar { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 12px; 
+        }
+        .cmd-top-left { 
+            display: flex; align-items: center; gap: 12px; 
+        }
+        .cmd-index-badge {
+            width: 32px; height: 32px; background-color: #eff6ff; color: #3b82f6; 
+            font-family: Consolas, monospace; font-size: 1.05rem; font-weight: bold; 
+            border-radius: 8px; display: flex; justify-content: center; align-items: center; 
+            border: 1px solid #bfdbfe; flex-shrink: 0;
+        }
+        .fav-emoji-btn {
+            font-size: 1.8rem; cursor: pointer; transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+            user-select: none; display: flex; align-items: center; justify-content: center;
+        }
+        .fav-emoji-btn:hover { transform: scale(1.2); }
+        /* =================================================================== */
+
         .cmd-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 10px; margin-bottom: 15px; flex-wrap: nowrap; }
         
         .cmd-code-container { flex-grow: 1; min-width: 0; background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 8px; overflow: hidden; }
@@ -174,18 +189,8 @@
 
         .btn-group { display: flex; gap: 8px; flex-shrink: 0; align-items: flex-start;}
 
-        /* ============== 收藏星星按钮 UI ============== */
-        .fav-btn { 
-            height: 48px; width: 48px; padding: 0; font-size: 1.6rem; border-radius: 8px; cursor: pointer; 
-            transition: all 0.2s ease; border: 1px solid #cbd5e1; background-color: #f1f5f9; color: #94a3b8; 
-            display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; line-height: 1;
-        }
-        .fav-btn:hover { background-color: #e2e8f0; color: #f59e0b; border-color: #cbd5e1; transform: scale(1.05);}
-        .fav-btn.active { background-color: #fffbeb; color: #f59e0b; border-color: #fcd34d; }
-        .fav-btn.active:hover { background-color: #fef3c7; }
-        /* =========================================== */
-
-        .tag-btn { height: 48px; width: 80px; padding: 0; font-size: 0.95rem; font-weight: bold; border-radius: 8px; cursor: pointer; transition: all 0.3s ease; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; white-space: nowrap; }
+        /* 修改了标签的高度适配顶栏 */
+        .tag-btn { height: 32px; width: 80px; padding: 0; font-size: 0.9rem; font-weight: bold; border-radius: 6px; cursor: pointer; transition: all 0.3s ease; border: 1px solid transparent; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; white-space: nowrap; }
         .tag-btn:hover { filter: brightness(0.95); transform: translateY(-2px); box-shadow: 0 4px 6px rgba(0,0,0,0.08); }
         
         .tag-btn .btn-text-hover { display: none; } 
@@ -322,8 +327,6 @@
             .cmd-header { flex-direction: column; align-items: stretch; }
             
             .btn-group { width: 100%; display: flex; gap: 10px; }
-            .fav-btn { width: 48px; flex-shrink: 0; }
-            .tag-btn { width: 72px; flex-shrink: 0; padding: 0;}
             .example-btn { width: 60px; flex-shrink: 0;} 
             .copy-btn { flex-grow: 1; }  
             
@@ -383,6 +386,7 @@
                     </div>
 
                     <button id="nav-fav-btn" class="nav-fav-btn" onclick="showFavorites()">⭐ 我的本地收藏</button>
+
                     <div class="toc-container" id="toc-container" style="display: none;">
                         <div class="toc-title">📑 本页目录</div>
                         <ul class="toc-list" id="toc-list">
@@ -519,8 +523,6 @@
 
     let commandDatabase = [];
     let currentObjectCommands = [];
-    
-    // ============== 新增：UI 三态管理 ==============
     let isGlobalSearchMode = false; 
     let isFavoritesMode = false;
 
@@ -539,7 +541,6 @@
              .replace(/>/g, "&gt;");
     }
 
-    // 核心安全转义：生成绝对唯一的每行卡片 ID，用于收藏功能！
     function getCmdId(cmd) {
         return escapeHtml(`${cmd.category}_${cmd.object_name}_${cmd.object_function}_${cmd.command_template}`).replace(/\s+/g, '');
     }
@@ -697,12 +698,10 @@
         updateObjectNames(); 
     }
 
-    // ============== 新增：展示本地收藏 ==============
     function showFavorites() {
         isFavoritesMode = true;
         isGlobalSearchMode = false;
         
-        // 视觉上清空左侧菜单选择，让用户明白现在进入了特殊模式
         document.getElementById("category").value = "";
         document.getElementById("object-name").innerHTML = '<option value="">👈 选择类别后可选</option>';
         document.getElementById("name-group-wrapper").classList.remove('show');
@@ -713,7 +712,6 @@
         
         renderCommandCards();
     }
-    // ==============================================
 
     function toggleMobileBox1() {
         if (window.innerWidth <= 768) {
@@ -737,7 +735,7 @@
     }
 
     function updateObjectNames() {
-        isFavoritesMode = false; // 用户只要操作了左侧菜单，就自动退出收藏模式
+        isFavoritesMode = false; 
         const selectedCat = document.getElementById("category").value;
         const objSelect = document.getElementById("object-name");
         const nameWrapper = document.getElementById("name-group-wrapper");
@@ -914,7 +912,6 @@
         }
     }
 
-    // ============== 新增：收藏逻辑 ==============
     function toggleFav(index) {
         let cmd = currentObjectCommands[index];
         if (!cmd) return;
@@ -927,23 +924,20 @@
         if (favIndex > -1) {
             favs.splice(favIndex, 1);
             if (btn) {
-                btn.classList.remove('active');
-                btn.innerHTML = '☆';
+                btn.innerHTML = '<span style="color: #cbd5e1;">☆</span>';
                 btn.title = '加入收藏';
             }
             showToast("已取消收藏");
         } else {
             favs.push(cmdId);
             if (btn) {
-                btn.classList.add('active');
-                btn.innerHTML = '★';
+                btn.innerHTML = '<span style="color: #f59e0b; text-shadow: 0 2px 4px rgba(245,158,11,0.3);">★</span>';
                 btn.title = '取消收藏';
             }
             showToast("收藏成功！");
         }
         localStorage.setItem('m5py_favorites', JSON.stringify(favs));
     }
-    // ==========================================
 
     function renderCommandCards() {
         let favs = JSON.parse(localStorage.getItem('m5py_favorites')) || [];
@@ -956,7 +950,6 @@
         
         noteContainer.style.display = 'none'; 
 
-        // ============== 收藏夹渲染模式 ==============
         if (isFavoritesMode) {
             document.getElementById('nav-fav-btn').classList.add('active');
             updateSearchBoxUI('fav'); 
@@ -991,7 +984,6 @@
                 return;
             }
         } else {
-            // ============== 常规模式/全局模式 ==============
             document.getElementById('nav-fav-btn').classList.remove('active');
             const selectedCat = document.getElementById("category").value;
             const selectedObj = document.getElementById("object-name").value;
@@ -1161,7 +1153,7 @@
                 tocContainer.style.display = 'none';
                 return;
             }
-        } // end of else (not favorites mode)
+        } 
 
         let htmlContent = '';
         let tocContent = ''; 
@@ -1174,7 +1166,9 @@
 
         currentObjectCommands.forEach((cmd, index) => {
             let title = cmd.command_title || cmd.command_template || `命令 ${index + 1}`;
-            tocContent += `<li class="toc-item" onclick="scrollToCard(${index})">📌 ${escapeHtml(title)}</li>`;
+            // 目录加上两位数序号
+            let listIndexStr = String(index + 1).padStart(2, '0');
+            tocContent += `<li class="toc-item" onclick="scrollToCard(${index})">📌 ${listIndexStr}. ${escapeHtml(title)}</li>`;
 
             let hasParams = false;
             let paramInputsHtml = '';
@@ -1317,8 +1311,7 @@
             const tagText = hasTag ? String(cmd.tag).trim() : '';
             const tagClass = hasTag ? getTagClass(tagText) : '';
 
-            // 在收藏夹模式下，也支持点击标签在当前范围内进行过滤
-            let isCurrentFilter = (!isGlobalSearchMode && hasTag && selectedTag === tagText);
+            let isCurrentFilter = (!isGlobalSearchMode && !isFavoritesMode && hasTag && selectedTag === tagText);
             let tagOnClick = isCurrentFilter ? `selectTag('ALL')` : `selectTag('${tagText}')`;
             let tagTitle = isCurrentFilter ? "点击显示全部条目" : `点击只看[${tagText}]标签`;
             let activeClass = isCurrentFilter ? "active-filter" : "";
@@ -1332,13 +1325,30 @@
                 breadcrumbHtml = `<div class="cmd-breadcrumb">🗂️ 所属模块：<span>${pathText}</span></div>`;
             }
 
-            // ============== 获取当前指令的收藏状态 ==============
             let cmdId = getCmdId(cmd);
             let isFav = favs.includes(cmdId);
-            // ==================================================
+            let favHtml = isFav 
+                ? '<span style="color: #f59e0b; text-shadow: 0 2px 4px rgba(245,158,11,0.3);">★</span>' 
+                : '<span style="color: #cbd5e1;">☆</span>';
 
+            // ============== 核心重构：双层卡片布局 ==============
             htmlContent += `
             <div class="cmd-card" id="cmd-card-${index}">
+                
+                <div class="cmd-top-bar">
+                    <div class="cmd-top-left">
+                        <div class="cmd-index-badge">${listIndexStr}</div>
+                        ${hasTag ? `
+                        <button class="tag-btn ${tagClass} ${activeClass}" onclick="${tagOnClick}" title="${tagTitle}">
+                            <span class="btn-text-normal">${tagText}</span>
+                            <span class="btn-text-hover">全部</span>
+                        </button>` : ''}
+                    </div>
+                    <div class="fav-emoji-btn" id="fav-btn-${index}" onclick="toggleFav(${index})" title="${isFav ? '取消收藏' : '加入收藏'}">
+                        ${favHtml}
+                    </div>
+                </div>
+                
                 <div class="cmd-header">
                     <div class="cmd-code-container">
                         <div class="cmd-code-text ${hasParams ? 'clickable' : ''}" ${hasParams ? `onclick="toggleParamsPanel(${index}, ${hasParams})"` : ''}>
@@ -1360,16 +1370,6 @@
                     </div>
                     
                     <div class="btn-group">
-                        <button id="fav-btn-${index}" class="fav-btn ${isFav ? 'active' : ''}" onclick="toggleFav(${index})" title="${isFav ? '取消收藏' : '加入收藏'}">
-                            ${isFav ? '★' : '☆'}
-                        </button>
-
-                        ${hasTag ? `
-                        <button class="tag-btn ${tagClass} ${activeClass}" onclick="${tagOnClick}" title="${tagTitle}">
-                            <span class="btn-text-normal">${tagText}</span>
-                            <span class="btn-text-hover">全部</span>
-                        </button>` : ''}
-                        
                         ${hasExample ? `<button class="example-btn" id="example-btn-${index}" onclick="toggleExamplePanel(${index})" title="查看示例代码">💡</button>` : ''}
                         <button class="copy-btn" onclick="copyCommand(${index})">复制</button>
                     </div>
