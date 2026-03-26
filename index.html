@@ -123,7 +123,6 @@
         select.param-input { cursor: pointer; appearance: auto; background-image: none; }
         select.param-input:hover { border-color: #93c5fd; }
 
-        /* ============== 全新极致清爽的 VS Code 风格侧边栏树状图 ============== */
         .sidebar-tree { margin-bottom: 20px; user-select: none; }
         .tree-folder { margin-bottom: 2px; }
         .tree-folder-header { 
@@ -136,7 +135,7 @@
         
         .tree-folder-body { 
             display: none; padding-left: 6px; margin-top: 2px; 
-            border-left: 1px solid #cbd5e1; margin-left: 18px; /* 清爽的左侧视觉引导线 */
+            border-left: 1px solid #cbd5e1; margin-left: 18px;
         }
         .tree-folder-body.open { display: block; animation: cardFadeIn 0.2s ease; }
         
@@ -147,7 +146,6 @@
         }
         .tree-item:hover { background: #f1f5f9; color: #2563eb; }
         .tree-item.active { background: #eff6ff; color: #2563eb; font-weight: 700; }
-        /* 选中时的蓝色竖条高亮 */
         .tree-item.active::before { content: ''; position: absolute; left: -7px; top: 10%; height: 80%; width: 2px; background: #3b82f6; border-radius: 2px; }
         
         .tree-sub-list { display: flex; flex-direction: column; gap: 1px; margin-top: 2px; margin-bottom: 4px; padding-left: 8px; border-left: 1px dashed #cbd5e1; margin-left: 12px; }
@@ -157,7 +155,6 @@
         .tree-sub-item:hover { background: #f1f5f9; color: #3b82f6; }
         .tree-sub-item.active { background: #e0f2fe; color: #0284c7; font-weight: bold; }
         .tree-sub-item.active::before { content: ''; position: absolute; left: -9px; top: 15%; height: 70%; width: 2px; background: #0ea5e9; border-radius: 2px; }
-        /* ====================================================================== */
 
         .tag-group-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
         .tag-group-wrapper.show { grid-template-rows: 1fr; }
@@ -1378,11 +1375,20 @@
                             descText = descText.replace(optMatch[0], '').trim();
                         }
                         
+                        // ============== 修改：判断参数是否为完全可选 (None或空) ==============
+                        let isOptional = hasEq && (pDefault.toUpperCase() === 'NONE' || pDefault === '');
+
                         if (options.length > 0) {
-                            pDefault = pName; 
-                            hasEq = false;    
+                            if (!isOptional) {
+                                pDefault = pName; 
+                                hasEq = false;    
+                            }
                         }
-                        parsedDefaultParams.push(hasEq ? `${pName}=${pDefault}` : pDefault);
+                        
+                        if (!isOptional) {
+                            parsedDefaultParams.push(hasEq ? `${pName}=${pDefault}` : pDefault);
+                        }
+                        // ====================================================================
 
                         let extraInfo = "";
                         if (descText !== "") {
@@ -1395,7 +1401,9 @@
                         }
 
                         let typePlaceholder = "";
-                        if (hasEq) {
+                        if (isOptional) {
+                            typePlaceholder = `[可选] 可以填入: ${extraInfo ? extraInfo : pName}`;
+                        } else if (hasEq) {
                             typePlaceholder = `默认值: ${pDefault}`;
                             if (extraInfo) typePlaceholder += `, ${extraInfo}`;
                         } else {
@@ -1673,16 +1681,31 @@
                             let defVal = inputEl.getAttribute('data-default');
                             let isSelect = inputEl.tagName.toLowerCase() === 'select';
 
+                            // ============== 修改：拼装代码时应用隐身逻辑 ==============
+                            let isOptional = hasEq && (defVal.toUpperCase() === 'NONE' || defVal === '');
+
                             if (isSelect && val === '') {
-                                currentParams.push(pName);
+                                if (!isOptional) {
+                                    currentParams.push(pName);
+                                }
+                            } else if (val.trim() === '') {
+                                if (!isOptional) {
+                                    let finalVal = defVal;
+                                    if (hasEq) {
+                                        currentParams.push(`${pName}=${finalVal}`);
+                                    } else {
+                                        currentParams.push(finalVal);
+                                    }
+                                }
                             } else {
-                                let finalVal = val !== '' ? val.trim() : defVal;
+                                let finalVal = val.trim();
                                 if (hasEq) {
                                     currentParams.push(`${pName}=${finalVal}`);
                                 } else {
                                     currentParams.push(finalVal);
                                 }
                             }
+                            // ========================================================
                         } else {
                             currentParams.push(rawParams[i]); 
                         }
