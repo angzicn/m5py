@@ -38,7 +38,7 @@
         .box1::-webkit-scrollbar { width: 5px; }
         .box1::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 5px; }
         
-        .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 20px; flex-wrap: nowrap; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: opacity 0.2s ease; }
+        .header-title { display: flex; align-items: center; justify-content: center; gap: 10px; border-bottom: 2px solid var(--border-color); padding-bottom: 20px; margin-bottom: 10px; flex-wrap: nowrap; overflow: hidden; flex-shrink: 0; cursor: pointer; transition: opacity 0.2s ease; }
         .header-title:hover { opacity: 0.8; }
 
         .team-logo { height: 14px; width: auto; object-fit: contain; flex-shrink: 0; display: block; } 
@@ -123,48 +123,50 @@
         select.param-input { cursor: pointer; appearance: auto; background-image: none; }
         select.param-input:hover { border-color: #93c5fd; }
 
-        /* ============== 全新：侧边栏目录树样式 ============== */
-        .sidebar-tree { margin-bottom: 20px; }
-        .tree-folder { margin-bottom: 6px; }
+        /* ============== 全新极致清爽的 VS Code 风格侧边栏树状图 ============== */
+        .sidebar-tree { margin-bottom: 20px; user-select: none; }
+        .tree-folder { margin-bottom: 2px; }
         .tree-folder-header { 
-            padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; 
-            border-radius: 8px; cursor: pointer; font-weight: bold; color: #334155; 
-            display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;
-            user-select: none;
+            padding: 8px 10px; border-radius: 6px; cursor: pointer; font-weight: 600; color: #334155; 
+            display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;
+            font-size: 0.95rem;
         }
-        .tree-folder-header:hover { background: #f1f5f9; border-color: #cbd5e1; }
-        .tree-folder-header.active { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+        .tree-folder-header:hover { background: #f1f5f9; color: #1d4ed8; }
+        .tree-folder-header.active { background: #eff6ff; color: #1d4ed8; font-weight: 700; }
         
         .tree-folder-body { 
-            display: none; padding: 10px 0 8px 12px; margin-left: 12px; border-left: 1px dashed #cbd5e1; 
+            display: none; padding-left: 6px; margin-top: 2px; 
+            border-left: 1px solid #cbd5e1; margin-left: 18px; /* 清爽的左侧视觉引导线 */
         }
-        .tree-folder-body.open { display: block; animation: cardFadeIn 0.3s ease; }
+        .tree-folder-body.open { display: block; animation: cardFadeIn 0.2s ease; }
         
         .tree-item { 
-            padding: 8px 12px; margin-bottom: 4px; border-radius: 6px; cursor: pointer; 
-            color: #475569; font-size: 0.95rem; transition: all 0.2s; font-weight: 600;
-            display: flex; align-items: center; gap: 8px;
+            padding: 6px 10px; margin-bottom: 2px; border-radius: 6px; cursor: pointer; 
+            color: #475569; font-size: 0.9rem; transition: background 0.2s; font-weight: 500;
+            display: flex; align-items: center; gap: 6px; position: relative;
         }
-        .tree-item:hover { background: #f1f5f9; color: #3b82f6; }
-        .tree-item.active { background: #eff6ff; color: #2563eb; font-weight: bold; border: 1px solid #bfdbfe;}
+        .tree-item:hover { background: #f1f5f9; color: #2563eb; }
+        .tree-item.active { background: #eff6ff; color: #2563eb; font-weight: 700; }
+        /* 选中时的蓝色竖条高亮 */
+        .tree-item.active::before { content: ''; position: absolute; left: -7px; top: 10%; height: 80%; width: 2px; background: #3b82f6; border-radius: 2px; }
         
-        .tree-sub-list { padding-left: 26px; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
-        .tree-sub-pill { 
-            padding: 4px 10px; background: #ffffff; border: 1px solid #e2e8f0; 
-            border-radius: 12px; font-size: 0.8rem; cursor: pointer; color: #64748b; font-weight: bold; transition: all 0.2s;
+        .tree-sub-list { display: flex; flex-direction: column; gap: 1px; margin-top: 2px; margin-bottom: 4px; padding-left: 8px; border-left: 1px dashed #cbd5e1; margin-left: 12px; }
+        .tree-sub-item { 
+            padding: 5px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: #64748b; transition: all 0.2s; position: relative;
         }
-        .tree-sub-pill:hover { border-color: #94a3b8; color: #3b82f6; }
-        .tree-sub-pill.active { background: #3b82f6; color: #ffffff; border-color: #3b82f6; box-shadow: 0 2px 4px rgba(59,130,246,0.3);}
-        /* ==================================================== */
+        .tree-sub-item:hover { background: #f1f5f9; color: #3b82f6; }
+        .tree-sub-item.active { background: #e0f2fe; color: #0284c7; font-weight: bold; }
+        .tree-sub-item.active::before { content: ''; position: absolute; left: -9px; top: 15%; height: 70%; width: 2px; background: #0ea5e9; border-radius: 2px; }
+        /* ====================================================================== */
 
         .tag-group-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
         .tag-group-wrapper.show { grid-template-rows: 1fr; }
         .tag-group-inner { overflow: hidden; }
 
         .nav-fav-btn {
-            width: 100%; padding: 12px; background: #fffbeb; border: 1px dashed #f59e0b; color: #d97706; 
-            border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; transition: all 0.2s ease; 
-            display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px;
+            width: 100%; padding: 10px; background: #fffbeb; border: 1px dashed #f59e0b; color: #d97706; 
+            border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; 
+            display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; margin-top: 10px;
         }
         .nav-fav-btn:hover { background: #fef3c7; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1); }
         .nav-fav-btn.active { background: #f59e0b; color: #ffffff; border-style: solid; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); }
@@ -331,6 +333,11 @@
         }
         .welcome-header { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 5px; }
         .welcome-icon { font-size: 2.2rem; animation: wave 2s infinite; transform-origin: 70% 70%; }
+        @keyframes wave { 
+            0% { transform: rotate(0deg); } 10% { transform: rotate(14deg); } 20% { transform: rotate(-8deg); } 
+            30% { transform: rotate(14deg); } 40% { transform: rotate(-4deg); } 50% { transform: rotate(10deg); } 
+            60%, 100% { transform: rotate(0deg); }
+        }
         .welcome-box h3 { margin: 0; font-size: 1.6rem; color: #1e293b; letter-spacing: 1px;}
         .welcome-subtitle { color: #64748b; font-size: 0.95rem; margin-bottom: 25px; text-align: center;}
         
@@ -376,6 +383,8 @@
             .cmd-top-left { flex-direction: row; flex-wrap: wrap; align-items: stretch; }
             .cmd-top-right { justify-content: flex-end; width: 100%; margin-top: 5px;}
             .cmd-desc-box { width: 100%; }
+            
+            .fav-svg-btn { align-self: flex-end; margin-top: -42px; height: 38px; }
 
             .cmd-header { flex-direction: column; align-items: stretch; }
             
@@ -411,6 +420,7 @@
                     <input type="hidden" id="object-function" value="">
 
                     <div id="sidebar-tree" class="sidebar-tree"></div>
+
                     <div class="tag-group-wrapper" id="tag-group-wrapper">
                         <div class="tag-group-inner">
                             <div class="form-group" style="margin-bottom: 20px;">
@@ -608,7 +618,6 @@
              .replace(/>/g, "&gt;");
     }
     
-    // 生成安全不带空格的 CSS ID
     function safeId(str) {
         return encodeURIComponent(str).replace(/[%]/g, '_');
     }
@@ -754,10 +763,7 @@
                 }
                 commandDatabase = results.data;
                 buildTagColorMap();
-                
-                // ============== 启动侧边目录树构建 ==============
                 buildSidebarTree();
-                // ==============================================
             },
             error: function(err) {
                 console.error("加载错误：", err);
@@ -766,7 +772,6 @@
         });
     };
 
-    // ============== 核心引擎：生成左侧导航树结构 ==============
     function buildSidebarTree() {
         let tree = {};
         commandDatabase.forEach(item => {
@@ -798,7 +803,7 @@
                 html += `
                 <div class="tree-folder">
                     <div class="tree-folder-header tree-node" id="tree-node-${sIdCat}" onclick="navTo('${safeCatStr}', '', '')">
-                        <span>🗂️ ${safeCatStr}</span>
+                        <div style="display:flex; align-items:center; gap:6px;"><span style="font-size:1.1rem;opacity:0.8;">🗂️</span> <span>${safeCatStr}</span></div>
                     </div>
                 </div>`;
             } else {
@@ -806,8 +811,8 @@
                 html += `
                 <div class="tree-folder">
                     <div class="tree-folder-header" onclick="toggleTreeFolder('${catDomId}')">
-                        <span>🗂️ ${safeCatStr}</span>
-                        <span id="icon-${catDomId}">▼</span>
+                        <div style="display:flex; align-items:center; gap:6px;"><span style="font-size:1.1rem;opacity:0.8;">🗂️</span> <span>${safeCatStr}</span></div>
+                        <span id="icon-${catDomId}" style="font-size:0.7rem; color:#94a3b8; transition:transform 0.2s;">▶</span>
                     </div>
                     <div class="tree-folder-body" id="${catDomId}">
                 `;
@@ -818,16 +823,23 @@
                     let sIdName = safeId(name);
                     let funcs = Array.from(tree[cat][name]);
                     
-                    html += `<div class="tree-item tree-node" id="tree-node-${sIdCat}-${sIdName}" onclick="navTo('${safeCatStr}', '${safeNameStr}', 'ALL')">📦 ${safeNameStr}</div>`;
-                    
-                    if (funcs.length > 0) {
-                        html += `<div class="tree-sub-list">`;
-                        for (let func of funcs) {
+                    if (funcs.length === 0) {
+                         html += `<div class="tree-item tree-node" id="tree-node-${sIdCat}-${sIdName}" onclick="navTo('${safeCatStr}', '${safeNameStr}', 'ALL')">
+                            <span style="opacity:0.6;font-size:0.9rem;">📦</span> ${safeNameStr}
+                         </div>`;
+                    } else {
+                         html += `<div class="tree-item tree-node" id="tree-node-${sIdCat}-${sIdName}" onclick="navTo('${safeCatStr}', '${safeNameStr}', 'ALL')">
+                            <span style="opacity:0.6;font-size:0.9rem;">📦</span> ${safeNameStr}
+                         </div>`;
+                         html += `<div class="tree-sub-list">`;
+                         for (let func of funcs) {
                             let safeFuncStr = escapeHtml(func);
                             let sIdFunc = safeId(func);
-                            html += `<div class="tree-sub-pill tree-node" id="tree-node-${sIdCat}-${sIdName}-${sIdFunc}" onclick="event.stopPropagation(); navTo('${safeCatStr}', '${safeNameStr}', '${safeFuncStr}')">${safeFuncStr}</div>`;
-                        }
-                        html += `</div>`;
+                            html += `<div class="tree-sub-item tree-node" id="tree-node-${sIdCat}-${sIdName}-${sIdFunc}" onclick="event.stopPropagation(); navTo('${safeCatStr}', '${safeNameStr}', '${safeFuncStr}')">
+                                <span style="opacity:0.5;font-size:0.5rem;margin-right:4px;">●</span> ${safeFuncStr}
+                            </div>`;
+                         }
+                         html += `</div>`;
                     }
                 }
                 html += `</div></div>`;
@@ -835,7 +847,6 @@
         }
         document.getElementById('sidebar-tree').innerHTML = html;
         
-        // 构建完成后，执行一次初次渲染，展示欢迎页
         resetToHome();
     }
     
@@ -844,10 +855,10 @@
         const icon = document.getElementById(`icon-${catId}`);
         if (body.classList.contains('open')) {
             body.classList.remove('open');
-            icon.innerText = '▼';
+            icon.style.transform = 'rotate(0deg)';
         } else {
             body.classList.add('open');
-            icon.innerText = '▲';
+            icon.style.transform = 'rotate(90deg)';
         }
     }
     
@@ -876,12 +887,11 @@
             let body = document.getElementById(catDomId);
             if (body && !body.classList.contains('open')) {
                 body.classList.add('open');
-                document.getElementById(`icon-${catDomId}`).innerText = '▲';
+                document.getElementById(`icon-${catDomId}`).style.transform = 'rotate(90deg)';
             }
         }
     }
 
-    // ================== 一键穿透导航 ===================
     window.navTo = function(cat, name, func) {
         isGlobalSearchMode = false;
         isFavoritesMode = false;
@@ -900,7 +910,6 @@
         }
         window.scrollTo({ top: 0, behavior: 'smooth' });
     }
-    // ===================================================
 
     function getWelcomeTreeHtml() {
         let tree = {};
@@ -968,7 +977,7 @@
         
         updateTreeSelection("", "", "");
         document.querySelectorAll('.tree-folder-body').forEach(el => el.classList.remove('open'));
-        document.querySelectorAll('[id^="icon-cat-"]').forEach(el => el.innerText = '▼');
+        document.querySelectorAll('[id^="icon-cat-"]').forEach(el => { el.style.transform = 'rotate(0deg)'; });
         
         renderCommandCards();
     }
