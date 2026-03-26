@@ -123,9 +123,43 @@
         select.param-input { cursor: pointer; appearance: auto; background-image: none; }
         select.param-input:hover { border-color: #93c5fd; }
 
-        .name-group-wrapper, .function-group-wrapper, .tag-group-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
-        .name-group-wrapper.show, .function-group-wrapper.show, .tag-group-wrapper.show { grid-template-rows: 1fr; }
-        .name-group-inner, .function-group-inner, .tag-group-inner { overflow: hidden; }
+        /* ============== 全新：侧边栏目录树样式 ============== */
+        .sidebar-tree { margin-bottom: 20px; }
+        .tree-folder { margin-bottom: 6px; }
+        .tree-folder-header { 
+            padding: 10px 12px; background: #f8fafc; border: 1px solid #e2e8f0; 
+            border-radius: 8px; cursor: pointer; font-weight: bold; color: #334155; 
+            display: flex; justify-content: space-between; align-items: center; transition: all 0.2s;
+            user-select: none;
+        }
+        .tree-folder-header:hover { background: #f1f5f9; border-color: #cbd5e1; }
+        .tree-folder-header.active { background: #eff6ff; border-color: #bfdbfe; color: #1d4ed8; }
+        
+        .tree-folder-body { 
+            display: none; padding: 10px 0 8px 12px; margin-left: 12px; border-left: 1px dashed #cbd5e1; 
+        }
+        .tree-folder-body.open { display: block; animation: cardFadeIn 0.3s ease; }
+        
+        .tree-item { 
+            padding: 8px 12px; margin-bottom: 4px; border-radius: 6px; cursor: pointer; 
+            color: #475569; font-size: 0.95rem; transition: all 0.2s; font-weight: 600;
+            display: flex; align-items: center; gap: 8px;
+        }
+        .tree-item:hover { background: #f1f5f9; color: #3b82f6; }
+        .tree-item.active { background: #eff6ff; color: #2563eb; font-weight: bold; border: 1px solid #bfdbfe;}
+        
+        .tree-sub-list { padding-left: 26px; display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
+        .tree-sub-pill { 
+            padding: 4px 10px; background: #ffffff; border: 1px solid #e2e8f0; 
+            border-radius: 12px; font-size: 0.8rem; cursor: pointer; color: #64748b; font-weight: bold; transition: all 0.2s;
+        }
+        .tree-sub-pill:hover { border-color: #94a3b8; color: #3b82f6; }
+        .tree-sub-pill.active { background: #3b82f6; color: #ffffff; border-color: #3b82f6; box-shadow: 0 2px 4px rgba(59,130,246,0.3);}
+        /* ==================================================== */
+
+        .tag-group-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
+        .tag-group-wrapper.show { grid-template-rows: 1fr; }
+        .tag-group-inner { overflow: hidden; }
 
         .nav-fav-btn {
             width: 100%; padding: 12px; background: #fffbeb; border: 1px dashed #f59e0b; color: #d97706; 
@@ -291,7 +325,6 @@
         }
         .color-toggle-btn:hover { background: #f1f5f9; color: #3b82f6; border-color: #94a3b8; }
 
-        /* ============== 全新：动态树状仪表盘 UI ============== */
         .welcome-box {
             background: var(--box-bg); padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
             border: 1px solid #e2e8f0; animation: cardFadeIn 0.4s ease-out forwards;
@@ -317,10 +350,8 @@
         .tree-func-pill.all-pill { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; border-radius: 12px; }
         .tree-func-pill.all-pill:hover { background: #0284c7; color: white; border-color: #0284c7; }
 
-        /* 极致压缩的页脚说明 */
         .welcome-features-mini { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; border-top: 1px dashed #cbd5e1; padding-top: 20px;}
         .feature-mini { font-size: 0.85rem; color: #64748b; display: flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; border: 1px solid #e2e8f0;}
-        /* ============================================================== */
 
         @media (max-width: 768px) {
             .box1 { position: sticky; top: 10px; z-index: 999; max-width: 100%; max-height: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); margin-bottom: 20px; overflow-y: visible; }
@@ -345,8 +376,6 @@
             .cmd-top-left { flex-direction: row; flex-wrap: wrap; align-items: stretch; }
             .cmd-top-right { justify-content: flex-end; width: 100%; margin-top: 5px;}
             .cmd-desc-box { width: 100%; }
-            
-            .fav-svg-btn { align-self: flex-end; margin-top: -42px; height: 38px; }
 
             .cmd-header { flex-direction: column; align-items: stretch; }
             
@@ -377,33 +406,15 @@
             <div class="box1-content-inner">
                 <div class="box1-scroll-area">
                     
-                    <div class="form-group" style="margin-bottom: 20px;">
-                        <label for="category">对象类别：</label>
-                        <select id="category" onchange="updateObjectNames()"><option>等待连接...</option></select>
-                    </div>
+                    <input type="hidden" id="category" value="">
+                    <input type="hidden" id="object-name" value="">
+                    <input type="hidden" id="object-function" value="">
 
-                    <div class="name-group-wrapper show" id="name-group-wrapper">
-                        <div class="name-group-inner">
-                            <div class="form-group" style="margin-bottom: 20px;">
-                                <label for="object-name">对象名称：</label>
-                                <select id="object-name" onchange="updateObjectFunctions()"><option>等待连接...</option></select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="function-group-wrapper" id="function-group-wrapper">
-                        <div class="function-group-inner">
-                            <div class="form-group" style="margin-bottom: 20px;">
-                                <label for="object-function">对象功能：</label>
-                                <select id="object-function" onchange="updateObjectTags()"><option>等待加载...</option></select>
-                            </div>
-                        </div>
-                    </div>
-
+                    <div id="sidebar-tree" class="sidebar-tree"></div>
                     <div class="tag-group-wrapper" id="tag-group-wrapper">
                         <div class="tag-group-inner">
                             <div class="form-group" style="margin-bottom: 20px;">
-                                <label for="object-tag">🏷️ 标签：</label>
+                                <label for="object-tag">🏷️ 标签过滤：</label>
                                 <select id="object-tag" onchange="renderCommandCards()"><option value="ALL">显示全部</option></select>
                             </div>
                         </div>
@@ -596,6 +607,11 @@
              .replace(/</g, "&lt;")
              .replace(/>/g, "&gt;");
     }
+    
+    // 生成安全不带空格的 CSS ID
+    function safeId(str) {
+        return encodeURIComponent(str).replace(/[%]/g, '_');
+    }
 
     function getCmdId(cmd) {
         return escapeHtml(`${cmd.category}_${cmd.object_name}_${cmd.object_function}_${cmd.command_template}`).replace(/\s+/g, '');
@@ -738,7 +754,10 @@
                 }
                 commandDatabase = results.data;
                 buildTagColorMap();
-                initCategoryDropdown();
+                
+                // ============== 启动侧边目录树构建 ==============
+                buildSidebarTree();
+                // ==============================================
             },
             error: function(err) {
                 console.error("加载错误：", err);
@@ -747,10 +766,9 @@
         });
     };
 
-    // ============== 核心：生成动态仪表盘 HTML ==============
-    function getWelcomeTreeHtml() {
+    // ============== 核心引擎：生成左侧导航树结构 ==============
+    function buildSidebarTree() {
         let tree = {};
-        
         commandDatabase.forEach(item => {
             if (!hasContent(item.command_template)) return;
             let cat = hasContent(item.category) ? String(item.category).trim() : "";
@@ -758,7 +776,141 @@
             let func = hasContent(item.object_function) ? String(item.object_function).trim() : "";
 
             if (cat === "") return;
+            if (!tree[cat]) tree[cat] = {};
+            
+            if (name !== "") {
+                if (!tree[cat][name]) tree[cat][name] = new Set();
+                if (func !== "" && func.toUpperCase() !== "ALL") {
+                    tree[cat][name].add(func);
+                }
+            } else {
+                if (!tree[cat]["__NO_NAME__"]) tree[cat]["__NO_NAME__"] = new Set();
+            }
+        });
 
+        let html = '';
+        for (let cat in tree) {
+            let safeCatStr = escapeHtml(cat);
+            let sIdCat = safeId(cat);
+            let names = Object.keys(tree[cat]);
+            
+            if (names.length === 1 && names[0] === "__NO_NAME__") {
+                html += `
+                <div class="tree-folder">
+                    <div class="tree-folder-header tree-node" id="tree-node-${sIdCat}" onclick="navTo('${safeCatStr}', '', '')">
+                        <span>🗂️ ${safeCatStr}</span>
+                    </div>
+                </div>`;
+            } else {
+                let catDomId = 'cat-' + sIdCat;
+                html += `
+                <div class="tree-folder">
+                    <div class="tree-folder-header" onclick="toggleTreeFolder('${catDomId}')">
+                        <span>🗂️ ${safeCatStr}</span>
+                        <span id="icon-${catDomId}">▼</span>
+                    </div>
+                    <div class="tree-folder-body" id="${catDomId}">
+                `;
+                
+                for (let name of names) {
+                    if (name === "__NO_NAME__") continue;
+                    let safeNameStr = escapeHtml(name);
+                    let sIdName = safeId(name);
+                    let funcs = Array.from(tree[cat][name]);
+                    
+                    html += `<div class="tree-item tree-node" id="tree-node-${sIdCat}-${sIdName}" onclick="navTo('${safeCatStr}', '${safeNameStr}', 'ALL')">📦 ${safeNameStr}</div>`;
+                    
+                    if (funcs.length > 0) {
+                        html += `<div class="tree-sub-list">`;
+                        for (let func of funcs) {
+                            let safeFuncStr = escapeHtml(func);
+                            let sIdFunc = safeId(func);
+                            html += `<div class="tree-sub-pill tree-node" id="tree-node-${sIdCat}-${sIdName}-${sIdFunc}" onclick="event.stopPropagation(); navTo('${safeCatStr}', '${safeNameStr}', '${safeFuncStr}')">${safeFuncStr}</div>`;
+                        }
+                        html += `</div>`;
+                    }
+                }
+                html += `</div></div>`;
+            }
+        }
+        document.getElementById('sidebar-tree').innerHTML = html;
+        
+        // 构建完成后，执行一次初次渲染，展示欢迎页
+        resetToHome();
+    }
+    
+    function toggleTreeFolder(catId) {
+        const body = document.getElementById(catId);
+        const icon = document.getElementById(`icon-${catId}`);
+        if (body.classList.contains('open')) {
+            body.classList.remove('open');
+            icon.innerText = '▼';
+        } else {
+            body.classList.add('open');
+            icon.innerText = '▲';
+        }
+    }
+    
+    function updateTreeSelection(cat, name, func) {
+        document.querySelectorAll('.tree-node').forEach(el => el.classList.remove('active'));
+        
+        if (cat === "") return; 
+        
+        let sIdCat = safeId(cat);
+        let sIdName = safeId(name);
+        let sIdFunc = safeId(func);
+        
+        if (name === "") {
+            let el = document.getElementById(`tree-node-${sIdCat}`);
+            if (el) el.classList.add('active');
+        } else {
+            if (func === "" || func === "ALL") {
+                let el = document.getElementById(`tree-node-${sIdCat}-${sIdName}`);
+                if (el) el.classList.add('active');
+            } else {
+                let el = document.getElementById(`tree-node-${sIdCat}-${sIdName}-${sIdFunc}`);
+                if (el) el.classList.add('active');
+            }
+            
+            let catDomId = 'cat-' + sIdCat;
+            let body = document.getElementById(catDomId);
+            if (body && !body.classList.contains('open')) {
+                body.classList.add('open');
+                document.getElementById(`icon-${catDomId}`).innerText = '▲';
+            }
+        }
+    }
+
+    // ================== 一键穿透导航 ===================
+    window.navTo = function(cat, name, func) {
+        isGlobalSearchMode = false;
+        isFavoritesMode = false;
+        document.getElementById("search-input").value = "";
+        document.getElementById('nav-fav-btn').classList.remove('active');
+
+        document.getElementById("category").value = cat;
+        document.getElementById("object-name").value = name;
+        document.getElementById("object-function").value = func;
+        
+        updateTreeSelection(cat, name, func);
+        updateObjectTags(); 
+        
+        if (window.innerWidth <= 768) {
+            document.getElementById('main-box1').classList.remove('expanded');
+        }
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+    // ===================================================
+
+    function getWelcomeTreeHtml() {
+        let tree = {};
+        commandDatabase.forEach(item => {
+            if (!hasContent(item.command_template)) return;
+            let cat = hasContent(item.category) ? String(item.category).trim() : "";
+            let name = hasContent(item.object_name) ? String(item.object_name).trim() : "";
+            let func = hasContent(item.object_function) ? String(item.object_function).trim() : "";
+
+            if (cat === "") return;
             if (!tree[cat]) tree[cat] = {};
             
             if (name !== "") {
@@ -783,7 +935,6 @@
             } else {
                 for (let name of names) {
                     if (name === "__NO_NAME__") continue;
-                    
                     let funcs = Array.from(tree[cat][name]);
                     html += `<div class="tree-name-block">`;
                     
@@ -805,41 +956,21 @@
         html += '</div>';
         return html;
     }
-    // ========================================================
-
-    // ============== 核心：一键导航引擎 ==============
-    window.navTo = function(cat, name, func) {
-        isGlobalSearchMode = false;
-        isFavoritesMode = false;
-        document.getElementById("search-input").value = "";
-        document.getElementById('nav-fav-btn').classList.remove('active');
-
-        document.getElementById("category").value = cat;
-        updateObjectNames(); 
-
-        if (name && name !== "") {
-            document.getElementById("object-name").value = name;
-            updateObjectFunctions(); 
-            
-            if (func && func !== "") {
-                document.getElementById("object-function").value = func;
-                updateObjectTags(); 
-            }
-        }
-
-        if (window.innerWidth <= 768) {
-            document.getElementById('main-box1').classList.remove('expanded');
-        }
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-    }
-    // ================================================
 
     function resetToHome() {
         document.getElementById("category").value = "";
+        document.getElementById("object-name").value = "";
+        document.getElementById("object-function").value = "";
         document.getElementById("search-input").value = "";
         isGlobalSearchMode = false;
         isFavoritesMode = false;
-        updateObjectNames(); 
+        document.getElementById('nav-fav-btn').classList.remove('active');
+        
+        updateTreeSelection("", "", "");
+        document.querySelectorAll('.tree-folder-body').forEach(el => el.classList.remove('open'));
+        document.querySelectorAll('[id^="icon-cat-"]').forEach(el => el.innerText = '▼');
+        
+        renderCommandCards();
     }
 
     function showFavorites() {
@@ -847,12 +978,11 @@
         isGlobalSearchMode = false;
         
         document.getElementById("category").value = "";
-        document.getElementById("object-name").innerHTML = '<option value="">👈 选择类别后可选</option>';
-        document.getElementById("name-group-wrapper").classList.remove('show');
-        document.getElementById("function-group-wrapper").classList.remove('show');
-        document.getElementById("tag-group-wrapper").classList.remove('show');
-        
+        document.getElementById("object-name").value = "";
+        document.getElementById("object-function").value = "";
         document.getElementById("search-input").value = "";
+        
+        updateTreeSelection("", "", "");
         
         renderCommandCards();
     }
@@ -863,98 +993,16 @@
         }
     }
 
-    function initCategoryDropdown() {
-        const catSelect = document.getElementById("category");
-        const uniqueCategories = [...new Set(commandDatabase.map(item => item.category).filter(hasContent))];
-        
-        catSelect.innerHTML = `<option value="">-- 请选择硬件类别 --</option>` + 
-                              uniqueCategories.map(cat => `<option value="${cat}">${cat}</option>`).join('');
-        catSelect.value = ""; 
-        
-        isGlobalSearchMode = false;
-        isFavoritesMode = false;
-        document.getElementById("search-input").value = "";
-        
-        updateObjectNames(); 
-    }
-
-    function updateObjectNames() {
-        isFavoritesMode = false; 
-        const selectedCat = document.getElementById("category").value;
-        const objSelect = document.getElementById("object-name");
-        const nameWrapper = document.getElementById("name-group-wrapper");
-        
-        if (selectedCat === "") {
-            objSelect.innerHTML = `<option value="">👈 选择类别后可选</option>`;
-            nameWrapper.classList.add('show');
-            updateObjectFunctions();
-            return;
-        }
-
-        const filteredData = commandDatabase.filter(item => item.category === selectedCat);
-        const uniqueObjects = [...new Set(filteredData.map(item => item.object_name).filter(hasContent))];
-        
-        if (uniqueObjects.length > 0) {
-            objSelect.innerHTML = `<option value="">-- 请选择硬件名称 --</option>` + 
-                                  uniqueObjects.map(obj => `<option value="${obj}">${obj}</option>`).join('');
-            objSelect.value = ""; 
-            nameWrapper.classList.add('show'); 
-        } else {
-            objSelect.innerHTML = `<option value="ALL">无</option>`;
-            objSelect.value = "ALL";
-            nameWrapper.classList.remove('show'); 
-        }
-        
-        updateObjectFunctions();
-    }
-
-    function updateObjectFunctions() {
-        isFavoritesMode = false;
-        const selectedCat = document.getElementById("category").value;
-        const selectedObj = document.getElementById("object-name").value;
-        const nameWrapper = document.getElementById("name-group-wrapper");
-        const isNameVisible = nameWrapper.classList.contains("show");
-        
-        const funcWrapper = document.getElementById("function-group-wrapper");
-        const funcSelect = document.getElementById("object-function");
-
-        if (selectedCat === "" || (isNameVisible && selectedObj === "")) {
-            funcSelect.innerHTML = `<option value="ALL">无</option>`;
-            funcWrapper.classList.remove('show');
-            updateObjectTags();
-            return;
-        }
-
-        const filteredData = commandDatabase.filter(item => {
-            if (item.category !== selectedCat) return false;
-            if (isNameVisible && item.object_name !== selectedObj) return false;
-            return true;
-        });
-        
-        const uniqueFunctions = [...new Set(filteredData.map(item => item.object_function).filter(hasContent))];
-
-        if (uniqueFunctions.length > 0) {
-            funcSelect.innerHTML = `<option value="ALL">显示全部功能</option>` + 
-                                   uniqueFunctions.map(func => `<option value="${func}">${func}</option>`).join('');
-            funcWrapper.classList.add('show');
-        } else {
-            funcSelect.innerHTML = `<option value="ALL">无</option>`;
-            funcWrapper.classList.remove('show');
-        }
-
-        updateObjectTags();
-    }
-
     function updateObjectTags() {
         isFavoritesMode = false;
         const selectedCat = document.getElementById("category").value;
         const selectedObj = document.getElementById("object-name").value;
-        const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
+        const selectedFunc = document.getElementById("object-function").value;
         
         const tagSelect = document.getElementById("object-tag");
         const tagWrapper = document.getElementById("tag-group-wrapper");
 
-        if (selectedCat === "" || (isNameVisible && selectedObj === "")) {
+        if (selectedCat === "") {
             tagSelect.innerHTML = `<option value="ALL">显示全部</option>`;
             tagWrapper.classList.remove('show');
             tagSelect.value = "ALL";
@@ -962,15 +1010,11 @@
             return;
         }
 
-        const funcWrapper = document.getElementById("function-group-wrapper");
-        const selectedFunc = document.getElementById("object-function").value;
-        const isFuncVisible = funcWrapper.classList.contains("show");
-
         const filteredData = commandDatabase.filter(item => {
             if (!hasContent(item.command_template)) return false;
             if (item.category !== selectedCat) return false;
-            if (isNameVisible && item.object_name !== selectedObj) return false;
-            if (isFuncVisible && selectedFunc !== "ALL") {
+            if (selectedObj !== "" && item.object_name !== selectedObj) return false;
+            if (selectedFunc !== "" && selectedFunc !== "ALL") {
                 if (String(item.object_function || '').trim() !== selectedFunc) return false;
             }
             return true;
@@ -1028,16 +1072,8 @@
         }
 
         const selectedCat = document.getElementById("category").value;
-        const selectedObj = document.getElementById("object-name").value;
-        const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
         const query = document.getElementById("search-input").value.trim();
         
-        const isIntermediateState = (selectedCat !== "" && isNameVisible && selectedObj === "");
-        if (isIntermediateState) {
-            updateDisplay();
-            return; 
-        }
-
         if (selectedCat === "") {
             if ((query === "" && isGlobalSearchMode) || (query !== "" && !isGlobalSearchMode)) {
                 renderCommandCards();
@@ -1124,11 +1160,7 @@
             document.getElementById('nav-fav-btn').classList.remove('active');
             const selectedCat = document.getElementById("category").value;
             const selectedObj = document.getElementById("object-name").value;
-            const isNameVisible = document.getElementById("name-group-wrapper").classList.contains("show");
-            
-            if (selectedCat !== "" && isNameVisible && selectedObj === "") {
-                return;
-            }
+            const selectedFunc = document.getElementById("object-function").value;
             
             if (selectedCat === "") {
                 if (query === "") {
@@ -1148,7 +1180,7 @@
                                 <span class="welcome-icon">👋</span>
                                 <h3>欢迎使用 M5PY 助手</h3>
                             </div>
-                            <p class="welcome-subtitle">请在下方快速选择您要查看的指令字典，或在上方全局检索</p>
+                            <p class="welcome-subtitle">请在左侧选取指令，或直接点击下方图谱一键直达</p>
                             
                             ${getWelcomeTreeHtml()}
 
@@ -1200,23 +1232,17 @@
                 updateSearchBoxUI('local');
                 topControls.style.display = 'flex'; 
 
-                const funcWrapper = document.getElementById("function-group-wrapper");
-                const selectedFunc = document.getElementById("object-function").value;
-                const isFuncVisible = funcWrapper.classList.contains("show");
-                
-                const tagWrapper = document.getElementById("tag-group-wrapper");
                 const selectedTag = document.getElementById("object-tag").value;
-                const isTagVisible = tagWrapper.classList.contains("show");
 
                 currentObjectCommands = commandDatabase.filter(item => {
                     if (!hasContent(item.command_template)) return false;
                     if (item.category !== selectedCat) return false;
-                    if (isNameVisible && item.object_name !== selectedObj) return false;
+                    if (selectedObj !== "" && item.object_name !== selectedObj) return false;
                     
-                    if (isFuncVisible && selectedFunc !== "ALL") {
+                    if (selectedFunc !== "" && selectedFunc !== "ALL") {
                         if (String(item.object_function || '').trim() !== selectedFunc) return false;
                     }
-                    if (isTagVisible && selectedTag !== "ALL") {
+                    if (selectedTag !== "ALL") {
                         if (String(item.tag || '').trim() !== selectedTag) return false;
                     }
                     return true;
@@ -1229,7 +1255,7 @@
                 thumbImg.onload = function() { thumbBox.classList.remove('hidden-by-error'); };
                 thumbImg.onerror = function() { thumbBox.classList.add('hidden-by-error'); };
                 
-                const imageName = isNameVisible ? selectedObj : selectedCat;
+                const imageName = selectedObj !== "" ? selectedObj : selectedCat;
                 thumbImg.src = `image/${imageName}.jpg`;
 
                 let needsInstance = currentObjectCommands.some(cmd => hasContent(cmd.requires_instance) && String(cmd.requires_instance).toUpperCase() === 'TRUE');
