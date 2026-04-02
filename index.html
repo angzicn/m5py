@@ -441,6 +441,7 @@
                             <select id="tool-select" onchange="toggleTool()">
                                 <option value="none">【可选择小工具】</option>
                                 <option value="color_picker">🎨 实时取色器</option>
+                                <option value="note_freq">🎵 音频频率换算</option>
                             </select>
                         </div>
                         
@@ -518,6 +519,20 @@
                                 <div class="tool-input-group" style="display: flex;">
                                     <input type="text" id="rgb-input" value="0, 255, 0" style="font-family: Consolas, monospace;">
                                     <button class="copy-btn tool-copy-btn" onclick="copyToolValue('rgb-input', 'RGB 数组')">复制</button>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="tool-note-freq" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; animation: fadein 0.3s;">
+                            <div class="form-group" style="margin-bottom: 12px;">
+                                <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 4px;">选择音符：</label>
+                                <select id="note-select" style="width: 100%; padding: 8px; border-radius: 6px; border: 1px solid #cbd5e1; font-family: Consolas, monospace; cursor: pointer;" onchange="updateFreq()">
+                                    </select>
+                            </div>
+                            <div class="form-group" style="margin-bottom: 0;">
+                                <label style="font-size: 0.85rem; margin-bottom: 4px;">对应频率 (Hz)</label>
+                                <div class="tool-input-group" style="display: flex;">
+                                    <input type="text" id="freq-output" value="" readonly style="font-family: Consolas, monospace; background-color: #f1f5f9;">
+                                    <button class="copy-btn tool-copy-btn" onclick="copyToolValue('freq-output', '频率数值')">复制</button>
                                 </div>
                             </div>
                         </div>
@@ -1759,10 +1774,17 @@
     function toggleTool() {
         const tool = document.getElementById('tool-select').value;
         const cp = document.getElementById('tool-color-picker');
+        const nf = document.getElementById('tool-note-freq'); // 新增的频率工具
+        
+        // 先把所有工具都隐藏
+        cp.style.display = 'none';
+        nf.style.display = 'none';
+
+        // 根据选择显示对应的工具
         if (tool === 'color_picker') {
             cp.style.display = 'block';
-        } else {
-            cp.style.display = 'none';
+        } else if (tool === 'note_freq') {
+            nf.style.display = 'block';
         }
     }
     
@@ -1852,6 +1874,44 @@
             toast.className = toast.className.replace("show", ""); 
         }, 2000);
     }
+
+    // =======================================================
+    // 扩展工具：音频频率换算逻辑 (A4 = 440Hz)
+    // =======================================================
+    const notesArr = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    
+    function initNoteOptions() {
+        const noteSelect = document.getElementById('note-select');
+        if (!noteSelect) return;
+        
+        let html = '';
+        // 自动生成 C2(低音) 到 B6(高音) 的频段，这是蜂鸣器最常用的音区
+        for (let octave = 2; octave <= 6; octave++) {
+            for (let i = 0; i < notesArr.length; i++) {
+                let noteName = notesArr[i] + octave;
+                // 根据 MIDI 编号算法计算频率
+                let midiNumber = (octave + 1) * 12 + i;
+                let freq = Math.round(440 * Math.pow(2, (midiNumber - 69) / 12));
+                
+                // 默认选中中央 C (C4)
+                let selected = (noteName === 'C4') ? 'selected' : '';
+                html += `<option value="${freq}" ${selected}>${noteName} ➜ ${freq} Hz</option>`;
+            }
+        }
+        noteSelect.innerHTML = html;
+        updateFreq(); // 初始化文本框显示
+    }
+
+    function updateFreq() {
+        const noteSelect = document.getElementById('note-select');
+        const freqOutput = document.getElementById('freq-output');
+        if (noteSelect && freqOutput) {
+            freqOutput.value = noteSelect.value;
+        }
+    }
+
+    // 监听页面加载完毕后，自动填充音符下拉框
+    window.addEventListener('DOMContentLoaded', initNoteOptions);
 </script>
 
 </body>
