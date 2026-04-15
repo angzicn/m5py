@@ -572,6 +572,22 @@
                                 </div>
                             </div>
                         </div>
+
+                        <div id="tool-matrix-8x8" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; animation: fadein 0.3s;">
+                            
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
+                                <label style="font-size: 0.85rem; color: #64748b; font-weight: bold; margin: 0;">选择画笔颜色：</label>
+                                <input type="color" id="matrix-color-picker" value="#FFFFFF" style="width: 44px; height: 32px; border: none; border-radius: 6px; cursor: pointer; padding: 0; background: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
+                            </div>
+                            
+                            <div id="matrix-grid" style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; background: #94a3b8; border: 2px solid #94a3b8; border-radius: 6px; padding: 2px; margin-bottom: 15px; user-select: none;">
+                                </div>
+
+                            <div style="display: flex; gap: 10px;">
+                                <button class="example-btn" onclick="clearMatrix()" style="flex: 1; height: 40px; font-size: 0.9rem; padding: 0;">🗑️ 清空</button>
+                                <button class="copy-btn" onclick="copyMatrixList()" style="flex: 2; height: 40px; font-size: 0.95rem; padding: 0;">📋 复制数组 (64项)</button>
+                            </div>
+                        </div>
                         </div>
                 </div> 
             </div> 
@@ -1808,14 +1824,19 @@
         const tool = document.getElementById('tool-select').value;
         const cp = document.getElementById('tool-color-picker');
         const nf = document.getElementById('tool-note-freq');
+        const mx = document.getElementById('tool-matrix-8x8');
         
         if(cp) cp.style.display = 'none';
         if(nf) nf.style.display = 'none';
+        if(mx) mx.style.display = 'none';
 
         if (tool === 'color_picker' && cp) {
             cp.style.display = 'block';
         } else if (tool === 'note_freq' && nf) {
             nf.style.display = 'block';
+        } else if (tool === 'matrix_8x8' && mx) {
+            mx.style.display = 'block';
+            initMatrix(); 
         }
     }
     
@@ -1912,7 +1933,7 @@
         }, 2000);
     }
 
-    // ================= 新增：虚拟钢琴引擎 =================
+    // ================= 虚拟钢琴引擎 =================
     let currentOctave = 4;
     const noteNamesArr = ['C', 'C#', 'D', 'D#', 'E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
     
@@ -1947,7 +1968,76 @@
             alert('复制失败，请手动记录频率数值。');
         });
     }
-    // ====================================================
+
+    // ================= 新增：8x8 矩阵像素画板引擎 =================
+    let matrixData = new Array(64).fill('0x000000');
+    let isMatrixInitialized = false;
+    let isDrawing = false; 
+
+    function initMatrix() {
+        if (isMatrixInitialized) return;
+        const grid = document.getElementById('matrix-grid');
+        if (!grid) return;
+        
+        grid.innerHTML = '';
+        for (let i = 0; i < 64; i++) {
+            const cell = document.createElement('div');
+            cell.style.aspectRatio = '1 / 1';
+            cell.style.backgroundColor = '#000000'; // 默认全黑
+            cell.style.borderRadius = '2px';
+            cell.style.cursor = 'crosshair';
+            cell.style.transition = 'transform 0.1s';
+            
+            // 鼠标按下：涂色并开启拖拽状态
+            cell.addEventListener('mousedown', (e) => {
+                isDrawing = true;
+                paintCell(i, cell);
+            });
+            // 鼠标划过：如果在拖拽状态，直接涂色
+            cell.addEventListener('mouseenter', (e) => {
+                if (isDrawing) paintCell(i, cell);
+            });
+            
+            grid.appendChild(cell);
+        }
+        
+        // 鼠标在全局任意位置松开时，关闭拖拽状态
+        document.addEventListener('mouseup', () => { isDrawing = false; });
+        isMatrixInitialized = true;
+    }
+
+    function paintCell(index, cellElem) {
+        const colorPicker = document.getElementById('matrix-color-picker');
+        const hexColor = colorPicker.value.toUpperCase(); 
+        
+        cellElem.style.backgroundColor = hexColor;
+        cellElem.style.transform = 'scale(0.85)';
+        setTimeout(() => { cellElem.style.transform = 'scale(1)'; }, 100);
+        
+        matrixData[index] = hexColor.replace('#', '0x');
+    }
+
+    function clearMatrix() {
+        matrixData = new Array(64).fill('0x000000');
+        const grid = document.getElementById('matrix-grid');
+        if (grid) {
+            Array.from(grid.children).forEach(cell => {
+                cell.style.backgroundColor = '#000000';
+            });
+        }
+        showToast("画布已全部清空为黑色！");
+    }
+
+    function copyMatrixList() {
+        const listString = '[' + matrixData.join(', ') + ']';
+        navigator.clipboard.writeText(listString).then(() => {
+            showToast("📋 64项颜色数组已复制！");
+        }).catch(err => {
+            console.error('复制失败', err);
+            alert('复制失败，请重试');
+        });
+    }
+    // ==============================================================
 </script>
 
 </body>
