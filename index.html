@@ -123,6 +123,33 @@
         select.param-input { cursor: pointer; appearance: auto; background-image: none; }
         select.param-input:hover { border-color: #93c5fd; }
 
+        /* ============== 新增：带有默认值的参数框专属样式 ============== */
+        .param-input-default {
+            background-color: #f1f5f9 !important; /* 淡淡的灰蓝色，表示非必须 */
+            border: 1px dashed #94a3b8 !important; /* 虚线框，表示可选 */
+            color: #475569 !important;
+        }
+        .param-input-default:focus {
+            background-color: #ffffff !important;
+            border-style: solid !important;
+            border-color: #3b82f6 !important;
+            color: #1e3a8a !important;
+            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
+        }
+
+        /* ============== 新增：点击标签快速粘贴交互样式 ============== */
+        .click-paste {
+            cursor: pointer;
+            text-decoration: underline dashed #cbd5e1;
+            text-underline-offset: 4px;
+            transition: color 0.2s;
+        }
+        .click-paste:hover {
+            color: #3b82f6;
+            text-decoration-color: #3b82f6;
+        }
+        /* ========================================================= */
+
         .sidebar-tree { margin-bottom: 20px; user-select: none; }
         .tree-folder { margin-bottom: 2px; }
         .tree-folder-header { 
@@ -474,7 +501,7 @@
                         
                         <div id="tool-color-picker" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; animation: fadein 0.3s;">
                             
-                            <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">快速预设颜色：</label>
+                            <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">快速预设颜色 (点击瞬间复制)：</label>
                             <div class="color-presets-wrapper">
                                 <div class="color-presets" id="color-presets">
                                     <div class="color-swatch" style="background-color: #000000;" data-hex="#000000" onclick="applyPresetColor(this)" title="黑"></div>
@@ -597,6 +624,7 @@
                                 <button class="copy-btn" onclick="copyMatrixList()" style="flex: 2; height: 40px; font-size: 0.95rem; padding: 0;">📋 复制数组 (64项)</button>
                             </div>
                         </div>
+
                         </div>
                 </div> 
             </div> 
@@ -811,6 +839,22 @@
             searchLabel.innerText = "搜索当前指令：";
         }
     }
+
+    // ============== 新增：参数一键粘贴引擎 ==============
+    async function pasteToInput(inputId) {
+        try {
+            const text = await navigator.clipboard.readText();
+            const inputEl = document.getElementById(inputId);
+            if(inputEl) {
+                inputEl.value = text;
+                inputEl.dispatchEvent(new Event('input')); // 触发视图更新
+                showToast("📋 已成功粘贴！");
+            }
+        } catch (err) {
+            alert("无法读取剪贴板。请确保浏览器授予了剪贴板权限，或手动在框内按 Ctrl+V 粘贴。");
+        }
+    }
+    // ====================================================
 
     window.addEventListener('resize', () => {
         adjustCodeFontSizes();
@@ -1451,7 +1495,7 @@
                             descText = descText.replace(optMatch[0], '').trim();
                         }
                         
-                        // ============== 修复：去除代码生成的参数名 pName =============
+                        // 判断是否为真正可选的参数（None或空值）
                         let isOptional = hasEq && (pDefault.toUpperCase() === 'NONE' || pDefault === '');
 
                         if (options.length > 0) {
@@ -1461,10 +1505,11 @@
                             }
                         }
                         
+                        // ================= 修复 1：初始化时强制全部转换为【关键字参数】 =================
                         if (!isOptional) {
-                            parsedDefaultParams.push(pDefault); // 🌟 这里直接推送默认值，去掉了 pName=
+                            parsedDefaultParams.push(`${pName}=${pDefault}`); // 🌟 无论原来有没有等号，统一加上 pName=
                         }
-                        // ==============================================================
+                        // =================================================================================
 
                         let extraInfo = "";
                         if (descText !== "") {
@@ -1490,6 +1535,7 @@
                             }
                         }
 
+                        // ================= 修复 2 & 3：默认参数特殊样式 + 点击标签快速粘贴 =================
                         if (options.length > 0) {
                             let optionsHtml = `<option value="" selected>-- 点击选择可选参数 --</option>`;
                             optionsHtml += options.map(opt => {
@@ -1498,8 +1544,8 @@
                             
                             paramInputsHtml += `
                                 <div class="param-row">
-                                    <span class="param-label" title="${escapeHtml(descText)}">${escapeHtml(pName)}:</span>
-                                    <select class="param-input" id="param-input-${index}-${pIdx}" 
+                                    <span class="param-label click-paste" title="点击直接粘贴剪贴板内容&#10;${escapeHtml(descText)}" onclick="pasteToInput('param-input-${index}-${pIdx}')">${escapeHtml(pName)}:</span>
+                                    <select class="param-input ${hasEq ? 'param-input-default' : ''}" id="param-input-${index}-${pIdx}" 
                                            data-default="${escapeHtml(pDefault)}" 
                                            data-name="${escapeHtml(pName)}" 
                                            data-haseq="${hasEq}"
@@ -1511,8 +1557,8 @@
                         } else {
                             paramInputsHtml += `
                                 <div class="param-row">
-                                    <span class="param-label" title="${escapeHtml(descText)}">${escapeHtml(pName)}:</span>
-                                    <input type="text" class="param-input" id="param-input-${index}-${pIdx}" 
+                                    <span class="param-label click-paste" title="点击直接粘贴剪贴板内容&#10;${escapeHtml(descText)}" onclick="pasteToInput('param-input-${index}-${pIdx}')">${escapeHtml(pName)}:</span>
+                                    <input type="text" class="param-input ${hasEq ? 'param-input-default' : ''}" id="param-input-${index}-${pIdx}" 
                                            placeholder="${escapeHtml(typePlaceholder)}" 
                                            data-default="${escapeHtml(pDefault)}" 
                                            data-name="${escapeHtml(pName)}" 
@@ -1757,21 +1803,21 @@
                             let defVal = inputEl.getAttribute('data-default');
                             let isSelect = inputEl.tagName.toLowerCase() === 'select';
 
-                            // ============== 修复：更新预览框时同样剥离参数名 =============
                             let isOptional = hasEq && (defVal.toUpperCase() === 'NONE' || defVal === '');
 
+                            // ================= 修复 1：每次用户输入更新代码时，依然强转全量关键字参数 =================
                             if (isSelect && val === '') {
                                 if (!isOptional) {
-                                    currentParams.push(pName);
+                                    currentParams.push(`${pName}=${defVal}`); // 🌟 强转
                                 }
                             } else if (val.trim() === '') {
                                 if (!isOptional) {
-                                    currentParams.push(defVal); // 🌟 剥离 pName=，只填默认值
+                                    currentParams.push(`${pName}=${defVal}`); // 🌟 强转
                                 }
                             } else {
-                                currentParams.push(val.trim()); // 🌟 剥离 pName=，只填输入值
+                                currentParams.push(`${pName}=${val.trim()}`); // 🌟 强转
                             }
-                            // ==========================================================
+                            // =========================================================================================
                         } else {
                             currentParams.push(rawParams[i]); 
                         }
@@ -1822,7 +1868,6 @@
         });
     }
 
-    // ================= 工具栏逻辑整合 =================
     function toggleTool() {
         const tool = document.getElementById('tool-select').value;
         const cp = document.getElementById('tool-color-picker');
@@ -1839,7 +1884,7 @@
             nf.style.display = 'block';
         } else if (tool === 'matrix_8x8' && mx) {
             mx.style.display = 'block';
-            initMatrix(); // 初始化8x8画板
+            initMatrix(); 
         }
     }
     
@@ -1854,12 +1899,21 @@
         }
     }
 
+    // ================= 修复 4：点击预设颜色秒出且秒复制 =================
     function applyPresetColor(element) {
         const hex = element.getAttribute('data-hex');
         const nativeColor = document.getElementById('native-color');
         nativeColor.value = hex;
-        nativeColor.dispatchEvent(new Event('input'));
+        nativeColor.dispatchEvent(new Event('input')); // 同步更新下方参数
+        
+        // 瞬间复制黑科技
+        navigator.clipboard.writeText(hex).then(() => {
+            showToast(`🎨 颜色 ${hex} 已极速复制！`);
+        }).catch(err => {
+            console.error('极速复制失败', err);
+        });
     }
+    // ===================================================================
 
     const nativeColor = document.getElementById('native-color');
     const hexInput = document.getElementById('hex-input');
@@ -1972,7 +2026,7 @@
         });
     }
 
-    // ================= 新增：8x8 矩阵像素画板引擎 =================
+    // ================= 8x8 矩阵像素画板引擎 =================
     let matrixData = new Array(64).fill('0x000000');
     let isMatrixInitialized = false;
     let isDrawing = false; 
@@ -1986,17 +2040,15 @@
         for (let i = 0; i < 64; i++) {
             const cell = document.createElement('div');
             cell.style.aspectRatio = '1 / 1';
-            cell.style.backgroundColor = '#000000'; // 默认全黑
+            cell.style.backgroundColor = '#000000'; 
             cell.style.borderRadius = '2px';
             cell.style.cursor = 'crosshair';
             cell.style.transition = 'transform 0.1s';
             
-            // 鼠标按下：涂色并开启拖拽状态
             cell.addEventListener('mousedown', (e) => {
                 isDrawing = true;
                 paintCell(i, cell);
             });
-            // 鼠标划过：如果在拖拽状态，直接涂色
             cell.addEventListener('mouseenter', (e) => {
                 if (isDrawing) paintCell(i, cell);
             });
@@ -2004,7 +2056,6 @@
             grid.appendChild(cell);
         }
         
-        // 鼠标在全局任意位置松开时，关闭拖拽状态
         document.addEventListener('mouseup', () => { isDrawing = false; });
         isMatrixInitialized = true;
     }
