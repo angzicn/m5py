@@ -123,62 +123,26 @@
         select.param-input { cursor: pointer; appearance: auto; background-image: none; }
         select.param-input:hover { border-color: #93c5fd; }
 
-        /* ============== 新增：带有默认值的参数框专属样式 ============== */
-        .param-input-default {
-            background-color: #f1f5f9 !important; /* 淡淡的灰蓝色，表示非必须 */
-            border: 1px dashed #94a3b8 !important; /* 虚线框，表示可选 */
-            color: #475569 !important;
-        }
-        .param-input-default:focus {
-            background-color: #ffffff !important;
-            border-style: solid !important;
-            border-color: #3b82f6 !important;
-            color: #1e3a8a !important;
-            box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important;
-        }
+        .param-input-default { background-color: #f1f5f9 !important; border: 1px dashed #94a3b8 !important; color: #475569 !important; }
+        .param-input-default:focus { background-color: #ffffff !important; border-style: solid !important; border-color: #3b82f6 !important; color: #1e3a8a !important; box-shadow: 0 0 0 2px rgba(59, 130, 246, 0.2) !important; }
 
-        /* ============== 新增：点击标签快速粘贴交互样式 ============== */
-        .click-paste {
-            cursor: pointer;
-            text-decoration: underline dashed #cbd5e1;
-            text-underline-offset: 4px;
-            transition: color 0.2s;
-        }
-        .click-paste:hover {
-            color: #3b82f6;
-            text-decoration-color: #3b82f6;
-        }
-        /* ========================================================= */
+        .click-paste { cursor: pointer; text-decoration: underline dashed #cbd5e1; text-underline-offset: 4px; transition: color 0.2s; }
+        .click-paste:hover { color: #3b82f6; text-decoration-color: #3b82f6; }
 
         .sidebar-tree { margin-bottom: 20px; user-select: none; }
         .tree-folder { margin-bottom: 2px; }
-        .tree-folder-header { 
-            padding: 8px 10px; border-radius: 6px; cursor: pointer; font-weight: 600; color: #334155; 
-            display: flex; justify-content: space-between; align-items: center; transition: background 0.2s;
-            font-size: 0.95rem;
-        }
+        .tree-folder-header { padding: 8px 10px; border-radius: 6px; cursor: pointer; font-weight: 600; color: #334155; display: flex; justify-content: space-between; align-items: center; transition: background 0.2s; font-size: 0.95rem; }
         .tree-folder-header:hover { background: #f1f5f9; color: #1d4ed8; }
         .tree-folder-header.active { background: #eff6ff; color: #1d4ed8; font-weight: 700; }
-        
-        .tree-folder-body { 
-            display: none; padding-left: 6px; margin-top: 2px; 
-            border-left: 1px solid #cbd5e1; margin-left: 18px;
-        }
+        .tree-folder-body { display: none; padding-left: 6px; margin-top: 2px; border-left: 1px solid #cbd5e1; margin-left: 18px; }
         .tree-folder-body.open { display: block; animation: cardFadeIn 0.2s ease; }
-        
-        .tree-item { 
-            padding: 6px 10px; margin-bottom: 2px; border-radius: 6px; cursor: pointer; 
-            color: #475569; font-size: 0.9rem; transition: background 0.2s; font-weight: 500;
-            display: flex; align-items: center; gap: 6px; position: relative;
-        }
+        .tree-item { padding: 6px 10px; margin-bottom: 2px; border-radius: 6px; cursor: pointer; color: #475569; font-size: 0.9rem; transition: background 0.2s; font-weight: 500; display: flex; align-items: center; gap: 6px; position: relative; }
         .tree-item:hover { background: #f1f5f9; color: #2563eb; }
         .tree-item.active { background: #eff6ff; color: #2563eb; font-weight: 700; }
         .tree-item.active::before { content: ''; position: absolute; left: -7px; top: 10%; height: 80%; width: 2px; background: #3b82f6; border-radius: 2px; }
         
         .tree-sub-list { display: flex; flex-direction: column; gap: 1px; margin-top: 2px; margin-bottom: 4px; padding-left: 8px; border-left: 1px dashed #cbd5e1; margin-left: 12px; }
-        .tree-sub-item { 
-            padding: 5px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: #64748b; transition: all 0.2s; position: relative;
-        }
+        .tree-sub-item { padding: 5px 10px; border-radius: 6px; font-size: 0.85rem; cursor: pointer; color: #64748b; transition: all 0.2s; position: relative; }
         .tree-sub-item:hover { background: #f1f5f9; color: #3b82f6; }
         .tree-sub-item.active { background: #e0f2fe; color: #0284c7; font-weight: bold; }
         .tree-sub-item.active::before { content: ''; position: absolute; left: -9px; top: 15%; height: 70%; width: 2px; background: #0ea5e9; border-radius: 2px; }
@@ -187,11 +151,7 @@
         .tag-group-wrapper.show { grid-template-rows: 1fr; }
         .tag-group-inner { overflow: hidden; }
 
-        .nav-fav-btn {
-            width: 100%; padding: 10px; background: #fffbeb; border: 1px dashed #f59e0b; color: #d97706; 
-            border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; 
-            display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; margin-top: 10px;
-        }
+        .nav-fav-btn { width: 100%; padding: 10px; background: #fffbeb; border: 1px dashed #f59e0b; color: #d97706; border-radius: 8px; font-size: 0.95rem; font-weight: bold; cursor: pointer; transition: all 0.2s ease; display: flex; align-items: center; justify-content: center; gap: 8px; margin-bottom: 20px; margin-top: 10px; }
         .nav-fav-btn:hover { background: #fef3c7; box-shadow: 0 2px 4px rgba(245, 158, 11, 0.1); }
         .nav-fav-btn.active { background: #f59e0b; color: #ffffff; border-style: solid; box-shadow: 0 4px 6px rgba(245, 158, 11, 0.2); }
 
@@ -203,10 +163,7 @@
         .toc-container::-webkit-scrollbar { width: 4px; }
         .toc-container::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
 
-        @keyframes cardFadeIn {
-            from { opacity: 0; transform: translateY(12px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        @keyframes cardFadeIn { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
         .cmd-card { background: var(--box-bg); padding: 20px; border-radius: 12px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border: 1px solid #e2e8f0; transition: all 0.3s ease; animation: cardFadeIn 0.3s ease-out forwards; }
         
         @keyframes flashFocus {
@@ -216,39 +173,17 @@
         }
         .highlight-active { animation: flashFocus 0.8s ease 2 alternate; border-color: #3b82f6 !important; }
 
-        .cmd-top-bar { 
-            display: flex; justify-content: space-between; align-items: stretch; 
-            margin-bottom: 15px; gap: 12px;
-        }
-        .cmd-top-left { 
-            display: flex; align-items: stretch; gap: 12px; flex-grow: 1; min-width: 0;
-        }
-        .cmd-index-badge {
-            background-color: #eff6ff; color: #3b82f6; 
-            font-family: Consolas, monospace; font-size: 1.05rem; font-weight: bold; 
-            border-radius: 8px; display: flex; justify-content: center; align-items: center; 
-            border: 1px solid #bfdbfe; flex-shrink: 0; padding: 0 12px; min-height: 38px;
-        }
-        .cmd-desc-box {
-            flex-grow: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; 
-            padding: 8px 15px; font-size: 0.95rem; color: #334155; font-weight: bold; 
-            display: flex; align-items: center; line-height: 1.5; min-width: 0; min-height: 38px;
-        }
+        .cmd-top-bar { display: flex; justify-content: space-between; align-items: stretch; margin-bottom: 15px; gap: 12px; }
+        .cmd-top-left { display: flex; align-items: stretch; gap: 12px; flex-grow: 1; min-width: 0; }
+        .cmd-index-badge { background-color: #eff6ff; color: #3b82f6; font-family: Consolas, monospace; font-size: 1.05rem; font-weight: bold; border-radius: 8px; display: flex; justify-content: center; align-items: center; border: 1px solid #bfdbfe; flex-shrink: 0; padding: 0 12px; min-height: 38px; }
+        .cmd-desc-box { flex-grow: 1; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 8px 15px; font-size: 0.95rem; color: #334155; font-weight: bold; display: flex; align-items: center; line-height: 1.5; min-width: 0; min-height: 38px; }
         
-        .cmd-top-right {
-            display: flex; align-items: stretch; gap: 12px; flex-shrink: 0;
-        }
+        .cmd-top-right { display: flex; align-items: stretch; gap: 12px; flex-shrink: 0; }
 
-        .fav-svg-btn {
-            width: 42px; flex-shrink: 0; display: flex; justify-content: center; align-items: center;
-            cursor: pointer; color: #cbd5e1; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px;
-            min-height: 38px; box-sizing: border-box; 
-        }
+        .fav-svg-btn { width: 42px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; cursor: pointer; color: #cbd5e1; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); background: #ffffff; border: 1px solid #e2e8f0; border-radius: 8px; min-height: 38px; box-sizing: border-box; }
         .fav-svg-btn svg { width: 22px; height: 22px; fill: none; stroke: currentColor; stroke-width: 2; transition: all 0.3s; }
         .fav-svg-btn:hover { border-color: #94a3b8; background: #f8fafc; }
         .fav-svg-btn:hover svg { color: #f59e0b; transform: scale(1.15); }
-        
         .fav-svg-btn.active { color: #f59e0b; border-color: #fde68a; background: #fffbeb; }
         .fav-svg-btn.active svg { fill: #f59e0b; stroke: #f59e0b; filter: drop-shadow(0 2px 4px rgba(245,158,11,0.4)); }
         
@@ -259,30 +194,24 @@
         .tag-btn.active-filter:hover .btn-text-hover { display: inline; } 
 
         .cmd-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; margin-bottom: 15px; flex-wrap: nowrap; }
-        
         .cmd-code-container { flex-grow: 1; min-width: 0; background: var(--code-bg); border: 1px solid var(--code-border); border-radius: 8px; overflow: hidden; }
-        
         .cmd-code-text { display: flex; justify-content: flex-start; align-items: center; height: 48px; padding: 0 18px; color: var(--code-text); font-family: 'Consolas', monospace; font-weight: 600; overflow-x: auto; white-space: nowrap; transition: background-color 0.2s; box-sizing: border-box;}
         .cmd-code-text span { font-size: 1.1rem; }
-        
         .cmd-code-text.clickable { cursor: pointer; }
         .cmd-code-text.clickable:hover { background-color: #e0f2fe; }
 
         .btn-group { display: flex; gap: 10px; flex-shrink: 0; align-items: flex-start;}
-
         .example-btn { background-color: #f1f5f9; color: #475569; border: 1px solid #cbd5e1; height: 48px; padding: 0 16px; font-size: 1.1rem; border-radius: 8px; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; box-sizing: border-box; }
         .example-btn:hover { background-color: #e2e8f0; border-color: #94a3b8; }
         .example-btn.open { background-color: #e0f2fe; border-color: #7dd3fc; }
 
         .copy-btn { background-color: #3b82f6; color: white; border: none; height: 48px; padding: 0 24px; font-size: 14px; font-weight: bold; border-radius: 8px; cursor: pointer; transition: background 0.2s; white-space: nowrap; box-sizing: border-box; }
         .copy-btn:hover { background-color: #2563eb; }
-        
         .tool-copy-btn { padding: 10px 15px; font-size: 13px; margin-left: 8px; height: auto;}
 
         .params-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
         .params-wrapper.open { grid-template-rows: 1fr; }
         .params-inner { overflow: hidden; }
-        
         .params-content { padding: 15px 18px; background: #f8fafc; border-top: 1px dashed var(--code-border); }
         .param-row { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
         .param-row:last-child { margin-bottom: 0; }
@@ -297,7 +226,6 @@
 
         .cmd-params { background: var(--param-bg); border-left: 4px solid var(--param-border); color: var(--param-text); padding: 12px 15px; border-radius: 4px 8px 8px 4px; margin-bottom: 15px; font-size: 0.95rem; }
         .cmd-params strong { display: block; margin-bottom: 5px; color: #b45309; }
-        
         .cmd-returns { background: #f0fdf4; border-left: 4px solid #22c55e; color: #166534; padding: 12px 15px; border-radius: 4px 8px 8px 4px; margin-bottom: 15px; font-size: 0.95rem; }
         .cmd-returns strong { display: block; margin-bottom: 5px; color: #15803d; }
         
@@ -308,20 +236,8 @@
         .cmd-example { background: var(--example-bg); color: var(--example-text); border: 1px dashed var(--example-border); padding: 15px; border-radius: 8px; font-family: 'Consolas', monospace; font-size: 0.95rem; overflow-x: auto; white-space: pre-wrap; margin: 0; }
         .cmd-example .example-label { display: block; margin-bottom: 8px; color: #64748b; font-family: sans-serif; font-size: 0.85rem; text-transform: uppercase; letter-spacing: 1px; font-weight: bold; }
 
-        .cmd-breadcrumb {
-            margin-top: 15px;
-            padding-top: 12px;
-            border-top: 1px dashed #e2e8f0;
-            font-size: 0.85rem;
-            color: #64748b;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-        .cmd-breadcrumb span {
-            color: #0ea5e9;
-            font-weight: bold;
-        }
+        .cmd-breadcrumb { margin-top: 15px; padding-top: 12px; border-top: 1px dashed #e2e8f0; font-size: 0.85rem; color: #64748b; display: flex; align-items: center; gap: 6px; }
+        .cmd-breadcrumb span { color: #0ea5e9; font-weight: bold; }
 
         #toast { visibility: hidden; min-width: 200px; background-color: #10b981; color: #fff; text-align: center; border-radius: 8px; padding: 12px; position: fixed; z-index: 100; left: 50%; bottom: 30px; transform: translateX(-50%); font-size: 16px; font-weight: bold; box-shadow: 0 4px 6px rgba(0,0,0,0.2); }
         #toast.show { visibility: visible; animation: fadein 0.3s, fadeout 0.3s 2s; }
@@ -329,65 +245,34 @@
         @keyframes fadeout { from {bottom: 30px; opacity: 1;} to {bottom: 0; opacity: 0;} }
         
         .tool-panel { flex-shrink: 0; margin-top: auto; padding-top: 20px; border-top: 2px dashed var(--border-color); }
-
         .color-presets-wrapper { margin-bottom: 12px; }
-        .color-presets { 
-            display: flex; flex-wrap: wrap; gap: 8px; 
-            max-height: 56px; 
-            overflow: hidden; 
-            transition: max-height 0.35s ease-in-out; 
-        }
+        .color-presets { display: flex; flex-wrap: wrap; gap: 8px; max-height: 56px; overflow: hidden; transition: max-height 0.35s ease-in-out; }
         .color-presets.expanded { max-height: 300px; }
-        .color-swatch { 
-            width: 24px; height: 24px; border-radius: 4px; cursor: pointer; 
-            border: 1px solid rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s; 
-            box-sizing: border-box;
-        }
+        .color-swatch { width: 24px; height: 24px; border-radius: 4px; cursor: pointer; border: 1px solid rgba(0,0,0,0.15); transition: transform 0.2s, box-shadow 0.2s; box-sizing: border-box; }
         .color-swatch:hover { transform: scale(1.15); box-shadow: 0 2px 5px rgba(0,0,0,0.2); z-index: 2; }
-        
-        .color-toggle-btn {
-            width: 100%; background: #f8fafc; border: 1px dashed #cbd5e1; color: #64748b; font-size: 0.8rem;
-            padding: 4px 0; border-radius: 6px; cursor: pointer; margin-top: 8px; transition: all 0.2s ease;
-        }
+        .color-toggle-btn { width: 100%; background: #f8fafc; border: 1px dashed #cbd5e1; color: #64748b; font-size: 0.8rem; padding: 4px 0; border-radius: 6px; cursor: pointer; margin-top: 8px; transition: all 0.2s ease; }
         .color-toggle-btn:hover { background: #f1f5f9; color: #3b82f6; border-color: #94a3b8; }
 
-        /* ============== 虚拟钢琴 CSS ============== */
         .piano-wrapper { position: relative; user-select: none; }
         .octave-ctrl { display: flex; justify-content: space-between; align-items: center; background: #ffffff; padding: 6px 12px; border-radius: 6px; border: 1px solid #cbd5e1; margin-bottom: 12px;}
         .octave-btn { border: none; background: #f1f5f9; border-radius: 4px; width: 32px; height: 28px; cursor: pointer; font-weight: bold; color: #3b82f6; transition: background 0.2s; display: flex; align-items: center; justify-content: center; }
         .octave-btn:hover { background: #bfdbfe; color: #1d4ed8; }
         .octave-display { font-size: 0.9rem; font-weight: bold; color: #475569; }
-        
         .piano-container { position: relative; width: 100%; height: 100px; display: flex; border-radius: 4px; overflow: hidden; border: 1px solid #94a3b8; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
         .piano-key-w { flex: 1; border-right: 1px solid #cbd5e1; background: #ffffff; cursor: pointer; transition: background 0.1s; box-shadow: inset 0 -4px 4px rgba(0,0,0,0.05); }
         .piano-key-w:last-child { border-right: none; }
         .piano-key-w:hover { background: #f1f5f9; }
         .piano-key-w:active { background: #e2e8f0; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); }
-        
         .piano-key-b { position: absolute; width: 9%; height: 60%; background: #1e293b; border-radius: 0 0 4px 4px; cursor: pointer; z-index: 2; transition: background 0.1s; border: 1px solid #0f172a; box-shadow: 1px 2px 3px rgba(0,0,0,0.3); }
         .piano-key-b:hover { background: #334155; }
         .piano-key-b:active { background: #0f172a; box-shadow: inset 0 2px 4px rgba(0,0,0,0.5); }
-        
-        .pk-cs { left: 9.8%; }
-        .pk-ds { left: 24.1%; }
-        .pk-fs { left: 52.6%; }
-        .pk-gs { left: 66.9%; }
-        .pk-as { left: 81.2%; }
-        
+        .pk-cs { left: 9.8%; } .pk-ds { left: 24.1%; } .pk-fs { left: 52.6%; } .pk-gs { left: 66.9%; } .pk-as { left: 81.2%; }
         .piano-result-box { margin-top: 15px; text-align: center; background: #fffbeb; border: 1px dashed #f59e0b; padding: 10px; border-radius: 6px; font-size: 0.95rem; color: #b45309; }
-        /* ======================================== */
 
-        .welcome-box {
-            background: var(--box-bg); padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); 
-            border: 1px solid #e2e8f0; animation: cardFadeIn 0.4s ease-out forwards;
-        }
+        .welcome-box { background: var(--box-bg); padding: 30px; border-radius: 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); border: 1px solid #e2e8f0; animation: cardFadeIn 0.4s ease-out forwards; }
         .welcome-header { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 5px; }
         .welcome-icon { font-size: 2.2rem; animation: wave 2s infinite; transform-origin: 70% 70%; }
-        @keyframes wave { 
-            0% { transform: rotate(0deg); } 10% { transform: rotate(14deg); } 20% { transform: rotate(-8deg); } 
-            30% { transform: rotate(14deg); } 40% { transform: rotate(-4deg); } 50% { transform: rotate(10deg); } 
-            60%, 100% { transform: rotate(0deg); }
-        }
+        @keyframes wave { 0% { transform: rotate(0deg); } 10% { transform: rotate(14deg); } 20% { transform: rotate(-8deg); } 30% { transform: rotate(14deg); } 40% { transform: rotate(-4deg); } 50% { transform: rotate(10deg); } 60%, 100% { transform: rotate(0deg); } }
         .welcome-box h3 { margin: 0; font-size: 1.6rem; color: #1e293b; letter-spacing: 1px;}
         .welcome-subtitle { color: #64748b; font-size: 0.95rem; margin-bottom: 25px; text-align: center;}
         
@@ -395,53 +280,40 @@
         .tree-cat-card { background: #f8fafc; border: 1px solid #e2e8f0; border-top: 4px solid #3b82f6; border-radius: 10px; padding: 18px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); transition: transform 0.2s; }
         .tree-cat-card:hover { transform: translateY(-4px); box-shadow: 0 10px 15px -3px rgba(0,0,0,0.1); }
         .tree-cat-title { font-size: 1.15rem; font-weight: 800; color: #1e293b; margin-bottom: 15px; border-bottom: 2px dashed #cbd5e1; padding-bottom: 8px; display: flex; align-items: center; gap: 8px; }
-        
         .tree-name-block { margin-bottom: 15px; }
         .tree-name-block:last-child { margin-bottom: 0; }
         .tree-name-title { font-size: 0.95rem; color: #475569; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 6px; cursor: pointer; transition: color 0.2s;}
         .tree-name-title:hover { color: #2563eb; }
-        
         .tree-func-list { display: flex; flex-wrap: wrap; gap: 6px; padding-left: 20px; border-left: 2px solid #e2e8f0; margin-left: 6px; }
         .tree-func-pill { background: #ffffff; color: #3b82f6; padding: 4px 10px; border-radius: 6px; font-size: 0.85rem; font-weight: bold; cursor: pointer; transition: all 0.2s; border: 1px solid #bfdbfe; }
         .tree-func-pill:hover { background: #3b82f6; color: white; border-color: #3b82f6; }
         .tree-func-pill.all-pill { background: #e0f2fe; color: #0369a1; border-color: #bae6fd; border-radius: 12px; }
         .tree-func-pill.all-pill:hover { background: #0284c7; color: white; border-color: #0284c7; }
-
         .welcome-features-mini { display: flex; flex-wrap: wrap; justify-content: center; gap: 15px; border-top: 1px dashed #cbd5e1; padding-top: 20px;}
         .feature-mini { font-size: 0.85rem; color: #64748b; display: flex; align-items: center; gap: 5px; background: #f1f5f9; padding: 6px 12px; border-radius: 20px; border: 1px solid #e2e8f0;}
 
         @media (max-width: 768px) {
             .box1 { position: sticky; top: 10px; z-index: 999; max-width: 100%; max-height: none; box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.15); margin-bottom: 20px; overflow-y: visible; }
             .box1, .box2 { flex: 1 1 100%; min-width: 100%; }
-            
             .header-title { cursor: pointer; border-bottom: none; padding-bottom: 0; margin-bottom: 0; user-select: none; transition: padding 0.3s, margin 0.3s; }
             .mobile-toggle-icon { display: block; margin-left: auto; color: #64748b; transition: transform 0.3s ease; }
-            
             .box1.expanded .header-title { border-bottom: 2px solid var(--border-color); padding-bottom: 15px; margin-bottom: 15px; }
             .box1.expanded .mobile-toggle-icon { transform: rotate(180deg); color: #3b82f6; }
-            
             .box1-content-wrapper { display: grid; grid-template-rows: 0fr; transition: grid-template-rows 0.35s ease; }
             .box1.expanded .box1-content-wrapper { grid-template-rows: 1fr; }
-            
             .box1-content-inner { overflow: hidden; }
             .box1-scroll-area { max-height: 70vh; overflow-y: auto; padding-bottom: 5px; }
-
             .top-controls { flex-direction: column; gap: 15px; }
             .object-thumbnail-box { display: none !important; }
-            
             .cmd-top-bar { flex-direction: column; align-items: stretch; }
             .cmd-top-left { flex-direction: row; flex-wrap: wrap; align-items: stretch; }
             .cmd-top-right { justify-content: flex-end; width: 100%; margin-top: 5px;}
             .cmd-desc-box { width: 100%; }
-            
             .fav-svg-btn { align-self: flex-end; margin-top: -42px; height: 38px; }
-
             .cmd-header { flex-direction: column; align-items: stretch; }
-            
             .btn-group { width: 100%; display: flex; gap: 10px; }
             .example-btn { width: 60px; flex-shrink: 0;} 
             .copy-btn { flex-grow: 1; }  
-            
             .tool-copy-btn { margin-left: 0; margin-top: 8px; width: 100%; }
             .tool-input-group { flex-direction: column; }
             .param-label { width: 80px; font-size: 0.85rem;}
@@ -500,7 +372,6 @@
                         </div>
                         
                         <div id="tool-color-picker" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; animation: fadein 0.3s;">
-                            
                             <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">快速预设颜色 (点击瞬间复制)：</label>
                             <div class="color-presets-wrapper">
                                 <div class="color-presets" id="color-presets">
@@ -556,10 +427,8 @@
                                 </div>
                                 <button class="color-toggle-btn" id="color-toggle-btn" onclick="toggleColorPresets()">展开 ⬇</button>
                             </div>
-
                             <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">或点击下方色块自由选择：</label>
                             <input type="color" id="native-color" value="#00FF00" style="width: 100%; height: 50px; border: none; border-radius: 8px; cursor: pointer; padding: 0; margin-bottom: 15px; background: none;">
-
                             <div class="form-group" style="margin-bottom: 12px;">
                                 <label style="font-size: 0.85rem; margin-bottom: 4px;">16进制 (HEX)</label>
                                 <div class="tool-input-group" style="display: flex;">
@@ -567,7 +436,6 @@
                                     <button class="copy-btn tool-copy-btn" onclick="copyToolValue('hex-input', 'HEX 代码')">复制</button>
                                 </div>
                             </div>
-
                             <div class="form-group" style="margin-bottom: 0;">
                                 <label style="font-size: 0.85rem; margin-bottom: 4px;">RGB 数组</label>
                                 <div class="tool-input-group" style="display: flex;">
@@ -579,14 +447,12 @@
 
                         <div id="tool-note-freq" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; animation: fadein 0.3s;">
                             <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px; display: block;">选择音阶与音符 (点击琴键自动复制)：</label>
-                            
                             <div class="piano-wrapper">
                                 <div class="octave-ctrl">
                                     <button class="octave-btn" onclick="changeOctave(-1)" title="降低音阶">◀</button>
                                     <div class="octave-display" id="octave-display">第 4 音阶 (中音区)</div>
                                     <button class="octave-btn" onclick="changeOctave(1)" title="升高音阶">▶</button>
                                 </div>
-                                
                                 <div class="piano-container">
                                     <div class="piano-key-w" onclick="playAndCopyNote(0)" title="C (Do)"></div>
                                     <div class="piano-key-w" onclick="playAndCopyNote(2)" title="D (Re)"></div>
@@ -595,14 +461,12 @@
                                     <div class="piano-key-w" onclick="playAndCopyNote(7)" title="G (Sol)"></div>
                                     <div class="piano-key-w" onclick="playAndCopyNote(9)" title="A (La)"></div>
                                     <div class="piano-key-w" onclick="playAndCopyNote(11)" title="B (Si)"></div>
-
                                     <div class="piano-key-b pk-cs" onclick="playAndCopyNote(1)" title="C# / Db"></div>
                                     <div class="piano-key-b pk-ds" onclick="playAndCopyNote(3)" title="D# / Eb"></div>
                                     <div class="piano-key-b pk-fs" onclick="playAndCopyNote(6)" title="F# / Gb"></div>
                                     <div class="piano-key-b pk-gs" onclick="playAndCopyNote(8)" title="G# / Ab"></div>
                                     <div class="piano-key-b pk-as" onclick="playAndCopyNote(10)" title="A# / Bb"></div>
                                 </div>
-
                                 <div class="piano-result-box" id="piano-result">
                                     👈 点击上方虚拟琴键获取对应频率
                                 </div>
@@ -610,15 +474,12 @@
                         </div>
 
                         <div id="tool-matrix-8x8" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; animation: fadein 0.3s;">
-                            
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
                                 <label style="font-size: 0.85rem; color: #64748b; font-weight: bold; margin: 0;">选择画笔颜色：</label>
                                 <input type="color" id="matrix-color-picker" value="#FFFFFF" style="width: 44px; height: 32px; border: none; border-radius: 6px; cursor: pointer; padding: 0; background: none; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">
                             </div>
-                            
                             <div id="matrix-grid" style="display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; background: #94a3b8; border: 2px solid #94a3b8; border-radius: 6px; padding: 2px; margin-bottom: 15px; user-select: none;">
                                 </div>
-
                             <div style="display: flex; gap: 10px;">
                                 <button class="example-btn" onclick="clearMatrix()" style="flex: 1; height: 40px; font-size: 0.9rem; padding: 0;">🗑️ 清空</button>
                                 <button class="copy-btn" onclick="copyMatrixList()" style="flex: 2; height: 40px; font-size: 0.95rem; padding: 0;">📋 复制数组 (64项)</button>
@@ -840,21 +701,19 @@
         }
     }
 
-    // ============== 新增：参数一键粘贴引擎 ==============
     async function pasteToInput(inputId) {
         try {
             const text = await navigator.clipboard.readText();
             const inputEl = document.getElementById(inputId);
             if(inputEl) {
                 inputEl.value = text;
-                inputEl.dispatchEvent(new Event('input')); // 触发视图更新
+                inputEl.dispatchEvent(new Event('input')); 
                 showToast("📋 已成功粘贴！");
             }
         } catch (err) {
-            alert("无法读取剪贴板。请确保浏览器授予了剪贴板权限，或手动在框内按 Ctrl+V 粘贴。");
+            alert("无法读取剪贴板。请确保浏览器授予了权限，或手动按 Ctrl+V 粘贴。");
         }
     }
-    // ====================================================
 
     window.addEventListener('resize', () => {
         adjustCodeFontSizes();
@@ -963,7 +822,6 @@
             }
         }
         document.getElementById('sidebar-tree').innerHTML = html;
-        
         resetToHome();
     }
     
@@ -981,7 +839,6 @@
     
     function updateTreeSelection(cat, name, func) {
         document.querySelectorAll('.tree-node').forEach(el => el.classList.remove('active'));
-        
         if (cat === "") return; 
         
         let sIdCat = safeId(cat);
@@ -999,7 +856,6 @@
                 let el = document.getElementById(`tree-node-${sIdCat}-${sIdName}-${sIdFunc}`);
                 if (el) el.classList.add('active');
             }
-            
             let catDomId = 'cat-' + sIdCat;
             let body = document.getElementById(catDomId);
             if (body && !body.classList.contains('open')) {
@@ -1109,7 +965,6 @@
         document.getElementById("search-input").value = "";
         
         updateTreeSelection("", "", "");
-        
         renderCommandCards();
     }
 
@@ -1450,7 +1305,8 @@
             let paramInputsHtml = '';
             
             const paramMatch = extractOuterParams(String(cmd.command_template || ''));
-            let parsedDefaultParams = [];
+            let previewParams = []; // 显示专用：关键字格式
+            let copyParams = [];    // 复制专用：位置格式
             
             let rawCmdParams = hasContent(cmd.params) ? String(cmd.params) : "";
             let cleanCmdParams = rawCmdParams.replace(/\[.*?\]|【.*?】/g, '').trim();
@@ -1495,7 +1351,6 @@
                             descText = descText.replace(optMatch[0], '').trim();
                         }
                         
-                        // 判断是否为真正可选的参数（None或空值）
                         let isOptional = hasEq && (pDefault.toUpperCase() === 'NONE' || pDefault === '');
 
                         if (options.length > 0) {
@@ -1505,11 +1360,17 @@
                             }
                         }
                         
-                        // ================= 修复 1：初始化时强制全部转换为【关键字参数】 =================
+                        // ================== 核心修复：分离视图引擎 (初始化渲染) ==================
                         if (!isOptional) {
-                            parsedDefaultParams.push(`${pName}=${pDefault}`); // 🌟 无论原来有没有等号，统一加上 pName=
+                            if (hasEq) {
+                                previewParams.push(`${pName}=${pDefault}`); // 预览：显示关键字
+                                copyParams.push(pDefault);                  // 复制：剥离关键字
+                            } else {
+                                previewParams.push(pName);                  // 预览：只显示变量名
+                                copyParams.push(pName);                     // 复制：占位符
+                            }
                         }
-                        // =================================================================================
+                        // =========================================================================
 
                         let extraInfo = "";
                         if (descText !== "") {
@@ -1535,7 +1396,6 @@
                             }
                         }
 
-                        // ================= 修复 2 & 3：默认参数特殊样式 + 点击标签快速粘贴 =================
                         if (options.length > 0) {
                             let optionsHtml = `<option value="" selected>-- 点击选择可选参数 --</option>`;
                             optionsHtml += options.map(opt => {
@@ -1585,17 +1445,18 @@
                 initialFinalCode = initialFinalCode.replace(/{instance}\./g, '').replace(/{instance}/g, '');
             }
 
+            // 分别生成预览代码和复制代码
+            let initialPreviewCode = initialFinalCode;
+            let initialCopyCode = initialFinalCode;
             if (paramMatch && hasContent(paramMatch[1])) {
-                initialFinalCode = replaceOuterParams(initialFinalCode, parsedDefaultParams.join(', '));
+                initialPreviewCode = replaceOuterParams(initialFinalCode, previewParams.join(', '));
+                initialCopyCode = replaceOuterParams(initialFinalCode, copyParams.join(', '));
             }
             
-            let initialEscapedCode = escapeHtml(initialFinalCode);
-            let initialHighlightedCode = highlightParamsInCode(initialEscapedCode);
-            initialHighlightedCode = highlightSafe(initialHighlightedCode, safeQuery);
+            let initialHighlightedCode = highlightSafe(highlightParamsInCode(escapeHtml(initialPreviewCode)), safeQuery);
 
             const hasReturnDesc = hasContent(cmd.return_value);
             const hasExample = hasContent(cmd.example);
-            
             const hasTag = hasContent(cmd.tag);
             const tagText = hasTag ? String(cmd.tag).trim() : '';
 
@@ -1622,23 +1483,14 @@
                 <div class="cmd-top-bar">
                     <div class="cmd-top-left">
                         <div class="cmd-index-badge">${listIndexStr}</div>
-                        
                         <div class="cmd-desc-box" id="cmd-desc-${index}">
                             ${highlightSafe(escapeHtml(cmd.description || '暂无详细说明。'), safeQuery)}
                         </div>
                     </div>
-                    
                     <div class="cmd-top-right">
-                        ${hasTag ? `
-                        <button class="tag-btn tag-dynamic ${activeClass}" style="${getTagStyle(tagText)}" onclick="${tagOnClick}" title="${tagTitle}">
-                            <span class="btn-text-normal">${tagText}</span>
-                            <span class="btn-text-hover">全部</span>
-                        </button>` : ''}
-                        
+                        ${hasTag ? `<button class="tag-btn tag-dynamic ${activeClass}" style="${getTagStyle(tagText)}" onclick="${tagOnClick}" title="${tagTitle}"><span class="btn-text-normal">${tagText}</span><span class="btn-text-hover">全部</span></button>` : ''}
                         <div class="fav-svg-btn ${isFav ? 'active' : ''}" id="fav-btn-${index}" onclick="toggleFav(${index})" title="${isFav ? '取消收藏' : '加入收藏'}">
-                            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round">
-                                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon>
-                            </svg>
+                            <svg viewBox="0 0 24 24" stroke-linecap="round" stroke-linejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
                         </div>
                     </div>
                 </div>
@@ -1646,7 +1498,7 @@
                 <div class="cmd-header">
                     <div class="cmd-code-container">
                         <div class="cmd-code-text ${hasParams ? 'clickable' : ''}" ${hasParams ? `onclick="toggleParamsPanel(${index}, ${hasParams})"` : ''}>
-                            <span id="code-text-${index}">${initialHighlightedCode}</span>
+                            <span id="code-text-${index}" data-copy-code="${escapeHtml(initialCopyCode)}">${initialHighlightedCode}</span>
                         </div>
                         ${hasParams ? `
                         <div class="params-wrapper" id="params-wrapper-${index}">
@@ -1791,47 +1643,60 @@
                 }
 
                 const paramMatch = extractOuterParams(String(cmd.command_template || ''));
+                let previewParams = [];
+                let copyParams = [];
+
                 if (paramMatch && hasContent(paramMatch[1])) {
                     const rawParams = smartSplitComma(paramMatch[1]);
-                    let currentParams = [];
+                    
                     for (let i = 0; i < rawParams.length; i++) {
                         const inputEl = document.getElementById(`param-input-${index}-${i}`);
                         if (inputEl) {
-                            let val = inputEl.value;
+                            let val = inputEl.value.trim();
                             let pName = inputEl.getAttribute('data-name');
                             let hasEq = inputEl.getAttribute('data-haseq') === 'true';
                             let defVal = inputEl.getAttribute('data-default');
-                            let isSelect = inputEl.tagName.toLowerCase() === 'select';
 
                             let isOptional = hasEq && (defVal.toUpperCase() === 'NONE' || defVal === '');
 
-                            // ================= 修复 1：每次用户输入更新代码时，依然强转全量关键字参数 =================
-                            if (isSelect && val === '') {
+                            // ================= 核心修复：分离视图引擎 (用户输入更新) =================
+                            if (val === '') {
                                 if (!isOptional) {
-                                    currentParams.push(`${pName}=${defVal}`); // 🌟 强转
-                                }
-                            } else if (val.trim() === '') {
-                                if (!isOptional) {
-                                    currentParams.push(`${pName}=${defVal}`); // 🌟 强转
+                                    if (hasEq) {
+                                        previewParams.push(`${pName}=${defVal}`); // 预览：显示默认关键字
+                                        copyParams.push(defVal);                  // 复制：剥离关键字
+                                    } else {
+                                        previewParams.push(pName);                  // 预览：只显示变量名
+                                        copyParams.push(pName);                     // 复制：占位符
+                                    }
                                 }
                             } else {
-                                currentParams.push(`${pName}=${val.trim()}`); // 🌟 强转
+                                previewParams.push(`${pName}=${val}`);          // 预览：全部带关键字
+                                copyParams.push(val);                           // 复制：全部剥离关键字
                             }
-                            // =========================================================================================
+                            // =========================================================================
                         } else {
-                            currentParams.push(rawParams[i]); 
+                            previewParams.push(rawParams[i]); 
+                            copyParams.push(rawParams[i]);
                         }
                     }
-                    finalCode = replaceOuterParams(finalCode, currentParams.join(', '));
+                    
+                    let previewCode = replaceOuterParams(finalCode, previewParams.join(', '));
+                    let copyCode = replaceOuterParams(finalCode, copyParams.join(', '));
+                    
+                    const codeBlock = document.getElementById(`code-text-${index}`);
+                    if(codeBlock) {
+                        codeBlock.innerHTML = highlightSafe(highlightParamsInCode(escapeHtml(previewCode)), safeQuery);
+                        codeBlock.setAttribute('data-copy-code', copyCode); // 更新暗藏的复制代码
+                    }
+
+                } else {
+                    const codeBlock = document.getElementById(`code-text-${index}`);
+                    if(codeBlock) {
+                        codeBlock.innerHTML = highlightSafe(highlightParamsInCode(escapeHtml(finalCode)), safeQuery);
+                        codeBlock.setAttribute('data-copy-code', finalCode);
+                    }
                 }
-                
-                let escapedCode = escapeHtml(finalCode);
-                let highlightedCode = highlightParamsInCode(escapedCode);
-                highlightedCode = highlightSafe(highlightedCode, safeQuery);
-
-                const codeBlock = document.getElementById(`code-text-${index}`);
-                if(codeBlock) codeBlock.innerHTML = highlightedCode;
-
             } else {
                 card.style.display = 'none'; 
             }
@@ -1860,7 +1725,10 @@
     }
 
     function copyCommand(index) {
-        const textToCopy = document.getElementById(`code-text-${index}`).innerText;
+        const codeBlock = document.getElementById(`code-text-${index}`);
+        // 核心修复：优先读取暗藏的 data-copy-code (不带关键字的版本)
+        const textToCopy = codeBlock.getAttribute('data-copy-code') || codeBlock.innerText;
+        
         navigator.clipboard.writeText(textToCopy).then(() => {
             showToast("代码复制成功！");
         }).catch(err => {
@@ -1868,6 +1736,7 @@
         });
     }
 
+    // ================= 工具栏逻辑整合 =================
     function toggleTool() {
         const tool = document.getElementById('tool-select').value;
         const cp = document.getElementById('tool-color-picker');
@@ -1884,7 +1753,7 @@
             nf.style.display = 'block';
         } else if (tool === 'matrix_8x8' && mx) {
             mx.style.display = 'block';
-            initMatrix(); 
+            initMatrix(); // 初始化8x8画板
         }
     }
     
@@ -1899,21 +1768,19 @@
         }
     }
 
-    // ================= 修复 4：点击预设颜色秒出且秒复制 =================
     function applyPresetColor(element) {
         const hex = element.getAttribute('data-hex');
         const nativeColor = document.getElementById('native-color');
         nativeColor.value = hex;
         nativeColor.dispatchEvent(new Event('input')); // 同步更新下方参数
         
-        // 瞬间复制黑科技
+        // 瞬间极速复制
         navigator.clipboard.writeText(hex).then(() => {
             showToast(`🎨 颜色 ${hex} 已极速复制！`);
         }).catch(err => {
             console.error('极速复制失败', err);
         });
     }
-    // ===================================================================
 
     const nativeColor = document.getElementById('native-color');
     const hexInput = document.getElementById('hex-input');
