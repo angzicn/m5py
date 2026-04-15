@@ -356,6 +356,11 @@
         }
         .welcome-header { display: flex; align-items: center; justify-content: center; gap: 15px; margin-bottom: 5px; }
         .welcome-icon { font-size: 2.2rem; animation: wave 2s infinite; transform-origin: 70% 70%; }
+        @keyframes wave { 
+            0% { transform: rotate(0deg); } 10% { transform: rotate(14deg); } 20% { transform: rotate(-8deg); } 
+            30% { transform: rotate(14deg); } 40% { transform: rotate(-4deg); } 50% { transform: rotate(10deg); } 
+            60%, 100% { transform: rotate(0deg); }
+        }
         .welcome-box h3 { margin: 0; font-size: 1.6rem; color: #1e293b; letter-spacing: 1px;}
         .welcome-subtitle { color: #64748b; font-size: 0.95rem; margin-bottom: 25px; text-align: center;}
         
@@ -468,6 +473,7 @@
                         </div>
                         
                         <div id="tool-color-picker" style="display: none; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 15px; animation: fadein 0.3s;">
+                            
                             <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">快速预设颜色：</label>
                             <div class="color-presets-wrapper">
                                 <div class="color-presets" id="color-presets">
@@ -523,8 +529,10 @@
                                 </div>
                                 <button class="color-toggle-btn" id="color-toggle-btn" onclick="toggleColorPresets()">展开 ⬇</button>
                             </div>
+
                             <label style="font-size: 0.85rem; color: #64748b; margin-bottom: 5px;">或点击下方色块自由选择：</label>
                             <input type="color" id="native-color" value="#00FF00" style="width: 100%; height: 50px; border: none; border-radius: 8px; cursor: pointer; padding: 0; margin-bottom: 15px; background: none;">
+
                             <div class="form-group" style="margin-bottom: 12px;">
                                 <label style="font-size: 0.85rem; margin-bottom: 4px;">16进制 (HEX)</label>
                                 <div class="tool-input-group" style="display: flex;">
@@ -532,6 +540,7 @@
                                     <button class="copy-btn tool-copy-btn" onclick="copyToolValue('hex-input', 'HEX 代码')">复制</button>
                                 </div>
                             </div>
+
                             <div class="form-group" style="margin-bottom: 0;">
                                 <label style="font-size: 0.85rem; margin-bottom: 4px;">RGB 数组</label>
                                 <div class="tool-input-group" style="display: flex;">
@@ -1442,6 +1451,7 @@
                             descText = descText.replace(optMatch[0], '').trim();
                         }
                         
+                        // ============== 修复：去除代码生成的参数名 pName =============
                         let isOptional = hasEq && (pDefault.toUpperCase() === 'NONE' || pDefault === '');
 
                         if (options.length > 0) {
@@ -1452,8 +1462,9 @@
                         }
                         
                         if (!isOptional) {
-                            parsedDefaultParams.push(hasEq ? `${pName}=${pDefault}` : pDefault);
+                            parsedDefaultParams.push(pDefault); // 🌟 这里直接推送默认值，去掉了 pName=
                         }
+                        // ==============================================================
 
                         let extraInfo = "";
                         if (descText !== "") {
@@ -1746,6 +1757,7 @@
                             let defVal = inputEl.getAttribute('data-default');
                             let isSelect = inputEl.tagName.toLowerCase() === 'select';
 
+                            // ============== 修复：更新预览框时同样剥离参数名 =============
                             let isOptional = hasEq && (defVal.toUpperCase() === 'NONE' || defVal === '');
 
                             if (isSelect && val === '') {
@@ -1754,21 +1766,12 @@
                                 }
                             } else if (val.trim() === '') {
                                 if (!isOptional) {
-                                    let finalVal = defVal;
-                                    if (hasEq) {
-                                        currentParams.push(`${pName}=${finalVal}`);
-                                    } else {
-                                        currentParams.push(finalVal);
-                                    }
+                                    currentParams.push(defVal); // 🌟 剥离 pName=，只填默认值
                                 }
                             } else {
-                                let finalVal = val.trim();
-                                if (hasEq) {
-                                    currentParams.push(`${pName}=${finalVal}`);
-                                } else {
-                                    currentParams.push(finalVal);
-                                }
+                                currentParams.push(val.trim()); // 🌟 剥离 pName=，只填输入值
                             }
+                            // ==========================================================
                         } else {
                             currentParams.push(rawParams[i]); 
                         }
@@ -1836,7 +1839,7 @@
             nf.style.display = 'block';
         } else if (tool === 'matrix_8x8' && mx) {
             mx.style.display = 'block';
-            initMatrix(); 
+            initMatrix(); // 初始化8x8画板
         }
     }
     
