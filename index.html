@@ -856,6 +856,7 @@
                 let el = document.getElementById(`tree-node-${sIdCat}-${sIdName}-${sIdFunc}`);
                 if (el) el.classList.add('active');
             }
+            
             let catDomId = 'cat-' + sIdCat;
             let body = document.getElementById(catDomId);
             if (body && !body.classList.contains('open')) {
@@ -965,6 +966,7 @@
         document.getElementById("search-input").value = "";
         
         updateTreeSelection("", "", "");
+        
         renderCommandCards();
     }
 
@@ -1305,8 +1307,8 @@
             let paramInputsHtml = '';
             
             const paramMatch = extractOuterParams(String(cmd.command_template || ''));
-            let previewParams = []; // 显示专用：关键字格式
-            let copyParams = [];    // 复制专用：位置格式
+            let previewParams = []; 
+            let copyParams = [];    
             
             let rawCmdParams = hasContent(cmd.params) ? String(cmd.params) : "";
             let cleanCmdParams = rawCmdParams.replace(/\[.*?\]|【.*?】/g, '').trim();
@@ -1361,9 +1363,11 @@
                         }
                         
                         // ================== 核心修复：分离视图引擎 (初始化渲染) ==================
+                        // 规则①：如果有默认值（且非可选），代码框显示 关键字=默认值，复制剥离关键字
+                        // 规则②：如果没有默认值，代码框显示 参数名（无等号），复制也占位
                         if (!isOptional) {
                             if (hasEq) {
-                                previewParams.push(`${pName}=${pDefault}`); // 预览：显示关键字
+                                previewParams.push(`${pName}=${pDefault}`); // 预览：显示 关键字=默认值
                                 copyParams.push(pDefault);                  // 复制：剥离关键字
                             } else {
                                 previewParams.push(pName);                  // 预览：只显示变量名
@@ -1660,10 +1664,11 @@
                             let isOptional = hasEq && (defVal.toUpperCase() === 'NONE' || defVal === '');
 
                             // ================= 核心修复：分离视图引擎 (用户输入更新) =================
+                            // 规则③：如果给参数填写了值，代码框均以 关键字=值 显示，复制剥离关键字
                             if (val === '') {
                                 if (!isOptional) {
                                     if (hasEq) {
-                                        previewParams.push(`${pName}=${defVal}`); // 预览：显示默认关键字
+                                        previewParams.push(`${pName}=${defVal}`); // 预览：显示 关键字=默认值
                                         copyParams.push(defVal);                  // 复制：剥离关键字
                                     } else {
                                         previewParams.push(pName);                  // 预览：只显示变量名
@@ -1726,7 +1731,7 @@
 
     function copyCommand(index) {
         const codeBlock = document.getElementById(`code-text-${index}`);
-        // 核心修复：优先读取暗藏的 data-copy-code (不带关键字的版本)
+        // 核心修复：优先读取暗藏的 data-copy-code (不带关键字的位置参数版本)
         const textToCopy = codeBlock.getAttribute('data-copy-code') || codeBlock.innerText;
         
         navigator.clipboard.writeText(textToCopy).then(() => {
@@ -1771,12 +1776,16 @@
     function applyPresetColor(element) {
         const hex = element.getAttribute('data-hex');
         const nativeColor = document.getElementById('native-color');
+        
+        // 强转 0x 格式
+        const mcuHex = hex.replace('#', '0x');
+
         nativeColor.value = hex;
         nativeColor.dispatchEvent(new Event('input')); // 同步更新下方参数
         
-        // 瞬间极速复制
-        navigator.clipboard.writeText(hex).then(() => {
-            showToast(`🎨 颜色 ${hex} 已极速复制！`);
+        // 瞬间极速复制单片机格式
+        navigator.clipboard.writeText(mcuHex).then(() => {
+            showToast(`🎨 颜色 ${mcuHex} 已极速复制！`);
         }).catch(err => {
             console.error('极速复制失败', err);
         });
